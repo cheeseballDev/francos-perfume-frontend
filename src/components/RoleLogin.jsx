@@ -1,6 +1,6 @@
 import React from 'react';
 
-const RoleGateway = ({ onSelect }) => {
+const RoleLogin = ({ onSelect }) => {
   const roles = [
     { id: 'Cashier', label: 'Login as Cashier' },
     { id: 'Inventory', label: 'Login as Inventory' },
@@ -28,4 +28,4 @@ const RoleGateway = ({ onSelect }) => {
   );
 };
 
-export default RoleGateway;
+export default RoleLogin;

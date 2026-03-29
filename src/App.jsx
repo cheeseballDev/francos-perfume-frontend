@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import RoleGateway from "./components/RoleLogin"; // Double check this filename!
+import RoleLogin from "./components/RoleLogin"; 
 import StaffLogin from "./components/StaffLogin";
+import DashboardLayout from "./components/DashboardLayout";
 
 function App() {
   const [view, setView] = useState("gateway");
@@ -15,16 +16,24 @@ function App() {
     setView("gateway");
   };
 
+  // THIS IS NEW: The function that transitions the app to the dashboard
+  const handleLoginSuccess = () => {
+    setView("dashboard");
+  };
+
   return (
-    <div>
-      <div className="font-sans">
+    <div className="font-sans min-h-screen">
+      {view === "gateway" && <RoleLogin onSelect={handleRoleSelect} />}
       
-    </div>
-      {view === "gateway" ? (
-        <RoleGateway onSelect={handleRoleSelect} />
-      ) : (
-        <StaffLogin role={selectedRole} onBack={handleGoBack} />
+      {view === "login" && (
+        <StaffLogin 
+          role={selectedRole} 
+          onBack={handleGoBack} 
+          onLoginSuccess={handleLoginSuccess} // WE PASS IT HERE
+        />
       )}
+      
+      {view === "dashboard" && <DashboardLayout />}
     </div>
   );
 }
