@@ -5,18 +5,14 @@ const Sidebar = ({ role, activeTab, setActiveTab }) => {
   const normalizedRole = role ? role.toLowerCase() : '';
   
   const isManager = normalizedRole === 'manager';
-  const isAdmin = normalizedRole === 'admin';
   const isInventoryStaff = normalizedRole === 'inventory staff' || normalizedRole === 'inventory';
   const isCashierStaff = normalizedRole === 'cashier staff' || normalizedRole === 'cashier';
 
-  // NEW RULE: Cashiers cannot see the dashboard
   const canSeeDashboard = !isCashierStaff; 
-  
   const canSeeInventory = isManager || isInventoryStaff;
   const canSeeRequests = isManager || isInventoryStaff;
   const canSeeTransactions = isManager || isCashierStaff;
   const canSeeForecast = isManager;
-  const canSeeAdminTools = isAdmin;
 
   const getTabClass = (tabName) => {
     return `flex items-center gap-2 cursor-pointer p-3 rounded transition-colors ${
@@ -33,7 +29,6 @@ const Sidebar = ({ role, activeTab, setActiveTab }) => {
       
       <div className="p-6 flex flex-col gap-2 overflow-y-auto">
         
-       
         {canSeeDashboard && (
           <div onClick={() => setActiveTab('Dashboard')} className={getTabClass('Dashboard')}>
              <div className="w-4 h-4 bg-gray-400"></div>
@@ -67,24 +62,6 @@ const Sidebar = ({ role, activeTab, setActiveTab }) => {
              <div className="w-4 h-4 bg-gray-500"></div>
              <p className="font-medium text-sm">Forecast</p>
           </div>
-        )}
-
-        {canSeeAdminTools && (
-          <>
-            <div className="mt-4 mb-2 px-2 text-[10px] tracking-widest text-gray-500 font-bold uppercase">System Admin</div>
-            <div onClick={() => setActiveTab('Accounts')} className={getTabClass('Accounts')}>
-               <div className="w-4 h-4 bg-gray-500"></div>
-               <p className="font-medium text-sm">Accounts</p>
-            </div>
-            <div onClick={() => setActiveTab('Audit Logs')} className={getTabClass('Audit Logs')}>
-               <div className="w-4 h-4 bg-gray-500"></div>
-               <p className="font-medium text-sm">Audit Logs</p>
-            </div>
-            <div onClick={() => setActiveTab('Archives')} className={getTabClass('Archives')}>
-               <div className="w-4 h-4 bg-gray-500"></div>
-               <p className="font-medium text-sm">Archives</p>
-            </div>
-          </>
         )}
       </div>
     </div>

@@ -15,7 +15,9 @@ const Header = ({ role, userEmail, onLogout }) => {
   const displayUsername = userEmail ? userEmail.split('@')[0] : 'User';
   
   const normalizedRole = role ? role.toLowerCase() : '';
-  const canChangeLocation = normalizedRole === 'manager' || normalizedRole === 'admin';
+  
+  // REMOVED ADMIN CHECK HERE
+  const canChangeLocation = normalizedRole === 'manager';
 
   return (
     <>
@@ -72,7 +74,6 @@ const Header = ({ role, userEmail, onLogout }) => {
         </div>
       </header>
 
-      {/* LOGOUT CONFIRMATION MODAL */}
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all">
           <div className="bg-white p-8 rounded-md shadow-2xl max-w-sm w-full mx-4 border border-gray-100 animate-fade-in">
