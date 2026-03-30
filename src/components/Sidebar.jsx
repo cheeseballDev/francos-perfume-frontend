@@ -1,20 +1,23 @@
+import React from 'react';
 import logo from '../assets/FrancoPerfumeLogo.png';
 
 const Sidebar = ({ role, activeTab, setActiveTab }) => {
   const normalizedRole = role ? role.toLowerCase() : '';
   
   const isManager = normalizedRole === 'manager';
-  const isAdmin = normalizedRole === 'admin';
   const isInventoryStaff = normalizedRole === 'inventory staff' || normalizedRole === 'inventory';
   const isCashierStaff = normalizedRole === 'cashier staff' || normalizedRole === 'cashier';
 
+  const canSeeDashboard = !isCashierStaff; 
   const canSeeInventory = isManager || isInventoryStaff;
   const canSeeRequests = isManager || isInventoryStaff;
-  const canSeeTransactions = isManager || isCashierStaff;
+  
+  // NEW SEPARATED RULES
+  const canSeePOS = isCashierStaff; 
+  const canSeeTransactionHistory = isManager;
+  
   const canSeeForecast = isManager;
-  const canSeeAdminTools = isAdmin;
 
-  // Helper function to keep button classes clean
   const getTabClass = (tabName) => {
     return `flex items-center gap-2 cursor-pointer p-3 rounded transition-colors ${
       activeTab === tabName ? 'bg-[#333] text-[#D4C4B0]' : 'hover:bg-[#333] text-gray-300'
@@ -30,10 +33,12 @@ const Sidebar = ({ role, activeTab, setActiveTab }) => {
       
       <div className="p-6 flex flex-col gap-2 overflow-y-auto">
         
-        <div onClick={() => setActiveTab('Dashboard')} className={getTabClass('Dashboard')}>
-           <div className="w-4 h-4 bg-gray-400"></div>
-           <p className="font-medium text-sm">Dashboard</p>
-        </div>
+        {canSeeDashboard && (
+          <div onClick={() => setActiveTab('Dashboard')} className={getTabClass('Dashboard')}>
+             <div className="w-4 h-4 bg-gray-400"></div>
+             <p className="font-medium text-sm">Dashboard</p>
+          </div>
+        )}
         
         {canSeeInventory && (
           <div onClick={() => setActiveTab('Inventory')} className={getTabClass('Inventory')}>
@@ -49,10 +54,19 @@ const Sidebar = ({ role, activeTab, setActiveTab }) => {
           </div>
         )}
 
-        {canSeeTransactions && (
-          <div onClick={() => setActiveTab('Transactions')} className={getTabClass('Transactions')}>
+        {/* NEW POS TAB */}
+        {canSeePOS && (
+          <div onClick={() => setActiveTab('POS')} className={getTabClass('POS')}>
              <div className="w-4 h-4 bg-gray-500"></div>
-             <p className="font-medium text-sm">Transactions (POS)</p>
+             <p className="font-medium text-sm">Point of Sale (POS)</p>
+          </div>
+        )}
+
+        {/* NEW TRANSACTION HISTORY TAB */}
+        {canSeeTransactionHistory && (
+          <div onClick={() => setActiveTab('Transaction History')} className={getTabClass('Transaction History')}>
+             <div className="w-4 h-4 bg-gray-500"></div>
+             <p className="font-medium text-sm">Transaction History</p>
           </div>
         )}
             
@@ -62,28 +76,9 @@ const Sidebar = ({ role, activeTab, setActiveTab }) => {
              <p className="font-medium text-sm">Forecast</p>
           </div>
         )}
-
-        {canSeeAdminTools && (
-          <>
-            <div className="mt-4 mb-2 px-2 text-[10px] tracking-widest text-gray-500 font-bold uppercase">System Admin</div>
-            <div onClick={() => setActiveTab('Accounts')} className={getTabClass('Accounts')}>
-               <div className="w-4 h-4 bg-gray-500"></div>
-               <p className="font-medium text-sm">Accounts</p>
-            </div>
-            <div onClick={() => setActiveTab('Audit Logs')} className={getTabClass('Audit Logs')}>
-               <div className="w-4 h-4 bg-gray-500"></div>
-               <p className="font-medium text-sm">Audit Logs</p>
-            </div>
-            <div onClick={() => setActiveTab('Archives')} className={getTabClass('Archives')}>
-               <div className="w-4 h-4 bg-gray-500"></div>
-               <p className="font-medium text-sm">Archives</p>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );
 };
-
 
 export default Sidebar;

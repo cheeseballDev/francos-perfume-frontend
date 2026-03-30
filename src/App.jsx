@@ -1,54 +1,33 @@
-import { useState } from "react";
-import DashboardLayout from "./pages/DashboardLayout";
-import RoleLogin from "./pages/RoleLogin";
-import StaffLogin from "./pages/StaffLogin";
+import React, { useState } from 'react';
+import StaffLogin from './pages/StaffLogin';
+import DashboardLayout from './pages/DashboardLayout';
 
-function App() {
-  const [view, setView] = useState("gateway");
-  const [selectedRole, setSelectedRole] = useState("");
-  const [userEmail, setUserEmail] = useState(""); 
+const App = () => {
+  const [user, setUser] = useState(null);
 
-  const handleRoleSelect = (roleName) => {
-    setSelectedRole(roleName);
-    setView("login");
-  };
-
-  const handleGoBack = () => {
-    setView("gateway");
-  };
-
-  const handleLoginSuccess = (email) => {
-    setUserEmail(email);
-    setView("dashboard");
+  // Now accepts an object with multiple properties
+  const handleLogin = (userData) => {
+    setUser(userData);
   };
 
   const handleLogout = () => {
-    setUserEmail(""); 
-    setSelectedRole(""); 
-    setView("gateway"); 
+    setUser(null);
   };
 
   return (
-    <div className="font-sans min-h-screen">
-      {view === "gateway" && <RoleLogin onSelect={handleRoleSelect} />}
-      
-      {view === "login" && (
-        <StaffLogin 
-          role={selectedRole} 
-          onBack={handleGoBack} 
-          onLoginSuccess={handleLoginSuccess} 
-        />
-      )}
-      
-      {view === "dashboard" && (
+    <>
+      {!user ? (
+        <StaffLogin onLogin={handleLogin} />
+      ) : (
         <DashboardLayout 
-          role={selectedRole} 
-          userEmail={userEmail} 
+          trueRole={user.trueRole} 
+          activeRole={user.activeRole} 
+          userEmail={user.email} 
           onLogout={handleLogout} 
         />
       )}
-    </div>
+    </>
   );
-}
+};
 
 export default App;

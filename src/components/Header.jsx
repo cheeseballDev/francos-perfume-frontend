@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Settings, ArrowRightLeft, LogOut } from 'lucide-react'; // Importing exact icons
 
-const Header = ({ role, userEmail, onLogout }) => {
+const Header = ({ role, userEmail, onLogout, canSwitchAccess, onSwitchAccess }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState("");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -15,7 +16,7 @@ const Header = ({ role, userEmail, onLogout }) => {
   const displayUsername = userEmail ? userEmail.split('@')[0] : 'User';
   
   const normalizedRole = role ? role.toLowerCase() : '';
-  const canChangeLocation = normalizedRole === 'manager' || normalizedRole === 'admin';
+  const canChangeLocation = normalizedRole === 'manager';
 
   return (
     <>
@@ -50,21 +51,36 @@ const Header = ({ role, userEmail, onLogout }) => {
              <span className="text-xs">▼</span>
           </div>
 
+          {/* UPDATED DARK DROPDOWN MENU */}
           {isDropdownOpen && (
-            <div className="absolute right-0 top-full mt-4 w-48 bg-white border border-[#E5E5E5] rounded shadow-lg overflow-hidden flex flex-col z-50">
-              <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-[#E5E5E5]">
-                <div className="w-4 h-4 bg-gray-400"></div>
-                <span className="text-sm text-gray-700 font-medium">Settings</span>
+            <div className="absolute right-0 top-full mt-4 w-48 bg-[#1E1E1E] text-white rounded shadow-lg overflow-hidden flex flex-col z-50">
+              
+              <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[#333] transition-colors">
+                <Settings size={18} className="text-gray-300" />
+                <span className="text-sm font-medium">Settings</span>
               </div>
+              
+              {canSwitchAccess && (
+                <div 
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    onSwitchAccess();
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[#333] transition-colors"
+                >
+                  <ArrowRightLeft size={18} className="text-gray-300" />
+                  <span className="text-sm font-medium">Switch Access</span>
+                </div>
+              )}
               
               <div 
                 onClick={() => {
                   setIsDropdownOpen(false); 
                   setShowLogoutModal(true); 
                 }}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer bg-[#7D162E] hover:bg-[#631124] transition-colors text-white"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer bg-[#7D162E] hover:bg-[#631124] transition-colors"
               >
-                <div className="w-4 h-4 bg-white/70"></div>
+                <LogOut size={18} className="text-gray-100" />
                 <span className="text-sm font-medium">Logout</span>
               </div>
             </div>
@@ -72,7 +88,6 @@ const Header = ({ role, userEmail, onLogout }) => {
         </div>
       </header>
 
-      {/* LOGOUT CONFIRMATION MODAL */}
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all">
           <div className="bg-white p-8 rounded-md shadow-2xl max-w-sm w-full mx-4 border border-gray-100 animate-fade-in">
