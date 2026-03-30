@@ -2,7 +2,7 @@ const RoleButton = ({label, onClick}) => {
   return (
   <button 
       onClick={onClick}
-      className="w-full py-4 bg-[#E2D6C5] hover:bg-[#D4C4B0] text-[#4A4A4A] font-medium 
+      className="w-full py-4 bg-[#E2D6C5] hover:bg-[#D4C4B0] text-[#4A4A4A] font-medium
                 rounded-sm shadow-sm transition-all duration-300 tracking-wide uppercase text-sm">
       {label}
     </button>
