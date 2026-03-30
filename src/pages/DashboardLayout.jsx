@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
-import Header from './Header';
+import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
 import Inventory from './Inventory';
-import Sidebar from './Sidebar';
 
 const DashboardLayout = ({ role, userEmail, onLogout }) => {
  
