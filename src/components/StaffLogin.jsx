@@ -11,8 +11,8 @@ const StaffLogin = ({ role, onBack, onLoginSuccess }) => {
       return;
     }
     
-    // THIS IS NEW: If fields are filled, trigger the routing!
-    onLoginSuccess();
+    //If fields are filled, trigger the routing!
+    onLoginSuccess(email); // Pass the email up to the App component for dashboard display
   };
 
   return (

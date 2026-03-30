@@ -6,6 +6,7 @@ import DashboardLayout from "./components/DashboardLayout";
 function App() {
   const [view, setView] = useState("gateway");
   const [selectedRole, setSelectedRole] = useState("");
+  const [userEmail, setUserEmail] = useState(""); 
 
   const handleRoleSelect = (roleName) => {
     setSelectedRole(roleName);
@@ -16,9 +17,15 @@ function App() {
     setView("gateway");
   };
 
-  // THIS IS NEW: The function that transitions the app to the dashboard
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (email) => {
+    setUserEmail(email);
     setView("dashboard");
+  };
+
+  const handleLogout = () => {
+    setUserEmail(""); 
+    setSelectedRole(""); 
+    setView("gateway"); 
   };
 
   return (
@@ -29,11 +36,17 @@ function App() {
         <StaffLogin 
           role={selectedRole} 
           onBack={handleGoBack} 
-          onLoginSuccess={handleLoginSuccess} // WE PASS IT HERE
+          onLoginSuccess={handleLoginSuccess} 
         />
       )}
       
-      {view === "dashboard" && <DashboardLayout role={selectedRole} />}
+      {view === "dashboard" && (
+        <DashboardLayout 
+          role={selectedRole} 
+          userEmail={userEmail} 
+          onLogout={handleLogout} 
+        />
+      )}
     </div>
   );
 }
