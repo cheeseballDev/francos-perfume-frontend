@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import StaffLogin from './pages/StaffLogin';
+import { useEffect, useState } from 'react';
+import MobileBlocker from './components/cashier_components/MobileBlocker';
 import DashboardLayout from './pages/DashboardLayout';
-import MobileBlocker from './components/MobileBlocker'; // Import the new blocker
+import StaffLogin from './pages/StaffLogin';
 
 const App = () => {
   const [user, setUser] = useState(null);

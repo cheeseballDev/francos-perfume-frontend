@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
 import Header from '../components/general_components/Header';
+import Sidebar from '../components/general_components/Sidebar';
 import Inventory from './Inventory';
 import POS from './POS';
 

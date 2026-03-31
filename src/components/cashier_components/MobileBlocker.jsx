@@ -1,5 +1,4 @@
-import React from 'react';
-import logo from '../assets/FrancoPerfumeLogo.png';
+import logo from '../../assets/FrancoPerfumeLogo.png';
 
 const MobileBlocker = () => {
   return (
