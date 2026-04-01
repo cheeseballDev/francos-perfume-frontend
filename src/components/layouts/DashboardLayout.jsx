@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
-import Inventory from './Inventory';
-import POS from './POS';
-import DashboardHome from './DashboardHome'; // NEW IMPORT
+import { useEffect, useState } from 'react';
+import Header from '../../components/general_components/Header';
+import Sidebar from '../../components/general_components/Sidebar';
+import DashboardHome from '../../pages/DashboardHomePage'; // NEW IMPORT
+import Inventory from '../../pages/InventoryPage';
+import POS from '../../pages/PointOfSalePage';
 
 const DashboardLayout = ({ trueRole, activeRole: initialActiveRole, userEmail, onLogout }) => {
   const baseRole = trueRole ? trueRole.toLowerCase() : '';

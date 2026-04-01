@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import ProfileDropdown from './ProfileDropdown';
+import { useEffect, useState } from 'react';
+import ProfileDropdown from '../general_components/ProfileDropdown';
 
 const Header = ({ role, userEmail, onLogout, canSwitchAccess, onSwitchAccess }) => {
   const [currentDate, setCurrentDate] = useState("");

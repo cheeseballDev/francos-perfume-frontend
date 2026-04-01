@@ -9,6 +9,15 @@
 @theme {
     --font-montserrat: "Montserrat", sans-serif;
     --font-sans: var(--font-montserrat);
+    --color-custom-primary: #E1D4C1;
+    --color-custom-yellow: #FFBC2B;
+    --color-custom-white: #F6F5FF;
+    --color-custom-black: #1c1c1c;
+    --color-custom-gray: #878787;
+    --color-custom-red: #7E102C;
+    --color-custom-green: #509C54;
+    --color-custom-purple: #AA59BE;
+    --color-custom-blue: #424E9E;
 }
 
 @layer base {

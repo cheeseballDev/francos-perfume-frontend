@@ -1,5 +1,4 @@
-import React from 'react';
-import logo from '../assets/FrancoPerfumeLogo.png';
+import logo from '../../assets/FrancoPerfumeLogo.png';
 
 const Sidebar = ({ role, activeTab, setActiveTab }) => {
   const normalizedRole = role ? role.toLowerCase() : '';
