@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import DashboardHome from '../../pages/DashboardHomePage';
-import Inventory from '../../pages/InventoryPage';
-import POS from '../../pages/PointOfSalePage';
-import Header from '../general_components/Header';
-import Sidebar from '../general_components/Sidebar';
+import Header from '../components/general_components/Header';
+import Sidebar from '../components/general_components/Sidebar';
+import DashboardHome from './DashboardHomePage'; // NEW IMPORT
+import Inventory from './InventoryPage';
+import POS from './PointOfSalePage';
 
 const DashboardLayout = ({ trueRole, activeRole: initialActiveRole, userEmail, onLogout }) => {
   const baseRole = trueRole ? trueRole.toLowerCase() : '';
@@ -60,7 +60,7 @@ const DashboardLayout = ({ trueRole, activeRole: initialActiveRole, userEmail, o
           
           {/* LOOK HOW CLEAN THIS IS NOW */}
           {activeTab === 'Dashboard' && <DashboardHome />}
-          {activeTab === 'Inventory' && <Inventory />}
+          {activeTab === 'Inventory' && <Inventory role ={currentActiveRole}/>}
           
           {/* You can do the exact same thing for these three pages next! */}
           {activeTab === 'Requests' && <h1 className="text-[32px] font-bold">Delivery Requests</h1>}
