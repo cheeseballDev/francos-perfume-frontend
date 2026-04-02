@@ -11,7 +11,7 @@ const StatusCard = ({
 }) => {
 
     return (
-        <div className="bg-custom-white border border-b-slate-100 rounded-2xl p-6 w-full h-full shadow-sm mr-4">
+        <div className="border border-b-slate-100 rounded-2xl p-6 w-full h-full shadow-sm mr-4 transition duration-300 hover:scale-110">
             <div className="flex justify-between items-start mb-4">
                 <h3 className="text-custom-black text-xl">{title}</h3>
                 <Icon className={color} size={24}></Icon>
@@ -21,5 +21,9 @@ const StatusCard = ({
         </div>
     );
 };
+
+/*
+    Note to self: I can just put a division to any color i want to make it transparent
+*/
 
 export default StatusCard;

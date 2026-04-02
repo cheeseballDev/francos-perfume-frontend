@@ -1,4 +1,4 @@
-import { Boxes, Clock } from "lucide-react";
+import { Boxes, Clock, PhilippinePeso } from "lucide-react";
 import StatusCard from "../components/general_components/StatusCard";
 
 const DashboardHome = () => {
@@ -21,10 +21,10 @@ const DashboardHome = () => {
 
         />
         <StatusCard 
-          title={"Pending Requests"}
+          title={"Total Revenue"}
           mainValue={"5"}
-          Icon={Clock}
-          color={"text-custom-blue"}
+          Icon={PhilippinePeso}
+          color={"text-custom-green"}
         />
 
         <StatusCard 
