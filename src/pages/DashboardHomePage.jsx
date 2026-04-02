@@ -28,8 +28,8 @@ const DashboardHome = ({ role }) => {
       
       {
       /* 
-        ADD AN IF STATEMENT TO CHECK IF MANAGER OR NOT? 
         ADD A STATEMENT THAT CHANGES THE COLORS OF THE STATUS DEPENDING WHETHER ITS POSITIVE OR NOT
+        THIS IS TO BE CHANGED
       */
       }
 
