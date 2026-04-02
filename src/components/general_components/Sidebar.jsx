@@ -1,80 +1,88 @@
+import { Archive, Barcode, Boxes, ChartNoAxesCombined, FileClock, HandHelping, LayoutDashboard, Logs, Tag, UserPen } from 'lucide-react';
 import logo from '../../assets/FrancoPerfumeLogo.png';
 
 const Sidebar = ({ role, activeTab, setActiveTab }) => {
   const normalizedRole = role ? role.toLowerCase() : '';
   
   const isManager = normalizedRole === 'manager';
-  const isInventoryStaff = normalizedRole === 'inventory staff' || normalizedRole === 'inventory';
-  const isCashierStaff = normalizedRole === 'cashier staff' || normalizedRole === 'cashier';
-
-  const canSeeDashboard = !isCashierStaff; 
-  const canSeeInventory = isManager || isInventoryStaff;
-  const canSeeRequests = isManager || isInventoryStaff;
-  
-  // NEW SEPARATED RULES
-  const canSeePOS = isCashierStaff; 
-  const canSeeTransactionHistory = isManager;
-  
-  const canSeeForecast = isManager;
 
   const getTabClass = (tabName) => {
-    return `flex items-center gap-2 cursor-pointer p-3 rounded transition-colors ${
-      activeTab === tabName ? 'bg-[#333] text-[#D4C4B0]' : 'hover:bg-[#333] text-gray-300'
+    return `flex items-center justify-start w-full gap-2 cursor-pointer p-5 transition-colors ${
+      activeTab === tabName ? 'bg-custom-primary/20 text-custom-white border-r-20 border-custom-primary' : 'hover:bg-[#333]'
     }`;
   };
 
   return (
     <div className="w-64 bg-[#1E1E1E] text-white flex flex-col z-20 shrink-0">
-      <div className="py-10 px-6 border-b border-[#333] flex flex-col items-center justify-center mb-4">
+      <div className="py-8 px-6 border-b border-[#333] flex flex-col items-center justify-center mb-4">
         <img src={logo} alt="Franco's Logo" className="h-24 w-auto object-contain mb-6" />
-        <span className="text-[12px] tracking-widest text-gray-500 font-semibold uppercase">Main Menu</span>
+        <span className="text-1xl tracking-widest text-custom-gray font-semibold uppercase">Main Menu</span>
       </div>
       
-      <div className="p-6 flex flex-col gap-2 overflow-y-auto">
-        
-        {canSeeDashboard && (
-          <div onClick={() => setActiveTab('Dashboard')} className={getTabClass('Dashboard')}>
-             <div className="w-4 h-4 bg-gray-400"></div>
-             <p className="font-medium text-sm">Dashboard</p>
-          </div>
-        )}
-        
-        {canSeeInventory && (
-          <div onClick={() => setActiveTab('Inventory')} className={getTabClass('Inventory')}>
-             <div className="w-4 h-4 bg-gray-500"></div>
-             <p className="font-medium text-sm">Inventory</p>
-          </div>
-        )}
-        
-        {canSeeRequests && (
-          <div onClick={() => setActiveTab('Requests')} className={getTabClass('Requests')}>
-             <div className="w-4 h-4 bg-gray-500"></div>
-             <p className="font-medium text-sm">Requests</p>
-          </div>
-        )}
+      <div className="flex flex-col gap-2 overflow-y-auto ">
+        <div onClick={() => setActiveTab('Dashboard')} className={getTabClass('Dashboard')}>
+            <LayoutDashboard size={32}/>
+            <p className="text-xl">Dashboard</p>
+        </div>
+    
+        <div onClick={() => setActiveTab('Inventory')} className={getTabClass('Inventory')}>
+            <Boxes size={32}/>
+            <p className="text-xl">Inventory</p>
+        </div>
+      
+        <div onClick={() => setActiveTab('Requests')} className={getTabClass('Requests')}>
+            <HandHelping size={32}/>
+            <p className="text-xl">Requests</p>
+        </div>
+          
+        <div onClick={() => setActiveTab('Forecast')} className={getTabClass('Forecast')}>
+            <ChartNoAxesCombined size={32}/>
+            <p className="text-xl">Forecast</p>
+        </div>
 
-        {/* NEW POS TAB */}
-        {canSeePOS && (
-          <div onClick={() => setActiveTab('POS')} className={getTabClass('POS')}>
-             <div className="w-4 h-4 bg-gray-500"></div>
-             <p className="font-medium text-sm">Point of Sale (POS)</p>
-          </div>
-        )}
-
-        {/* NEW TRANSACTION HISTORY TAB */}
-        {canSeeTransactionHistory && (
+        {isManager && (
           <div onClick={() => setActiveTab('Transaction History')} className={getTabClass('Transaction History')}>
-             <div className="w-4 h-4 bg-gray-500"></div>
-             <p className="font-medium text-sm">Transaction History</p>
+            <FileClock size={32}/>
+             <p className="text-xl">Transaction History</p>
           </div>
         )}
-            
-        {canSeeForecast && (
-          <div onClick={() => setActiveTab('Forecast')} className={getTabClass('Forecast')}>
-             <div className="w-4 h-4 bg-gray-500"></div>
-             <p className="font-medium text-sm">Forecast</p>
+
+        {isManager && (
+          <div onClick={() => setActiveTab('Barcode')} className={getTabClass('Barcode')}>
+            <Barcode size={32}/>
+             <p className="text-xl">Barcode Generation</p>
           </div>
         )}
+
+        {isManager && (
+          <div onClick={() => setActiveTab('Discount')} className={getTabClass('Discount')}>
+            <Tag size={32}/>
+             <p className="text-xl">Discount Management</p>
+          </div>
+        )}
+
+        {isManager && (
+          <div onClick={() => setActiveTab('Audit Log')} className={getTabClass('Audit Log')}>
+            <Logs size={32}/>
+             <p className="text-xl">Audit Log</p>
+          </div>
+        )}
+
+        {isManager && (
+          <div onClick={() => setActiveTab('Accounts')} className={getTabClass('Accounts')}>
+            <UserPen size={32}/>
+             <p className="text-xl">Accounts</p>
+          </div>
+        )}
+
+        {isManager && (
+          <div onClick={() => setActiveTab('Archives')} className={getTabClass('Archives')}>
+            <Archive size={32}/>
+             <p className="text-xl">Archives</p>
+          </div>
+        )}
+      
+
       </div>
     </div>
   );

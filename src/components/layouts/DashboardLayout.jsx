@@ -21,11 +21,7 @@ const DashboardLayout = ({ trueRole, activeRole: initialActiveRole, userEmail, o
   }, [currentActiveRole]);
 
   const handleSwitchAccess = () => {
-    if (currentActiveRole === 'manager') {
-      setCurrentActiveRole('cashier staff');
-    } else {
-      setCurrentActiveRole('manager');
-    }
+    currentActiveRole === 'manager' ? setCurrentActiveRole('cashier staff') : setCurrentActiveRole('manager');
   };
 
   const canSwitchAccess = baseRole === 'manager';
@@ -42,6 +38,7 @@ const DashboardLayout = ({ trueRole, activeRole: initialActiveRole, userEmail, o
     );
   }
 
+  
   // STANDARD DASHBOARD LAYOUT
   return (
     <div className="flex h-screen bg-[#F7F7F9] text-[#333] font-montserrat text-[16px]">
@@ -58,8 +55,9 @@ const DashboardLayout = ({ trueRole, activeRole: initialActiveRole, userEmail, o
         
         <main className="flex-1 p-8 overflow-auto bg-[#F7F7F9]">
           
+          
           {/* LOOK HOW CLEAN THIS IS NOW */}
-          {activeTab === 'Dashboard' && <DashboardHome />}
+          {activeTab === 'Dashboard' && <DashboardHome role ={currentActiveRole}/>}
           {activeTab === 'Inventory' && <Inventory role ={currentActiveRole}/>}
           
           {/* You can do the exact same thing for these three pages next! */}
