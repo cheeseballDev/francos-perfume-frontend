@@ -39,11 +39,12 @@
 ::-webkit-scrollbar-thumb {
   background-color: transparent;
   border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: var(--color-custom-gray);
-  border: 2px solid var(--color-custom-black)
 }
 
 ::-webkit-scrollbar-track {
@@ -51,15 +52,8 @@
   scrollbar-gutter: stable both-edges;
 }
 
-body:hover ::-webkit-scrollbar-thumb,
-div:hover ::-webkit-scrollbar-thumb {
-  background-color: #878787; /* Your custom-gray */
-  border: 3px solid #1c1c1c; /* Match your background color to make it look "thin" */
-}
-
-
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-custom-primary) !important; 
+  background-color: var(--color-custom-black) !important; 
 }
 
 .sidebar-scroll {
