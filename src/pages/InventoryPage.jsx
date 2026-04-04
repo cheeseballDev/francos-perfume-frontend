@@ -29,8 +29,12 @@ const Inventory = ({ role }) => {
   const isManager = role === 'manager';
 
   const [searchQuery, setSearchQuery] = useState('');
+
   const [sortConfig, setSortConfig] = useState({key: 'id', direction: 'ascending'});
 
+  const [selectedGender, setSelectedGender] = useState('All');
+  const [selectedType, setSelectedType] = useState('All Types');
+  const [selectedBranch, setSelectedBranch] = useState('All Branches');
   
   const [inventory, setInventory] = useState(productTableData);
   
@@ -90,11 +94,17 @@ const Inventory = ({ role }) => {
     */
   };
 
-  const handleSort = (key, direction) => {
+  const handleSort = (key) => {
+
+    setSortConfig(prev => {
+      if (prev?.key === key) {
+        return { key, direction: prev.direction === 'ascending' ? 'descending' : 'ascending' };
+      }
+    });
+
+    let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
       direction = 'descending';
-    } else if (sortConfig.key === key && sortConfig.direction === 'descending') {
-      direction = 'ascending';  
     }
     setSortConfig({key, direction})
   }
@@ -106,19 +116,13 @@ const Inventory = ({ role }) => {
 
   const sortedData = [...filteredInventory].sort((a, b) => {
     if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === 'ascending'? -1 : 1;
+      return sortConfig.direction === 'ascending' ? -1 : 1;
     }
     if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === 'descending'? 1 : 1;
+      return sortConfig.direction === 'ascending' ? 1 : -1;
     }
     return 0;
   });
-
-  // --- LOGIC: Edit Modal Actions ---
-  
-
-  // --- LOGIC: Search Filter ---
-  // This looks at your search bar text and filters the table automatically
   
   return (
     <div className="flex flex-col h-full animate-fade-in font-montserrat relative">
