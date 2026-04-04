@@ -1,21 +1,24 @@
 
 import { useState } from 'react';
-import DataTable from '../components/dashboard_components/DataTable';
+import DataTable from '../components/data_components/DataTable';
+import FilterBar from '../components/general_components/FilterBar';
+import SearchBar from '../components/general_components/SearchBar';
 import AddProductModal from '../components/inventory_components/AddProductModal';
 import EditProductModal from '../components/inventory_components/EditProductModal';
-// ============================================================================
-// 🚨 DELETE THIS CODE IF CONNECTED TO THE API
-// ============================================================================
 
+ {/*
+    TEMP DATA 
+  */
+ }
 const productTableHeaders = [
-  { label: 'ID', key: 'id'},
-  { label: 'Perfume', key:'name'},
-  { label: 'Type', key: 'type'},
-  { label: 'Branch', key: 'branch'},
-  { label: 'Note', key: 'note'},
-  { label: 'Gender', key: 'gender'},
-  { label: 'Date Created', key: 'date'},
-  { label: 'Quantity', key: 'qty'}
+  { label: 'ID', key: 'id', sortable: false},
+  { label: 'Perfume', key:'name', sortable: true},
+  { label: 'Type', key: 'type', sortable: false},
+  { label: 'Branch', key: 'branch', sortable: false},
+  { label: 'Note', key: 'note', sortable: false},
+  { label: 'Gender', key: 'gender', sortable: false},
+  { label: 'Date Created', key: 'date', sortable: true},
+  { label: 'Quantity', key: 'qty', sortable: true}
 ];
 
 const productTableData = [
@@ -25,20 +28,32 @@ const productTableData = [
   { id: '04', name: 'Citrus Bloom', type: 'Premium', branch: 'Sta. Lucia', note: 'Apricot', gender: 'Male', date: '09-09-2025', qty: 100 },
   { id: '05', name: 'Velvet Rose', type: 'Premium', branch: 'Sta. Lucia', note: 'Apricot', gender: 'Female', date: '09-09-2025', qty: 100 },
 ];
-// ============================================================================
+
+const filterSelections = [
+  { key: 'type', label: 'Perfume Type', options: ['All Perfume Types', 'Premium', 'Classic']},
+  { key: 'branch', label: 'Branch', options: ['All Branches', 'Sta. Lucia', 'Riverbanks']},
+  { key: 'gender', label: 'Gender', options: ['All Genders', 'Unisex', 'Male', 'Female']}
+];
+
+ {/*
+    END OF TEMP DATA
+  */
+ }
 
 const Inventory = ({ role }) => {
   const isManager = role === 'manager';
-  // --- STATE ---
-  // MOVED THIS INSIDE THE COMPONENT!
+
   const [searchQuery, setSearchQuery] = useState('');
+
+  const [sortConfig, setSortConfig] = useState({key: 'id', direction: 'ascending'});
+
+  const [filters, setFilters] = useState({type: 'All Types', branch: 'All Branches', gender: 'All Gender'});
   
   const [inventory, setInventory] = useState(productTableData);
   
-  // States for the Edit Modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-//States for the add Product Modal
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   /* // 🔌 UNCOMMENT WHEN .NET IS READY
@@ -61,7 +76,6 @@ const Inventory = ({ role }) => {
     // 🔌 .NET API: await fetch(`.../api/inventory/${id}/decrease`, { method: 'PUT' });
   };
 
-  // --- LOGIC: Edit Modal Actions ---
   const handleOpenEditModal = (id) => {
     const productToEdit = inventory.find(item => item.id === id);
     setEditingProduct(productToEdit);
@@ -93,16 +107,48 @@ const Inventory = ({ role }) => {
     */
   };
 
-  // --- LOGIC: Search Filter ---
-  // This looks at your search bar text and filters the table automatically
-  const filteredInventory = inventory.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.id.includes(searchQuery)
-  );
+  const handleResetFilters = () => {
+    setFilters({ type: 'All Perfume Types', branch: 'All Branches', gender: 'All Genders' });
+  };
 
+
+  const handleSort = (key) => {
+    setSortConfig(prev => {
+      if (prev?.key === key) {
+        return { key, direction: prev.direction === 'ascending' ? 'descending' : 'ascending' };
+      }
+    });
+
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({key, direction})
+  }
+
+  const filteredInventory = inventory.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.id.includes(searchQuery)
+
+    const matchesType = filters.type === "" || filters.type === "All Types" || item.type === filters.type;
+    const matchesBranch = filters.branch === "" || filters.branch === "All Branches" || item.branch === filters.branch;
+    const matchesGender = filters.gender === "" || filters.gender === "All Genders" || item.gender === filters.gender;
+
+    return matchesSearch && matchesType && matchesBranch && matchesGender;
+  });
+
+  const sortedData = [...filteredInventory].sort((a, b) => {
+    if (a[sortConfig.key] < b[sortConfig.key]) {
+      return sortConfig.direction === 'ascending' ? -1 : 1;
+    }
+    if (a[sortConfig.key] > b[sortConfig.key]) {
+      return sortConfig.direction === 'ascending' ? 1 : -1;
+    }
+    return 0;
+  });
+  
   return (
-    <div className="flex flex-col h-full animate-fade-in font-montserrat relative">
-      
+    <div className="flex flex-col h-full animate-fade-in relative">
+
       {/* HEADER SECTION */}
       <div className="flex justify-between items-end mb-6">
         <div>
@@ -116,7 +162,10 @@ const Inventory = ({ role }) => {
             <span className="text-lg">▤</span> Scan barcode
           </button>
 
-          {/* SECURITY CHECK: Only show this if the user is a manager */}
+          {/* 
+            CHECK IF USER IS MANAGER
+          */}
+
           {isManager && (
             <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-[#94BE9F] text-white px-5 py-2.5 rounded font-bold text-sm hover:bg-[#7fa78a] transition-colors shadow-sm">
               + ADD PRODUCT
@@ -125,35 +174,26 @@ const Inventory = ({ role }) => {
         </div>
       </div>
 
-      {/* FILTERS SECTION */}
-      <div className="flex gap-4 mb-6">
-        <div className="relative flex-1 max-w-xs">
-          <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
-          <input 
-            type="text" 
-            placeholder="Search by name or id..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded text-sm focus:outline-none focus:border-gray-400"
-          />
-        </div>
+      <div className="flex items-center gap-4 mb-6">
+        <SearchBar 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
 
-        <select className="border border-gray-200 rounded px-4 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer w-40">
-          <option>Perfume Type</option>
-        </select>
-        <select className="border border-gray-200 rounded px-4 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer w-40">
-          <option>Branch</option>
-        </select>
-        <select className="border border-gray-200 rounded px-4 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer w-40">
-          <option>Gender</option>
-        </select>
+        <FilterBar
+          filters={filters}
+          setFilters={setFilters}
+          filterSelections={filterSelections}
+        />
       </div>
 
       {/* TABLE SECTION */}
 
       <DataTable 
         headers={productTableHeaders}
-        data={filteredInventory}
+        data={sortedData}
+        onSort={handleSort}
+        sortConfig={sortConfig}
         renderActions={(item) => {
           return(
           <>
@@ -180,10 +220,11 @@ const Inventory = ({ role }) => {
         product={editingProduct}
         onSave={handleSaveEdit}
       />
-    <AddProductModal 
-    isOpen={isAddModalOpen} 
-    onClose={() => setIsAddModalOpen(false)} 
-  />
+
+      <AddProductModal 
+      isOpen={isAddModalOpen} 
+      onClose={() => setIsAddModalOpen(false)} 
+      />
     </div>
   );
 };
