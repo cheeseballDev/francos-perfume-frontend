@@ -1,9 +1,12 @@
 
 import { useState } from 'react';
 import DataTable from '../components/data_components/DataTable';
+import FilterBar from '../components/general_components/FilterBar';
+import SearchBar from '../components/general_components/SearchBar';
 import AddProductModal from '../components/inventory_components/AddProductModal';
 import EditProductModal from '../components/inventory_components/EditProductModal';
-{/*
+
+ {/*
     TEMP DATA 
   */
  }
@@ -25,6 +28,18 @@ const productTableData = [
   { id: '04', name: 'Citrus Bloom', type: 'Premium', branch: 'Sta. Lucia', note: 'Apricot', gender: 'Male', date: '09-09-2025', qty: 100 },
   { id: '05', name: 'Velvet Rose', type: 'Premium', branch: 'Sta. Lucia', note: 'Apricot', gender: 'Female', date: '09-09-2025', qty: 100 },
 ];
+
+const filterSelections = [
+  { key: 'type', label: 'Perfume Type', options: ['All Perfume Types', 'Premium', 'Classic']},
+  { key: 'branch', label: 'Branch', options: ['All Branches', 'Sta. Lucia', 'Riverbanks']},
+  { key: 'gender', label: 'Gender', options: ['All Genders', 'Unisex', 'Male', 'Female']}
+];
+
+ {/*
+    END OF TEMP DATA
+  */
+ }
+
 const Inventory = ({ role }) => {
   const isManager = role === 'manager';
 
@@ -32,9 +47,7 @@ const Inventory = ({ role }) => {
 
   const [sortConfig, setSortConfig] = useState({key: 'id', direction: 'ascending'});
 
-  const [selectedGender, setSelectedGender] = useState('All');
-  const [selectedType, setSelectedType] = useState('All Types');
-  const [selectedBranch, setSelectedBranch] = useState('All Branches');
+  const [filters, setFilters] = useState({type: 'All Types', branch: 'All Branches', gender: 'All Gender'});
   
   const [inventory, setInventory] = useState(productTableData);
   
@@ -94,8 +107,12 @@ const Inventory = ({ role }) => {
     */
   };
 
-  const handleSort = (key) => {
+  const handleResetFilters = () => {
+    setFilters({ type: 'All Perfume Types', branch: 'All Branches', gender: 'All Genders' });
+  };
 
+
+  const handleSort = (key) => {
     setSortConfig(prev => {
       if (prev?.key === key) {
         return { key, direction: prev.direction === 'ascending' ? 'descending' : 'ascending' };
@@ -109,10 +126,15 @@ const Inventory = ({ role }) => {
     setSortConfig({key, direction})
   }
 
-  const filteredInventory = inventory.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.id.includes(searchQuery)
-  );
+  const filteredInventory = inventory.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.id.includes(searchQuery)
+
+    const matchesType = filters.type === "" || filters.type === "All Types" || item.type === filters.type;
+    const matchesBranch = filters.branch === "" || filters.branch === "All Branches" || item.branch === filters.branch;
+    const matchesGender = filters.gender === "" || filters.gender === "All Genders" || item.gender === filters.gender;
+
+    return matchesSearch && matchesType && matchesBranch && matchesGender;
+  });
 
   const sortedData = [...filteredInventory].sort((a, b) => {
     if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -125,8 +147,8 @@ const Inventory = ({ role }) => {
   });
   
   return (
-    <div className="flex flex-col h-full animate-fade-in font-montserrat relative">
-      
+    <div className="flex flex-col h-full animate-fade-in relative">
+
       {/* HEADER SECTION */}
       <div className="flex justify-between items-end mb-6">
         <div>
@@ -152,28 +174,17 @@ const Inventory = ({ role }) => {
         </div>
       </div>
 
-      {/* FILTERS SECTION */}
-      <div className="flex gap-4 mb-6">
-        <div className="relative flex-1 max-w-xs">
-          <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
-          <input 
-            type="text" 
-            placeholder="Search by name or id..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded text-sm focus:outline-none focus:border-gray-400"
-          />
-        </div>
+      <div className="flex items-center gap-4 mb-6">
+        <SearchBar 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
 
-        <select className="border border-gray-200 rounded px-4 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer w-40">
-          <option>Perfume Type</option>
-        </select>
-        <select className="border border-gray-200 rounded px-4 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer w-40">
-          <option>Branch</option>
-        </select>
-        <select className="border border-gray-200 rounded px-4 py-2 text-sm text-gray-600 focus:outline-none cursor-pointer w-40">
-          <option>Gender</option>
-        </select>
+        <FilterBar
+          filters={filters}
+          setFilters={setFilters}
+          filterSelections={filterSelections}
+        />
       </div>
 
       {/* TABLE SECTION */}

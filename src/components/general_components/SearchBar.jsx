@@ -1,9 +1,11 @@
 import { Search } from 'lucide-react';
 
-const SearchBar = ({ value, onChange, placeholder = "Search..." }) => {
+const SearchBar = ({ value, onChange, placeholder = "Search by name or id..."}) => {
   return (
-    <div className="relative flex-1 max-w-xs">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+    <div className="relative w-64">
+      <div className="absolute inset-y-0 left-0 pl-3 0 flex items-center pointer-events-none">
+      <Search className="h-4 w-4 text-custom-gray" size={18} />
+      </div>
       <input 
         type="text" 
         placeholder={placeholder}
