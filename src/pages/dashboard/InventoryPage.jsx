@@ -1,5 +1,4 @@
 import InventoryTable from "@/components/features/inventory_components/InventoryTable";
-import InventoryTable from "@/components/features/inventory_components/InventoryTable";
 import { useState } from "react";
 import AddProductModal from "../../components/features/inventory_components/AddProductModal";
 import EditProductModal from "../../components/features/inventory_components/EditProductModal";
@@ -263,12 +262,6 @@ const Inventory = ({ role }) => {
 
       {/* TABLE SECTION */}
 
-      <InventoryTable
-        role={role}
-        data={sortedData}
-        onIncrease={handleIncreaseQty}
-        onDecrease={handleDecreaseQty}
-        onEdit={handleOpenEditModal}
       <InventoryTable
         role={role}
         data={filteredInventory}
