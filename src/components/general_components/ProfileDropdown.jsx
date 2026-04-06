@@ -35,7 +35,8 @@ const ProfileDropdown = ({ userEmail, onLogout, canSwitchAccess, onSwitchAccess,
         <span className="font-medium text-[15px]">{displayUsername}</span>
         <span className="text-xs">▼</span>
       </div>
-
+       
+       "
       {/* The Floating Menu */}
       {isOpen && (
         <div className="absolute right-0 top-full mt-3 w-48 bg-[#1E1E1E] text-white rounded shadow-2xl overflow-hidden flex flex-col border border-[#333]">
