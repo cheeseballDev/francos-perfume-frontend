@@ -1,25 +1,15 @@
+import InventoryTable from "@/components/features/inventory_components/InventoryTable";
 import { useState } from "react";
-import DataTable from "../components/data_components/DataTable";
-import FilterBar from "../components/general_components/FilterBar";
-import SearchBar from "../components/general_components/SearchBar";
-import AddProductModal from "../components/inventory_components/AddProductModal";
-import EditProductModal from "../components/inventory_components/EditProductModal";
+import AddProductModal from "../../components/features/inventory_components/AddProductModal";
+import EditProductModal from "../../components/features/inventory_components/EditProductModal";
+import FilterBar from "../../components/shared/FilterBar";
+import SearchBar from "../../components/shared/SearchBar";
 
 {
   /*
     TEMP DATA 
   */
 }
-const productTableHeaders = [
-  { label: "ID", key: "id", sortable: false },
-  { label: "Perfume", key: "name", sortable: true },
-  { label: "Type", key: "type", sortable: false },
-  { label: "Branch", key: "branch", sortable: false },
-  { label: "Note", key: "note", sortable: false },
-  { label: "Gender", key: "gender", sortable: false },
-  { label: "Date Created", key: "date", sortable: true },
-  { label: "Quantity", key: "qty", sortable: true },
-];
 
 const productTableData = [
   {
@@ -74,6 +64,50 @@ const productTableData = [
   },
 ];
 
+const columns = [
+  {
+    header: () => 'id',
+    accessorKey: 'id',
+    enableSorting: false,
+  },
+  {
+    header: () => 'name',
+    accessorKey: 'name',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'type',
+    accessorKey: 'type',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'branch',
+    accessorKey: 'branch',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'note',
+    accessorKey: 'note',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'gender',
+    accessorKey: 'gender',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'date',
+    accessorKey: 'date',
+    sortingFn: 'datetime',
+  },
+  {
+    header: () => 'qty',
+    accessorKey: 'qty',
+    sortingFn: 'basic',
+  }
+
+];
+
 const filterSelections = [
   {
     key: "type",
@@ -103,13 +137,8 @@ const Inventory = ({ role }) => {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [sortConfig, setSortConfig] = useState({
-    key: "id",
-    direction: "ascending",
-  });
-
   const [filters, setFilters] = useState({
-    type: "All Types",
+    type: "All Perfume Types",
     branch: "All Branches",
     gender: "All Genders",
   });
@@ -160,7 +189,7 @@ const Inventory = ({ role }) => {
     // 🔌 .NET API: await fetch(`.../api/inventory/${id}/decrease`, { method: 'PUT' });
   };
 
-  const handleOpenEditModal = (id) => {
+  const handleOpenEditModal = (id, role) => {
     const productToEdit = inventory.find((item) => item.id === id);
     setEditingProduct(productToEdit);
     setIsEditModalOpen(true);
@@ -203,23 +232,6 @@ const Inventory = ({ role }) => {
     });
   };
 
-  const handleSort = (key) => {
-    setSortConfig((prev) => {
-      if (prev?.key === key) {
-        return {
-          key,
-          direction:
-            prev.direction === "ascending" ? "descending" : "ascending",
-        };
-      }
-    });
-
-    let direction = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
-  };
 
   const filteredInventory = inventory.filter((item) => {
     const matchesSearch =
@@ -228,7 +240,7 @@ const Inventory = ({ role }) => {
 
     const matchesType =
       filters.type === "" ||
-      filters.type === "All Types" ||
+      filters.type === "All Perfume Types" ||
       item.type === filters.type;
     const matchesBranch =
       filters.branch === "" ||
@@ -240,16 +252,6 @@ const Inventory = ({ role }) => {
       item.gender === filters.gender;
 
     return matchesSearch && matchesType && matchesBranch && matchesGender
-  });
-
-  const sortedData = [...filteredInventory].sort((a, b) => {
-    if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === "ascending" ? -1 : 1;
-    }
-    if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === "ascending" ? 1 : -1;
-    }
-    return 0;
   });
 
   return (
@@ -304,35 +306,13 @@ const Inventory = ({ role }) => {
 
       {/* TABLE SECTION */}
 
-      <DataTable
-        headers={productTableHeaders}
-        data={sortedData}
-        onSort={handleSort}
-        sortConfig={sortConfig}
-        renderActions={(item) => {
-          return (
-            <>
-              <button
-                onClick={() => handleIncreaseQty(item.id)}
-                className="w-7 h-7 bg-[#E3D7C6] hover:bg-[#D6C9B8] rounded text-gray-800 font-bold transition-colors"
-              >
-                +
-              </button>
-              <button
-                onClick={() => handleDecreaseQty(item.id)}
-                className="w-7 h-7 bg-[#E3D7C6] hover:bg-[#D6C9B8] rounded text-gray-800 font-bold transition-colors"
-              >
-                -
-              </button>
-              <button
-                onClick={() => handleOpenEditModal(item.id)}
-                className="w-7 h-7 bg-[#E3D7C6] hover:bg-[#D6C9B8] rounded flex items-center justify-center transition-colors text-xs"
-              >
-                📝
-              </button>
-            </>
-          );
-        }}
+      <InventoryTable
+        role={role}
+        data={filteredInventory}
+        columns={columns}
+        onIncrease={handleIncreaseQty}
+        onDecrease={handleDecreaseQty}
+        onEdit={handleOpenEditModal}
       />
 
       <div className="py-4 flex justify-between items-center text-sm text-gray-500 border-t border-gray-100">
