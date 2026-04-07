@@ -64,6 +64,50 @@ const productTableData = [
   },
 ];
 
+const columns = [
+  {
+    header: () => 'id',
+    accessorKey: 'id',
+    enableSorting: false,
+  },
+  {
+    header: () => 'name',
+    accessorKey: 'name',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'type',
+    accessorKey: 'type',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'branch',
+    accessorKey: 'branch',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'note',
+    accessorKey: 'note',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'gender',
+    accessorKey: 'gender',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: () => 'date',
+    accessorKey: 'date',
+    sortingFn: 'datetime',
+  },
+  {
+    header: () => 'qty',
+    accessorKey: 'qty',
+    sortingFn: 'basic',
+  }
+
+];
+
 const filterSelections = [
   {
     key: "type",
@@ -265,6 +309,7 @@ const Inventory = ({ role }) => {
       <InventoryTable
         role={role}
         data={filteredInventory}
+        columns={columns}
         onIncrease={handleIncreaseQty}
         onDecrease={handleDecreaseQty}
         onEdit={handleOpenEditModal}
