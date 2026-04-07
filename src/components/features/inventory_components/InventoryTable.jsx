@@ -20,7 +20,7 @@ import { useState } from "react";
 const InventoryTable = ({data, columns, onIncrease, onDecrease, onEdit}) => {
 
   const [sorting, setSorting] = useState([
-    { id: 'id', desc: true },
+    { id: 'id', desc: false },
   ])
 
   const table = useReactTable({
@@ -33,6 +33,7 @@ const InventoryTable = ({data, columns, onIncrease, onDecrease, onEdit}) => {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     enableSortingRemoval: false,
+    enableMultiSort: true,
   })
   {/*
     ADD THE FILTERING, PAGINATION, AND SORTING LOGIC HERE USING THE useReactTable HOOK
@@ -44,7 +45,7 @@ const InventoryTable = ({data, columns, onIncrease, onDecrease, onEdit}) => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px] cursor-pointer select-none"
-              onClick={() => { table.getColumn("id")?.toggleSorting() }}
+              onClick={() => { table.getColumn('id')?.toggleSorting() }}
               >ID {
                 table.getColumn('id')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
               </TableHead>

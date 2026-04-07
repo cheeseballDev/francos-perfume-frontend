@@ -65,7 +65,7 @@ const productTableData = [
 ];
 
 const columns = [
-  { header: () => 'id', accessorKey: 'id', enableSorting: false },
+  { header: () => 'id', accessorKey: 'id', sortingFn: 'basic' },
   { header: () => 'name', accessorKey: 'name', sortingFn: 'alphanumeric' },
   { header: () => 'type', accessorKey: 'type', sortingFn: 'alphanumeric' },
   { header: () => 'branch', accessorKey: 'branch', sortingFn: 'alphanumeric' },

@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Settings, ArrowRightLeft, LogOut, User } from 'lucide-react';
+import { ArrowRightLeft, LogOut, Settings, User } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const ProfileDropdown = ({ userEmail, onLogout, canSwitchAccess, onSwitchAccess, theme = 'dark' }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +36,6 @@ const ProfileDropdown = ({ userEmail, onLogout, canSwitchAccess, onSwitchAccess,
         <span className="text-xs">▼</span>
       </div>
        
-       "
       {/* The Floating Menu */}
       {isOpen && (
         <div className="absolute right-0 top-full mt-3 w-48 bg-[#1E1E1E] text-white rounded shadow-2xl overflow-hidden flex flex-col border border-[#333]">
