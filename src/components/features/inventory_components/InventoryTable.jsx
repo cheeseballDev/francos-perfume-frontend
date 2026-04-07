@@ -1,11 +1,8 @@
 import {
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable
 } from "@tanstack/react-table";
-import { useState } from "react";
 
 import {
   Table,
@@ -16,29 +13,27 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { Button } from "@radix-ui/themes";
-import { Edit, Minus, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit, Minus, Plus } from "lucide-react";
+import { useState } from "react";
 
 
-const InventoryTable = ({data, columns, role, onIncrease, onDecrease, onEdit}) => {
+const InventoryTable = ({data, columns, onIncrease, onDecrease, onEdit}) => {
 
-  const [sorting, setSorting] = useState([])
-  const [columnFilters, setColumnFilters] = useState([])
+  const [sorting, setSorting] = useState([
+    { id: 'id', desc: true },
+  ])
 
   const table = useReactTable({
-    data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+    data,
     state: {
       sorting,
-      columnFilters,
     },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    enableSortingRemoval: false,
   })
-
   {/*
     ADD THE FILTERING, PAGINATION, AND SORTING LOGIC HERE USING THE useReactTable HOOK
   */
@@ -48,21 +43,55 @@ const InventoryTable = ({data, columns, role, onIncrease, onDecrease, onEdit}) =
       <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">ID</TableHead>
-              <TableHead>Perfume Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Branch</TableHead>
-              <TableHead>Note</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Date Created</TableHead>
-              <TableHead className="text-right">Quantity</TableHead>
+              <TableHead className="w-[100px] cursor-pointer select-none"
+              onClick={() => { table.getColumn("id")?.toggleSorting() }}
+              >ID {
+                table.getColumn('id')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+              </TableHead>
+
+              <TableHead className="w-[200px] cursor-pointer select-none"
+              onClick={() => { table.getColumn('name')?.toggleSorting() }}
+              >Perfume Name {
+                table.getColumn('name')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+              </TableHead>
+              <TableHead className="w-[100px] cursor-pointer select-none"
+              onClick={() => { table.getColumn('type')?.toggleSorting() }}
+              >Type {
+                table.getColumn('type')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+              </TableHead>
+
+              <TableHead className="w-[100px] cursor-pointer select-none"
+              onClick={() => { table.getColumn('branch')?.toggleSorting() }}
+              >Branch {
+                table.getColumn('branch')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+              </TableHead>
+              <TableHead className="w-[100px] cursor-pointer select-none"
+              onClick={() => { table.getColumn('note')?.toggleSorting() }}
+              >Note {
+                table.getColumn('note')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+              </TableHead>
+              <TableHead className="w-[100px] cursor-pointer select-none"
+              onClick={() => { table.getColumn('gender')?.toggleSorting() }}
+              >Gender {
+                table.getColumn('gender')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+              </TableHead>
+              <TableHead className="w-[100px] cursor-pointer select-none"
+              onClick={() => { table.getColumn('date')?.toggleSorting() }}
+              >Date Created {
+                table.getColumn('date')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+              </TableHead>
+              <TableHead className="text-right">Quantity {
+                table.getColumn('qty')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+                </TableHead>
               <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {/* Direct mapping of the data prop */}
-            {data.map((item) => (
-              <TableRow key={item.id}>
+            {table.getRowModel().rows.map((row) => {
+            const item = row.original;
+
+            return (
+              <TableRow key={row.id}>
                 <TableCell className="font-medium">{item.id}</TableCell>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.type}</TableCell>
@@ -99,7 +128,8 @@ const InventoryTable = ({data, columns, role, onIncrease, onDecrease, onEdit}) =
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            );
+          })}
           </TableBody>
         </Table>
     </div>
