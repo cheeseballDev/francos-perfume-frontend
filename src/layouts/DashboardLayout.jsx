@@ -45,12 +45,6 @@ const DashboardLayout = ({ trueRole, activeRole: initialActiveRole, userEmail, o
     );
   }
 
-<<<<<<< HEAD
-  
-  // STANDARD DASHBOARD LAYOUT
-=======
-
->>>>>>> 0376fe8e9f2f58de342dcc376490edf6e31e0648
   return (
     <div className="flex h-screen bg-[#F7F7F9] text-[#333] font-montserrat text-[16px]">
       <Sidebar role={currentActiveRole} activeTab={activeTab} setActiveTab={setActiveTab} />

@@ -80,7 +80,9 @@ const InventoryTable = ({data, columns, onIncrease, onDecrease, onEdit}) => {
               >Date Created {
                 table.getColumn('date')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
               </TableHead>
-              <TableHead className="text-right">Quantity {
+              <TableHead className="w-[100px] text-right cursor-pointer select-none"
+              onClick={() => { table.getColumn('qty')?.toggleSorting() }}
+              >Quantity {
                 table.getColumn('qty')?.getIsSorted() === 'asc' ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
                 </TableHead>
               <TableHead className="text-center">Actions</TableHead>
