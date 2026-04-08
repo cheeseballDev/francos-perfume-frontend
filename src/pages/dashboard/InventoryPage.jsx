@@ -65,47 +65,14 @@ const productTableData = [
 ];
 
 const columns = [
-  {
-    header: () => 'id',
-    accessorKey: 'id',
-    enableSorting: false,
-  },
-  {
-    header: () => 'name',
-    accessorKey: 'name',
-    sortingFn: 'alphanumeric',
-  },
-  {
-    header: () => 'type',
-    accessorKey: 'type',
-    sortingFn: 'alphanumeric',
-  },
-  {
-    header: () => 'branch',
-    accessorKey: 'branch',
-    sortingFn: 'alphanumeric',
-  },
-  {
-    header: () => 'note',
-    accessorKey: 'note',
-    sortingFn: 'alphanumeric',
-  },
-  {
-    header: () => 'gender',
-    accessorKey: 'gender',
-    sortingFn: 'alphanumeric',
-  },
-  {
-    header: () => 'date',
-    accessorKey: 'date',
-    sortingFn: 'datetime',
-  },
-  {
-    header: () => 'qty',
-    accessorKey: 'qty',
-    sortingFn: 'basic',
-  }
-
+  { header: () => 'id', accessorKey: 'id', sortingFn: 'basic' },
+  { header: () => 'name', accessorKey: 'name', sortingFn: 'alphanumeric' },
+  { header: () => 'type', accessorKey: 'type', sortingFn: 'alphanumeric' },
+  { header: () => 'branch', accessorKey: 'branch', sortingFn: 'alphanumeric' },
+  { header: () => 'note', accessorKey: 'note', sortingFn: 'alphanumeric' },
+  { header: () => 'gender', accessorKey: 'gender', sortingFn: 'alphanumeric' },
+  { header: () => 'date', accessorKey: 'date', sortingFn: 'datetime' },
+  { header: () => 'qty', accessorKey: 'qty', sortingFn: 'basic' },
 ];
 
 const filterSelections = [
@@ -177,7 +144,6 @@ const Inventory = ({ role }) => {
         item.id === id ? { ...item, qty: item.qty + 1 } : item,
       ),
     );
-    // 🔌 .NET API: await fetch(`.../api/inventory/${id}/increase`, { method: 'PUT' });
   };
 
   const handleDecreaseQty = async (id) => {
@@ -186,7 +152,6 @@ const Inventory = ({ role }) => {
         item.id === id ? { ...item, qty: Math.max(0, item.qty - 1) } : item,
       ),
     );
-    // 🔌 .NET API: await fetch(`.../api/inventory/${id}/decrease`, { method: 'PUT' });
   };
 
   const handleOpenEditModal = (id, role) => {
@@ -315,17 +280,7 @@ const Inventory = ({ role }) => {
         onEdit={handleOpenEditModal}
       />
 
-      <div className="py-4 flex justify-between items-center text-sm text-gray-500 border-t border-gray-100">
-        <p>Showing {filteredInventory.length} entries</p>
-        <div className="flex gap-2">
-          <button className="p-1 hover:text-gray-800 font-bold transition-colors">
-            {"<"}
-          </button>
-          <button className="p-1 hover:text-gray-800 font-bold transition-colors">
-            {">"}
-          </button>
-        </div>
-      </div>
+      {/* Pagination is now handled inside InventoryTable */}
 
       {/* --- OUR NEW EDIT COMPONENT --- */}
       <EditProductModal
