@@ -11,13 +11,13 @@ const Sidebar = ({ role, activeTab, setActiveTab }) => {
   const getTabClass = (tabName) => {
     return `flex items-center w-full gap-2 cursor-pointer p-5 transition-colors duration-300
     ${
-      activeTab === tabName ? 'bg-custom-primary/20 text-custom-white border-r-20 border-custom-primary' : 'hover:bg-[#333]'
+      activeTab === tabName ? 'bg-custom-primary/20 text-custom-white border-r-20 border-custom-primary' : 'hover:bg-white/10'
     }`;
   };
 
   return (
     <div className="w-64 bg-custom-black text-custom-white flex flex-col z-20 shrink-0">
-      <div className="py-6 px-6 border-b border-[#333] flex flex-col items-center justify-center ">
+      <div className="py-6 px-6 border-b border-white/10 flex flex-col items-center justify-center ">
         <img src={logo} alt={companyPictureAlt} className="h-24 w-auto object-contain mb-6" />
         <span className="text-1xl tracking-widest text-custom-gray font-semibold uppercase">Main Menu</span>
       </div>

@@ -106,7 +106,7 @@ const InventoryTable = ({data, columns, onIncrease, onDecrease, onEdit}) => {
                       variant="outline" 
                       size="sm" 
                       onClick={() => onIncrease(item.id)}
-                      className="bg-[#E3D7C6] hover:bg-[#D6C9B8]"
+                      className="bg-custom-primary hover:bg-custom-primary/80"
                     >
                       <Plus size={16} />
                     </Button>
@@ -114,7 +114,7 @@ const InventoryTable = ({data, columns, onIncrease, onDecrease, onEdit}) => {
                       variant="outline" 
                       size="sm" 
                       onClick={() => onDecrease(item.id)}
-                      className="bg-[#E3D7C6] hover:bg-[#D6C9B8]"
+                      className="bg-custom-primary hover:bg-custom-primary/80"
                     >
                       <Minus size={16} />
                     </Button>
