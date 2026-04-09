@@ -8,6 +8,16 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -64,7 +74,6 @@ builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddAuthentication();
 var app = builder.Build();
-
 // Configure pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -77,5 +86,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors("AllowFrontend");
 
 app.Run();
