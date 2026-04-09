@@ -1,8 +1,10 @@
-import InventoryTable from "@/components/features/inventory_components/InventoryTable";
+import DataTable from "@/components/data_components/DataTable";
+import { Button } from "@/components/ui/button";
+import { Edit, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import AddProductModal from "../../components/features/inventory_components/AddProductModal";
 import EditProductModal from "../../components/features/inventory_components/EditProductModal";
-import FilterBar from "../../components/shared/FilterBar";
+import FilterBar from "../../components/shared/FilterDropDown";
 import SearchBar from "../../components/shared/SearchBar";
 
 {
@@ -64,17 +66,6 @@ const productTableData = [
   },
 ];
 
-const columns = [
-  { header: () => 'id', accessorKey: 'id', sortingFn: 'basic' },
-  { header: () => 'name', accessorKey: 'name', sortingFn: 'alphanumeric' },
-  { header: () => 'type', accessorKey: 'type', sortingFn: 'alphanumeric' },
-  { header: () => 'branch', accessorKey: 'branch', sortingFn: 'alphanumeric' },
-  { header: () => 'note', accessorKey: 'note', sortingFn: 'alphanumeric' },
-  { header: () => 'gender', accessorKey: 'gender', sortingFn: 'alphanumeric' },
-  { header: () => 'date', accessorKey: 'date', sortingFn: 'datetime' },
-  { header: () => 'qty', accessorKey: 'qty', sortingFn: 'basic' },
-];
-
 const filterSelections = [
   {
     key: "type",
@@ -91,13 +82,8 @@ const filterSelections = [
     label: "Gender",
     options: ["All Genders", "Unisex", "Male", "Female"],
   },
-];
 
-{
-  /*
-    END OF TEMP DATA
-  */
-}
+];
 
 const Inventory = ({ role }) => {
   const isManager = role === "manager";
@@ -116,6 +102,64 @@ const Inventory = ({ role }) => {
   const [editingProduct, setEditingProduct] = useState(null);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+
+  const columns = [
+  {
+    header: 'ID',
+    accessorKey: 'id',
+    enableSorting: true,
+  },
+  {
+    header: 'Perfume Name',
+    accessorKey: 'name',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: 'Perfume Type',
+    accessorKey: 'type',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: 'Branch',
+    accessorKey: 'branch',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: 'Note',
+    accessorKey: 'note',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: 'Gender',
+    accessorKey: 'gender',
+    sortingFn: 'alphanumeric',
+  },
+  {
+    header: 'Date Created',
+    accessorKey: 'date',
+    sortingFn: 'datetime',
+  },
+  {
+    header: 'Quantity',
+    accessorKey: 'qty',
+    sortingFn: 'basic',
+  },
+  {
+    header: 'Actions',
+    id: 'actions',
+    cell: ({row}) => {
+      const item = row.original;
+        return (
+          <div className="flex gap-1">
+            <Button variant="primary" size="icon-sm" onClick={() => handleIncreaseQty(item.id)}><Plus size={14}/></Button>
+            <Button variant="primary" size="icon-sm" onClick={() => handleDecreaseQty(item.id)}><Minus size={14}/></Button>
+            <Button variant="primary" size="icon-sm" onClick={() => handleOpenEditModal(item.id, role)}><Edit size={14}/></Button>
+          </div>
+        )
+      }
+    }
+  ];
 
   const handleAddProduct = (newProduct) => {
     // 1. Give it a temporary fake ID until you connect a real database later
@@ -236,21 +280,18 @@ const Inventory = ({ role }) => {
 
         {/* We put the buttons in a flex container so they sit next to each other */}
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 bg-[#E3D7C6] hover:bg-[#D6C9B8] text-gray-800 px-4 py-2 rounded font-medium transition-colors text-sm shadow-sm">
+          <Button variant="primary">
             <span className="text-lg">▤</span> Scan barcode
-          </button>
+          </Button>
 
-          {/* 
+          {/*
             CHECK IF USER IS MANAGER
           */}
 
           {isManager && (
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 bg-[#94BE9F] text-white px-5 py-2.5 rounded font-bold text-sm hover:bg-[#7fa78a] transition-colors shadow-sm"
-            >
+            <Button variant="success" onClick={() => setIsAddModalOpen(true)}>
               + ADD PRODUCT
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -273,26 +314,11 @@ const Inventory = ({ role }) => {
 
       {/* TABLE SECTION */}
 
-      <InventoryTable
-        role={role}
+      <DataTable
         data={filteredInventory}
         columns={columns}
-        onIncrease={handleIncreaseQty}
-        onDecrease={handleDecreaseQty}
-        onEdit={handleOpenEditModal}
       />
 
-      <div className="py-4 flex justify-between items-center text-sm text-gray-500 border-t border-gray-100">
-        <p>Showing {filteredInventory.length} entries</p>
-        <div className="flex gap-2">
-          <button className="p-1 hover:text-gray-800 font-bold transition-colors">
-            {"<"}
-          </button>
-          <button className="p-1 hover:text-gray-800 font-bold transition-colors">
-            {">"}
-          </button>
-        </div>
-      </div>
 
       {/* --- OUR NEW EDIT COMPONENT --- */}
       <EditProductModal
