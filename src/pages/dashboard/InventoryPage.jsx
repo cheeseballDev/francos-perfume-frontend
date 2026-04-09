@@ -1,4 +1,5 @@
 import DataTable from "@/components/data_components/DataTable";
+import { Button } from "@/components/ui/button";
 import { Edit, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import AddProductModal from "../../components/features/inventory_components/AddProductModal";
@@ -156,9 +157,9 @@ const Inventory = ({ role }) => {
       const item = row.original;
         return (
           <div className="flex gap-1">
-            <button className="bg-custom-primary" onClick={() => handleIncreaseQty(item.id)}> <Plus className="text-custom-black" size={16}/> </button>
-            <button className="bg-custom-primary" onClick={() => handleDecreaseQty(item.id)}> <Minus className="text-custom-black" size={16}/> </button>
-            <button className="bg-custom-primary" onClick={() => handleOpenEditModal(item.id, role)}> <Edit className="text-custom-black" size={16}/> </button>
+            <Button variant="primary" size="icon-sm" onClick={() => handleIncreaseQty(item.id)}><Plus size={14}/></Button>
+            <Button variant="primary" size="icon-sm" onClick={() => handleDecreaseQty(item.id)}><Minus size={14}/></Button>
+            <Button variant="primary" size="icon-sm" onClick={() => handleOpenEditModal(item.id, role)}><Edit size={14}/></Button>
           </div>
         )
       }
@@ -284,21 +285,18 @@ const Inventory = ({ role }) => {
 
         {/* We put the buttons in a flex container so they sit next to each other */}
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 bg-[#E3D7C6] hover:bg-[#D6C9B8] text-gray-800 px-4 py-2 rounded font-medium transition-colors text-sm shadow-sm">
+          <Button variant="primary">
             <span className="text-lg">▤</span> Scan barcode
-          </button>
+          </Button>
 
-          {/* 
+          {/*
             CHECK IF USER IS MANAGER
           */}
 
           {isManager && (
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 bg-[#94BE9F] text-white px-5 py-2.5 rounded font-bold text-sm hover:bg-[#7fa78a] transition-colors shadow-sm"
-            >
+            <Button variant="success" onClick={() => setIsAddModalOpen(true)}>
               + ADD PRODUCT
-            </button>
+            </Button>
           )}
         </div>
       </div>
