@@ -1,153 +1,271 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import SearchBar from "../../components/shared/SearchBar";
+import { getAllSales } from "../../services/SalesService";
 
-// --- DUMMY DATA (Simulating POS Sales & Inventory Restocks) ---
-const initialTransactions = [
-  { id: '20260328-001', details: 'Sale: 1x perfume', processedBy: 'John Smith', amount: 300.00, type: 'Sale', time: '12:24 PM', date: '2025-09-09' },
-  { id: '20260328-002', details: 'Restock: 5x perfume', processedBy: 'John Smith', amount: -3000.00, type: 'Restock', time: '12:24 PM', date: '2025-09-09' },
-  { id: '20260328-003', details: 'Sale: 1x perfume', processedBy: 'John Smith', amount: 300.00, type: 'Sale', time: '12:24 PM', date: '2025-09-09' },
-  { id: '20260328-004', details: 'Sale: 2x perfume', processedBy: 'Jane Doe', amount: 600.00, type: 'Sale', time: '01:15 PM', date: '2025-09-10' },
-  { id: '20260328-005', details: 'Restock: 1x perfume', processedBy: 'John Smith', amount: -300.00, type: 'Restock', time: '02:00 PM', date: '2025-09-10' },
-];
+/*
+  TransactionsPage
+  ─────────────────────────────────────────────────────────────────────────────
+  DATA FLOW:
+    Mount / refresh → getAllSales() → GET /api/sales/displayAll
+    Server returns all sales for the caller's branch, newest first.
+
+  API ROW SHAPE:
+    {
+      sales_id, sales_display_id, sales_total, sales_payment_method,
+      sales_timestamp, employeeFullName,
+      soldItems: [{ product_name, sold_qty, sales_price }]
+    }
+
+  DETAILS COLUMN:
+    Built from soldItems array:
+      "Sale: 2× Apricot Premium, 1× Rose Classic"
+    If soldItems is empty (no items linked yet), falls back to "Sale".
+
+  NOTE — Restocks:
+    Restocks (inventory additions) are tracked via the RequestsController +
+    AuditLogController, not as sales. This page shows ONLY point-of-sale
+    transactions from salestable. To show restocks here, you'd need to merge
+    the audit log or request data into this view.
+  ─────────────────────────────────────────────────────────────────────────────
+*/
+
+// Builds the human-readable "details" string from the soldItems array
+const buildDetails = (soldItems = []) => {
+  if (!soldItems.length) return "Sale";
+  return "Sale: " + soldItems
+    .map((si) => `${si.sold_qty}× ${si.product_name}`)
+    .join(", ");
+};
+
+// Maps the API sale record to the shape the table expects
+const normalizeSale = (sale) => ({
+  id:          sale.sales_display_id,
+  details:     buildDetails(sale.soldItems),
+  processedBy: sale.employeeFullName ?? "—",
+  amount:      sale.sales_total,
+  method:      sale.sales_payment_method,
+  type:        "Sale",
+  time:        sale.sales_timestamp
+                 ? new Date(sale.sales_timestamp).toLocaleTimeString("en-PH", {
+                     hour: "2-digit", minute: "2-digit",
+                   })
+                 : "—",
+  date:        sale.sales_timestamp
+                 ? new Date(sale.sales_timestamp).toLocaleDateString("en-PH")
+                 : "—",
+});
 
 const TransactionsPage = () => {
-  const [transactions, setTransactions] = useState(initialTransactions);
+  const [transactions, setTransactions] = useState([]);
+  const [isLoading, setIsLoading]       = useState(true);
+  const [error, setError]               = useState(null);
+
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState({ details: 'All', processedBy: 'All', dateFrom: '', dateTo: '' });
-  
+  const [filters, setFilters]         = useState({
+    type: "All", processedBy: "All", dateFrom: "", dateTo: "",
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  /* 🔌 BACKEND GUIDE: FETCHING FROM POS DATABASE
-     --------------------------------------------
-     useEffect(() => {
-       const fetchTransactions = async () => {
-         try {
-           const response = await fetch('https://localhost:5001/api/transactions');
-           const data = await response.json();
-           setTransactions(data);
-         } catch (err) { console.error("Database connection failed", err); }
-       };
-       fetchTransactions();
-     }, []);
-  */
+  // ── Fetch ────────────────────────────────────────────────────────────────
+  const fetchSales = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await getAllSales();
+      setTransactions(data.map(normalizeSale));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  // --- FILTER ENGINE ---
+  useEffect(() => { fetchSales(); }, [fetchSales]);
+
+  // ── Filter ───────────────────────────────────────────────────────────────
   const filteredData = transactions.filter((t) => {
-    const searchLower = searchQuery.toLowerCase();
-    const matchesSearch = t.id.toLowerCase().includes(searchLower) || t.processedBy.toLowerCase().includes(searchLower);
-    
-    const matchesType = filters.details === 'All' || t.type === filters.details;
-    const matchesStaff = filters.processedBy === 'All' || t.processedBy === filters.processedBy;
-
-    // Date Range Logic
-    const matchesDateFrom = !filters.dateFrom || new Date(t.date) >= new Date(filters.dateFrom);
-    const matchesDateTo = !filters.dateTo || new Date(t.date) <= new Date(filters.dateTo);
-
+    const q = searchQuery.toLowerCase();
+    const matchesSearch    = t.id.toLowerCase().includes(q) || t.processedBy.toLowerCase().includes(q);
+    const matchesType      = filters.type        === "All" || t.type        === filters.type;
+    const matchesStaff     = filters.processedBy === "All" || t.processedBy === filters.processedBy;
+    const matchesDateFrom  = !filters.dateFrom || new Date(t.date) >= new Date(filters.dateFrom);
+    const matchesDateTo    = !filters.dateTo   || new Date(t.date) <= new Date(filters.dateTo);
     return matchesSearch && matchesType && matchesStaff && matchesDateFrom && matchesDateTo;
   });
 
+  const totalPages   = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData  = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const handleClearFilters = () => {
-    setFilters({ details: 'All', processedBy: 'All', dateFrom: '', dateTo: '' });
+    setFilters({ type: "All", processedBy: "All", dateFrom: "", dateTo: "" });
     setSearchQuery("");
   };
 
-  // Pagination
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
   return (
-    <div className="flex flex-col h-full animate-fade-in font-montserrat">
+    <div className="flex flex-col h-full animate-fade-in">
+
+      {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <div className="flex justify-between items-start mb-1">
         <div>
-          <h1 className="text-[32px] font-bold text-[#333] tracking-tight leading-none">Transaction History</h1>
-          <p className="text-gray-400 text-sm mt-1">Review all sales and restock activities</p>
+          <h1 className="text-[32px] font-bold text-custom-black tracking-tight leading-none">
+            Transaction History
+          </h1>
+          <p className="text-custom-gray text-sm mt-1">Review all point-of-sale transactions</p>
         </div>
-        <button className="bg-[#E5D5C1] hover:bg-[#d4c2ab] text-gray-800 px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 shadow-sm">
-          🔄 Refresh Status
-        </button>
+        <Button
+          variant="outline"
+          onClick={fetchSales}
+          disabled={isLoading}
+          className="border-custom-gray-2 text-custom-gray hover:text-custom-black gap-2"
+        >
+          <RefreshCw size={15} className={isLoading ? "animate-spin" : ""} />
+          Refresh
+        </Button>
       </div>
 
-      {/* FILTER BAR */}
-      <div className="flex flex-wrap items-center gap-4 my-8 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex-1 min-w-[200px]">
-          <SearchBar value={searchQuery} onChange={(e) => setSearchQuery(e?.target ? e.target.value : e)} placeholder="Search transaction..." />
+      {/* ── FILTER BAR ──────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-4 my-8 bg-white p-4 rounded-xl border border-custom-gray-2">
+        <div className="flex-1 min-w-52">
+          <SearchBar
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e?.target ? e.target.value : e)}
+            placeholder="Search transaction ID or staff name…"
+          />
         </div>
-        
-        <select value={filters.details} onChange={(e) => setFilters({...filters, details: e.target.value})} className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-600 outline-none">
-          <option value="All">Details</option>
-          <option value="Sale">Sales Only</option>
-          <option value="Restock">Restocks Only</option>
-        </select>
 
-        <select value={filters.processedBy} onChange={(e) => setFilters({...filters, processedBy: e.target.value})} className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-600 outline-none">
-          <option value="All">Processed By</option>
-          <option value="John Smith">John Smith</option>
-          <option value="Jane Doe">Jane Doe</option>
+        <select
+          value={filters.type}
+          onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+          className="border border-custom-gray-2 rounded-md px-3 py-2 text-sm text-custom-gray outline-none"
+        >
+          <option value="All">All Types</option>
+          <option value="Sale">Sales Only</option>
         </select>
 
         <div className="flex items-center gap-2">
           <div className="relative">
-            <span className="absolute -top-4 left-0 text-[10px] text-gray-400">Date From:</span>
-            <input type="date" value={filters.dateFrom} onChange={(e) => setFilters({...filters, dateFrom: e.target.value})} className="border border-gray-300 rounded-md px-2 py-1.5 text-sm text-gray-600" />
+            <span className="absolute -top-4 left-0 text-[10px] text-custom-gray">Date From:</span>
+            <input
+              type="date"
+              value={filters.dateFrom}
+              onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+              className="border border-custom-gray-2 rounded-md px-2 py-1.5 text-sm text-custom-gray"
+            />
           </div>
           <div className="relative">
-            <span className="absolute -top-4 left-0 text-[10px] text-gray-400">Date To:</span>
-            <input type="date" value={filters.dateTo} onChange={(e) => setFilters({...filters, dateTo: e.target.value})} className="border border-gray-300 rounded-md px-2 py-1.5 text-sm text-gray-600" />
+            <span className="absolute -top-4 left-0 text-[10px] text-custom-gray">Date To:</span>
+            <input
+              type="date"
+              value={filters.dateTo}
+              onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+              className="border border-custom-gray-2 rounded-md px-2 py-1.5 text-sm text-custom-gray"
+            />
           </div>
         </div>
 
-        <button onClick={handleClearFilters} className="border border-dashed border-[#D47B7B] text-[#D47B7B] px-3 py-2 rounded-md text-xs font-bold hover:bg-red-50 transition-colors">
+        <button
+          onClick={handleClearFilters}
+          className="border border-dashed border-custom-red text-custom-red px-3 py-2 rounded-md text-xs font-bold hover:bg-red-50 transition-colors"
+        >
           ✕ Clear filters
         </button>
       </div>
 
-      {/* TABLE */}
-      <div className="overflow-hidden bg-white rounded-lg border border-gray-200 shadow-sm">
+      {/* ── ERROR BANNER ────────────────────────────────────────────────── */}
+      {error && (
+        <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-custom-red">
+          {error} — <button onClick={fetchSales} className="underline">retry</button>
+        </div>
+      )}
+
+      {/* ── TABLE ───────────────────────────────────────────────────────── */}
+      <div className="overflow-hidden bg-white rounded-lg border border-custom-gray-2">
         <table className="w-full text-sm text-left">
-          <thead className="text-gray-400 uppercase text-[11px] border-b border-gray-100">
+          <thead className="text-custom-gray uppercase text-[11px] border-b border-custom-gray-2">
             <tr>
-              <th className="px-6 py-4 font-medium">Transaction ID ▾</th>
-              <th className="px-6 py-4 font-medium">Details ▾</th>
-              <th className="px-6 py-4 font-medium">Processed By ▾</th>
-              <th className="px-6 py-4 font-medium">Amount ▾</th>
-              <th className="px-6 py-4 font-medium">Time ▾</th>
-              <th className="px-6 py-4 font-medium text-center">Date ▾</th>
+              <th className="px-6 py-4 font-medium">Transaction ID</th>
+              <th className="px-6 py-4 font-medium">Details</th>
+              <th className="px-6 py-4 font-medium">Processed By</th>
+              <th className="px-6 py-4 font-medium">Amount</th>
+              <th className="px-6 py-4 font-medium">Payment</th>
+              <th className="px-6 py-4 font-medium">Time</th>
+              <th className="px-6 py-4 font-medium text-center">Date</th>
             </tr>
           </thead>
           <tbody>
-            {currentData.map((t, index) => (
-              <tr key={t.id} className={index % 2 === 0 ? "bg-[#E3DFD6]/40" : "bg-white"}>
-                <td className="px-6 py-4 text-gray-500">{t.id}</td>
-                <td className="px-6 py-4 text-gray-700 font-medium">{t.details}</td>
-                <td className="px-6 py-4 text-gray-600">{t.processedBy}</td>
-                <td className={`px-6 py-4 font-bold ${t.amount > 0 ? 'text-[#94BE9F]' : 'text-[#902A3C]'}`}>
-                  {t.amount > 0 ? `+ ₱${t.amount.toFixed(2)}` : `- ₱${Math.abs(t.amount).toFixed(2)}`}
+            {isLoading ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-10 text-center text-custom-gray italic">
+                  Loading transactions…
                 </td>
-                <td className="px-6 py-4 text-gray-500">{t.time}</td>
-                <td className="px-6 py-4 text-gray-500 text-center">{t.date}</td>
               </tr>
-            ))}
+            ) : currentData.length > 0 ? (
+              currentData.map((t, index) => (
+                <tr key={t.id} className={index % 2 === 0 ? "bg-custom-primary/20" : "bg-white"}>
+                  <td className="px-6 py-4 text-custom-gray">{t.id}</td>
+                  <td className="px-6 py-4 text-custom-black font-medium">{t.details}</td>
+                  <td className="px-6 py-4 text-custom-gray">{t.processedBy}</td>
+                  <td className={`px-6 py-4 font-bold ${t.amount > 0 ? "text-custom-green" : "text-custom-red"}`}>
+                    {t.amount > 0
+                      ? `+ ₱${Number(t.amount).toFixed(2)}`
+                      : `- ₱${Math.abs(t.amount).toFixed(2)}`}
+                  </td>
+                  <td className="px-6 py-4 text-custom-gray">{t.method}</td>
+                  <td className="px-6 py-4 text-custom-gray">{t.time}</td>
+                  <td className="px-6 py-4 text-custom-gray text-center">{t.date}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="px-6 py-10 text-center text-custom-gray italic">
+                  No transactions found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* FOOTER */}
+      {/* ── FOOTER ──────────────────────────────────────────────────────── */}
       <div className="flex justify-between items-center mt-6">
-        <p className="text-sm text-gray-400">Showing {currentData.length} of {filteredData.length} entries</p>
+        <p className="text-sm text-custom-gray">
+          Showing {currentData.length} of {filteredData.length} entries
+        </p>
         <div className="flex gap-4">
-          <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} className="text-2xl text-gray-400 hover:text-gray-800">‹</button>
-          <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} className="text-2xl text-gray-400 hover:text-gray-800">›</button>
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className={`text-2xl transition-colors ${
+              currentPage === 1 ? "text-custom-gray-2 cursor-not-allowed" : "text-custom-gray hover:text-custom-black"
+            }`}
+          >
+            ‹
+          </button>
+          <span className="text-sm text-custom-gray self-center">
+            {currentPage} / {totalPages || 1}
+          </span>
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages || totalPages === 0}
+            className={`text-2xl transition-colors ${
+              currentPage === totalPages || totalPages === 0
+                ? "text-custom-gray-2 cursor-not-allowed"
+                : "text-custom-gray hover:text-custom-black"
+            }`}
+          >
+            ›
+          </button>
         </div>
       </div>
 
+      {/* Export placeholder */}
       <div className="flex gap-3 mt-4">
-        <button className="flex items-center gap-2 bg-[#E5D5C1] hover:bg-[#d4c2ab] text-gray-800 px-4 py-2 rounded font-medium text-sm transition-colors shadow-sm">
+        <Button variant="primary" className="gap-2">
           📊 Export
-        </button>
-        <button className="flex items-center gap-2 bg-[#E5D5C1] hover:bg-[#d4c2ab] text-gray-800 px-4 py-2 rounded font-medium text-sm transition-colors shadow-sm">
-          📥 Import
-        </button>
+        </Button>
       </div>
     </div>
   );

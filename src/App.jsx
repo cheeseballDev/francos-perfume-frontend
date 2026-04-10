@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { logout } from './services/LoginService';
 import MobileBlocker from './components/features/pos_components/MobileBlocker';
 import DashboardLayout from './layouts/DashboardLayout';
 import StaffLogin from './pages/auth/StaffLoginPage';
@@ -28,6 +29,7 @@ const App = () => {
   };
 
   const handleLogout = () => {
+    logout(); // clears localStorage["token"]
     setUser(null);
   };
 

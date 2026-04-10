@@ -30,12 +30,17 @@ namespace InventorySystemBackend.Controllers
                 .Where(i => i.branch_id == branch_id && i.product_qty > 0 && i.Products.product_status == "active")
                 .Select(i => new InventoryDisplayDTO
                 {
-                    ProductId = i.product_id,
-                    ProductDisplayId = i.Products.product_display_id,
-                    ProductName = i.Products.product_name,
-                    ProductType = i.Products.product_type,
-                    ProductStatus = i.Products.product_status,
-                    Quantity = i.product_qty
+                    ProductId          = i.product_id,
+                    ProductDisplayId   = i.Products.product_display_id,
+                    ProductName        = i.Products.product_name,
+                    ProductType        = i.Products.product_type,
+                    ProductNote        = i.Products.product_note,
+                    ProductGender      = i.Products.product_gender,
+                    ProductDateCreated = i.Products.product_date_created,
+                    ProductBarcode     = i.Products.product_barcode,
+                    ProductStatus      = i.Products.product_status,
+                    Quantity           = i.product_qty,
+                    BranchDisplayId    = i.Branch.branch_display_id
                 })
                 .ToListAsync();
 
