@@ -24,6 +24,4 @@ dist-ssr
 *.sw?
 
 public/ui-prototype-pictures
-
-
 src/api/appsettings.json
