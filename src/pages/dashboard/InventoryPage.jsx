@@ -66,20 +66,6 @@ const productTableData = [
   },
 ];
 
-<<<<<<< HEAD
-const columns = [
-  { header: () => 'id', accessorKey: 'id', sortingFn: 'basic' },
-  { header: () => 'name', accessorKey: 'name', sortingFn: 'alphanumeric' },
-  { header: () => 'type', accessorKey: 'type', sortingFn: 'alphanumeric' },
-  { header: () => 'branch', accessorKey: 'branch', sortingFn: 'alphanumeric' },
-  { header: () => 'note', accessorKey: 'note', sortingFn: 'alphanumeric' },
-  { header: () => 'gender', accessorKey: 'gender', sortingFn: 'alphanumeric' },
-  { header: () => 'date', accessorKey: 'date', sortingFn: 'datetime' },
-  { header: () => 'qty', accessorKey: 'qty', sortingFn: 'basic' },
-];
-
-=======
->>>>>>> 38c0438ae7b75cbb5dffc4fde492d04489125f7a
 const filterSelections = [
   {
     key: "type",
