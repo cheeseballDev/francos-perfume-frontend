@@ -7,6 +7,7 @@ import {
   HandHelping,
   LayoutDashboard,
   Logs,
+  Tag,
   UserPen
 } from "lucide-react";
 import { Link } from "react-router-dom"; // Move this to the top!
@@ -93,6 +94,18 @@ const Sidebar = ({ role, activeTab, setActiveTab }) => {
         )}
 
         {/* DISCOUNT - Now properly fixed and styled */}
+        {isManager && (
+          <Link
+            to="/discount"
+            onClick={() => setActiveTab("Discounts")}
+            className={getTabClass("Discounts")}>
+              <Tag size={24}/>
+              <p className="text-1xl">Discounts</p>
+          </Link>
+        )
+        }
+
+
         {isManager && (
           <Link
             to="/accounts"
