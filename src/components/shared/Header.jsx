@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import LogoutModal from './LogoutModal';
 import ProfileDropdown from './ProfileDropdown';
 
 const Header = ({ user, onLogout, onSwitchAccess }) => {
 
   const canSwitchAccessAndChangeLocation = user.trueRole === 'manager';
   const [currentDate, setCurrentDate] = useState("");
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("Sta. Lucia");
   
   useEffect(() => {
@@ -42,20 +40,12 @@ const Header = ({ user, onLogout, onSwitchAccess }) => {
         {/* OUR CLEAN NEW COMPONENT */}
         <ProfileDropdown
           user={user}
-          setShowLogoutModal={setShowLogoutModal}
+          onLogout={onLogout}
           onSwitchAccess={onSwitchAccess}
           //theme='light'  // Uncomment this line if you want to use the light theme variant
         />
         
       </header>
-
-      {/* CONFIRMATION LOGOUT MODAL */}
-      {showLogoutModal && (
-        <LogoutModal 
-          setShowLogoutModal={setShowLogoutModal}
-          onLogout={onLogout}
-          />
-      )}
     </>
   );
 };

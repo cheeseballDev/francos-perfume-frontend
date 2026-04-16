@@ -1,8 +1,11 @@
 import { ArrowRightLeft, LogOut, Settings, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import LogoutModal from './LogoutModal';
 
-const ProfileDropdown = ({ user, setShowLogoutModal, onSwitchAccess, /*theme = 'dark' */ }) => {
+const ProfileDropdown = ({ user, onSwitchAccess, onLogout /*theme = 'dark' */ }) => {
   const canSwitchAccess = user.trueRole === 'manager';
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -69,6 +72,13 @@ const ProfileDropdown = ({ user, setShowLogoutModal, onSwitchAccess, /*theme = '
             <span className="text-sm font-medium">Logout</span>
           </div>
         </div>
+      )}
+
+      {showLogoutModal && (
+        <LogoutModal
+          setShowLogoutModal={setShowLogoutModal}
+          onLogout={onLogout}
+          />
       )}
     </div>
   );

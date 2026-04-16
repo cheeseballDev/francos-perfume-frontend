@@ -14,11 +14,7 @@ const PointOfSalePage = ({ user, onLogout, onSwitchAccess }) => {
 
   const canSwitchAccess = user.trueRole === 'manager';
 
-  const handleSwitchAccess = () => {
-    onSwitchAccess('manager');
-  };
-
-
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const [cart, setCart] = useState([]);
   const [activeType, setActiveType] = useState('ALL'); 
@@ -201,8 +197,8 @@ const PointOfSalePage = ({ user, onLogout, onSwitchAccess }) => {
         {/* PROFILEDROPDOWN COMPONENT */}
         <ProfileDropdown 
           user={user}
-          onLogout={onLogout} 
-          onSwitchAccess={handleSwitchAccess} 
+          onSwitchAccess={onSwitchAccess} 
+          onLogout={onLogout}
           //theme="dark" 
         />
       </header>
