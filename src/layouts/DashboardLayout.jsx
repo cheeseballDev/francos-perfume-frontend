@@ -4,9 +4,7 @@ import Sidebar from "../components/shared/Sidebar";
 
 const DashboardLayout = ({ user, onRoleSwitch, onLogout }) => {
   
-  const { trueRole, activeRole, email: userEmail } = user;
-
-  const canSwitchAccess = trueRole === 'manager';
+  const { activeRole, email: userEmail } = user;
 
   const handleSwitchAccess = () => {
     const nextRole = activeRole === 'manager' ? 'cashier' : 'manager';
@@ -21,10 +19,8 @@ const DashboardLayout = ({ user, onRoleSwitch, onLogout }) => {
 
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <Header
-          role={activeRole}
-          userEmail={userEmail}
+          user={user}
           onLogout={onLogout}
-          canSwitchAccess={canSwitchAccess}
           onSwitchAccess={handleSwitchAccess}
         />
 

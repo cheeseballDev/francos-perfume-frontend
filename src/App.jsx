@@ -57,12 +57,12 @@ const App = () => {
 
         {/* Manager ONLY */}
           <Route element={<ProtectedRoute user={user} allowedRoles={['manager']} />}>
-              <Route path="barcode"      element={<BarcodePage />} />
+              <Route path="barcode" element={<BarcodePage />} />
               <Route path="transactions" element={<TransactionsPage />} />
-              <Route path="discount"     element={<DiscountPage />} />
-              <Route path="accounts"     element={<AccountsPage />} />
-              <Route path="archives"     element={<ArchivesPage />} />
-              <Route path="audit"        element={<AuditLogPage />} />
+              <Route path="discount" element={<DiscountPage />} />
+              <Route path="accounts" element={<AccountsPage />} />
+              <Route path="archives" element={<ArchivesPage />} />
+              <Route path="audit" element={<AuditLogPage />} />
           </Route>
         </Route>
         

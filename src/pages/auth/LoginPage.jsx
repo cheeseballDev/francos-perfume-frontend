@@ -15,12 +15,7 @@ const LoginPage = ({ onLogin }) => {
   //const [errorMessage, setErrorMessage] = useState('');
 
   // --- STATE ---
-  const [isManagerSelection, setIsManagerSelection] = useState(false);
   
-  
-  const [otp, setOtp] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
   // --- HANDLERS ---
   const handleLogin = async (e) => {
     e.preventDefault();
