@@ -123,6 +123,7 @@ const RequestPage = () => {
   };
 
   const handleOpenDetails = (id) => {
+     const productToEdit = inventory.find((item) => item.id === id);
     setSelectedRequest(id)
     setIsDetailsOpen(true)
   };
