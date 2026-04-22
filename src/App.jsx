@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Outlet, Route, BrowserRouter as Router, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom';
 import MobileBlocker from './components/features/pos_components/MobileBlocker';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/auth/LoginPage';
@@ -24,12 +24,15 @@ const ProtectedRoute = ({ user, allowedRoles }) => {
 
 const NavigationManager = ({ user }) => {
   const navigate = useNavigate();
+  const path = useLocation().pathname;
   useEffect(() => {
     if (user) {
-      if (user.activeRole === 'cashier') {
-        navigate('/pos');
+      if (user.activeRole === 'cashier' && path !== '/pos') {
+        navigate('/pos', { replace: true });
       } else if (user.activeRole === 'manager') {
-        navigate('/home');
+        if (!path.startsWith('/home')) {
+          navigate('/home', { replace: true });
+        }
       }
     }
   }, [user?.activeRole, navigate]);

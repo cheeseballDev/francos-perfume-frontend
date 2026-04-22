@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom"; // NEW: Outlet is the placeholder
+import { Outlet } from "react-router-dom";
 import Header from "../components/shared/Header";
 import Sidebar from "../components/shared/Sidebar";
 

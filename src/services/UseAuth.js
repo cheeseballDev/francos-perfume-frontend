@@ -1,16 +1,15 @@
 import { useState } from "react";
 
-const SESSION_KEYS = ['email', 'accessToken', 'branch', 'trueRole', 'activeRole']
+const SESSION_KEYS = ['email', 'accessToken', 'branchId', 'trueRole', 'activeRole']
 
 const loadFromSession = () => {
     const token = sessionStorage.getItem('accessToken');
-    console.log('Loading from session, token:', token);
     if (!token) return null;
 
     return {
         email: sessionStorage.getItem('email'),
         accessToken: token,
-        branch: sessionStorage.getItem('branch') || null,
+        branchId: sessionStorage.getItem('branchId'),
         trueRole: sessionStorage.getItem('trueRole'),
         activeRole: sessionStorage.getItem('activeRole') || null, 
     }
@@ -22,6 +21,7 @@ export const UseAuth = () => {
     const login = (userData) => {
         SESSION_KEYS.forEach(key => {
             if (userData[key]) {
+                console.log(`Storing ${key} in sessionStorage:`, userData[key]);
                 sessionStorage.setItem(key, userData[key]);
             }
         });
