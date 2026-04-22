@@ -1,18 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Settings, ArrowRightLeft, LogOut, User } from 'lucide-react';
+import { ArrowRightLeft, LogOut, Settings, User } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import LogoutModal from './LogoutModal';
 
-const ProfileDropdown = ({ userEmail, onLogout, canSwitchAccess, onSwitchAccess, theme = 'dark' }) => {
+const ProfileDropdown = ({ user, onSwitchAccess, onLogout /*theme = 'dark' */ }) => {
+  const canSwitchAccess = user.trueRole === 'manager';
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const displayUsername = userEmail ? userEmail.split('@')[0] : 'Employee Name';
+  const displayUsername = user.email ? user.email.split('@')[0] : 'Employee Name';
 
-  // Adapts the text color based on where you put the component
+  /* Adapts the text color based on where you put the component
   const triggerTextColor = theme === 'dark'
     ? 'text-custom-gray hover:text-custom-white'
     : 'text-custom-black hover:text-custom-black/70';
+    */
 
-  // Bonus: This automatically closes the dropdown if the user clicks anywhere else on the screen!
+    
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -29,13 +34,12 @@ const ProfileDropdown = ({ userEmail, onLogout, canSwitchAccess, onSwitchAccess,
       {/* The Clickable Trigger */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 cursor-pointer transition-colors ${triggerTextColor}`}
+        className={`flex items-center gap-2 cursor-pointer transition-colors text-custom-gray hover:text-custom-white`}
       >
         <User size={20} />
         <span className="font-medium text-[15px]">{displayUsername}</span>
         <span className="text-xs">▼</span>
       </div>
-
       {/* The Floating Menu */}
       {isOpen && (
         <div className="absolute right-0 top-full mt-3 w-48 bg-custom-black text-custom-white rounded shadow-2xl overflow-hidden flex flex-col border border-white/10">
@@ -60,7 +64,7 @@ const ProfileDropdown = ({ userEmail, onLogout, canSwitchAccess, onSwitchAccess,
           <div
             onClick={() => {
               setIsOpen(false);
-              onLogout();
+              setShowLogoutModal(true);
             }}
             className="flex items-center gap-3 px-4 py-3 cursor-pointer bg-custom-red hover:bg-custom-red/80 transition-colors"
           >
@@ -68,6 +72,13 @@ const ProfileDropdown = ({ userEmail, onLogout, canSwitchAccess, onSwitchAccess,
             <span className="text-sm font-medium">Logout</span>
           </div>
         </div>
+      )}
+
+      {showLogoutModal && (
+        <LogoutModal
+          setShowLogoutModal={setShowLogoutModal}
+          onLogout={onLogout}
+          />
       )}
     </div>
   );
