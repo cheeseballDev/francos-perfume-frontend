@@ -7,6 +7,7 @@ import EditProductModal from "../../components/features/inventory_components/Edi
 import FilterBar from "../../components/shared/FilterDropDown";
 import SearchBar from "../../components/shared/SearchBar";
 import { fetchAllInventory } from "../../services/InventoryService";
+import { UseAuth } from "../../services/UseAuth";
 
 
 
@@ -30,6 +31,7 @@ const filterSelections = [
 ];
 
 const Inventory = ({ role }) => {
+  const { user } = UseAuth();
   const isManager = role === "manager";
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,6 +43,7 @@ const Inventory = ({ role }) => {
   });
 
   const [inventory, setInventory] = useState([]);
+  // add a loading state to prevent rendering the table before data is fetched
   const [isLoading, setIsLoading] = useState(true);
 
 
@@ -50,18 +53,17 @@ const Inventory = ({ role }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
-    const getInventoryData = async () => {
+    const getInventoryData = async (token) => {
       try {
         setIsLoading(true);
-        const data = await fetchAllInventory();
-        console.log(data);
+        const data = await fetchAllInventory(token);
         setInventory(data);
       } catch (error) {
         alert("Inventory failed: " + error.message);
       }
     }
-    getInventoryData();
-  })
+    getInventoryData(user.accessToken);
+  }, [user.accessToken]);
 
 
   const columns = [
@@ -82,7 +84,7 @@ const Inventory = ({ role }) => {
   },
   {
     header: 'Branch',
-    accessorKey: 'branch',
+    accessorKey: 'branch_name',
     sortingFn: 'alphanumeric',
   },
   {
@@ -102,7 +104,7 @@ const Inventory = ({ role }) => {
   },
   {
     header: 'Quantity',
-    accessorKey: 'product_quantity',
+    accessorKey: 'product_qty',
     sortingFn: 'basic',
   },
   {
@@ -148,7 +150,6 @@ const Inventory = ({ role }) => {
         item.id === id ? { ...item, qty: item.qty + 1 } : item,
       ),
     );
-    // 🔌 .NET API: await fetch(`.../api/inventory/${id}/increase`, { method: 'PUT' });
   }, []);
 
   const decrement = useCallback(async (id) => {
@@ -157,8 +158,7 @@ const Inventory = ({ role }) => {
         item.id === id ? { ...item, qty: Math.max(0, item.qty - 1) } : item,
       ),
     );
-    // 🔌 .NET API: await fetch(`.../api/inventory/${id}/decrease`, { method: 'PUT' });
-  }, []);
+  }, []); 
 
 
   const handleOpenEditModal = (id, role) => {
@@ -206,25 +206,28 @@ const Inventory = ({ role }) => {
 
 
   const filteredInventory = inventory.filter((item) => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.id.includes(searchQuery);
+  // 1. Defend against missing properties and handle Number to String conversion
+  const name = item.product_name || "";
+  const id = item.product_display_id?.toString() || ""; // Using display_id from your DTO
+  const type = item.product_type || "";
+  const branch = item.branch_display_id || ""; // From your DTO
+  const gender = item.product_gender || "";
 
-    const matchesType =
-      filters.type === "" ||
-      filters.type === "All Perfume Types" ||
-      item.type === filters.type;
-    const matchesBranch =
-      filters.branch === "" ||
-      filters.branch === "All Branches" ||
-      item.branch === filters.branch;
-    const matchesGender =
-      filters.gender === "" ||
-      filters.gender === "All Genders" ||
-      item.gender === filters.gender;
+  const matchesSearch =
+    name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    id.includes(searchQuery);
 
-    return matchesSearch && matchesType && matchesBranch && matchesGender
-  });
+  const matchesType =
+    filters.type === "All Perfume Types" || type === filters.type;
+    
+  const matchesBranch =
+    filters.branch === "All Branches" || branch === filters.branch;
+    
+  const matchesGender =
+    filters.gender === "All Genders" || gender === filters.gender;
+
+  return matchesSearch && matchesType && matchesBranch && matchesGender;
+});
 
   return (
     <div className="flex flex-col h-full animate-fade-in relative">
@@ -273,15 +276,11 @@ const Inventory = ({ role }) => {
         />
       </div>
 
-      {/* TABLE SECTION */}
-
       <DataTable
         data={filteredInventory}
         columns={columns}
       />
 
-
-      {/* --- OUR NEW EDIT COMPONENT --- */}
       <EditProductModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

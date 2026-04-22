@@ -1,15 +1,10 @@
-import { Outlet } from "react-router-dom"; // NEW: Outlet is the placeholder
+import { Outlet } from "react-router-dom";
 import Header from "../components/shared/Header";
 import Sidebar from "../components/shared/Sidebar";
 
-const DashboardLayout = ({ user, onRoleSwitch, onLogout }) => {
+const DashboardLayout = ({ user, onSwitchAccess, onLogout }) => {
   
   const { activeRole, email: userEmail } = user;
-
-  const handleSwitchAccess = () => {
-    const nextRole = activeRole === 'manager' ? 'cashier' : 'manager';
-    onRoleSwitch(nextRole);
-  };
 
   return (
     <div className="flex h-screen bg-[#F7F7F9] text-[#333] font-montserrat text-[16px]">
@@ -21,7 +16,7 @@ const DashboardLayout = ({ user, onRoleSwitch, onLogout }) => {
         <Header
           user={user}
           onLogout={onLogout}
-          onSwitchAccess={handleSwitchAccess}
+          onSwitchAccess={onSwitchAccess}
         />
 
         <main className="flex-1 p-8 overflow-auto bg-[#F7F7F9]">

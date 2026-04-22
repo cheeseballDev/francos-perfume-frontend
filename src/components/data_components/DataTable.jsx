@@ -7,7 +7,7 @@ import { useState } from "react";
 const DataTable = ({ data, columns }) => {
 
     const [sorting, setSorting] = useState([
-        { id: 'id', desc: true },
+        { id: 'product_display_id', desc: true },
     ])
 
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10});

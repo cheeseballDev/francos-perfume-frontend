@@ -10,7 +10,7 @@ const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [trueRole, setTrueRole] = useState('');
-  const [branch, setBranch] = useState('');
+  const [branchId, setBranchId] = useState('');
 
   //const [errorMessage, setErrorMessage] = useState('');
 
@@ -25,18 +25,19 @@ const LoginPage = ({ onLogin }) => {
       setEmail(result.email);
       setPassword(result.accessToken);
       setTrueRole(result.role);
-      setBranch(result.branch);
+      setBranchId(result.branch_id);
 
       if (result.role === 'manager') {
         setView('module');
         sessionStorage.setItem('accessToken', result.accessToken);
+        sessionStorage.setItem('branchId', result.branch_id);
       } else {
         onLogin({
           email,
           accessToken: result.accessToken,
           trueRole: result.role,
           activeRole: result.role,
-          branch: result.branch
+          branchId
         });
         navigate(result.role === 'cashier' ? '/pos' : '/home');
       } 
@@ -52,7 +53,7 @@ const LoginPage = ({ onLogin }) => {
       accessToken: sessionStorage.getItem('accessToken'),
       trueRole,
       activeRole: module,
-      branch
+      branchId: sessionStorage.getItem('branchId')
     });
   };
 
