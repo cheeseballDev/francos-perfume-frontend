@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Outlet, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Navigate, Outlet, Route, BrowserRouter as Router, Routes, useNavigate } from 'react-router-dom';
 import MobileBlocker from './components/features/pos_components/MobileBlocker';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/auth/LoginPage';
@@ -17,13 +17,34 @@ import PointOfSalePage from './pages/pos/PointOfSalePage';
 import { UseAuth } from './services/UseAuth';
 
 const ProtectedRoute = ({ user, allowedRoles }) => {
-  if (!user) return <Navigate to="/login" />
-  if (allowedRoles && !allowedRoles.includes(user.trueRole)) { return <Navigate to="/home" replace />; };
+  if (!user) return <Navigate to="/login" />;
+  if (allowedRoles && !allowedRoles.includes(user.activeRole)) { return <Navigate to="/home" replace />; };
   return <Outlet />;
+}
+
+const NavigationManager = ({ user }) => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (user) {
+      if (user.activeRole === 'cashier') {
+        navigate('/pos');
+      } else if (user.activeRole === 'manager') {
+        navigate('/home');
+      }
+    }
+  }, [user?.activeRole, navigate]);
+
+  return null;
 }
 
 const App = () => {
   const { user, login, logout, switchRole } = UseAuth();
+
+  const handleSwitchAccess = () => {
+    const nextRole = user.activeRole === 'manager' ? 'cashier' : 'manager';
+    switchRole(nextRole);
+  };
+
 
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
   useEffect(() => {
@@ -37,6 +58,7 @@ const App = () => {
 
   return (
     <Router>
+      <NavigationManager user={user} />
       <Routes>
         <Route path='/login' 
           element={
@@ -46,7 +68,7 @@ const App = () => {
 
         <Route path='/home'
           element={
-            user ? <DashboardLayout user={user} onRoleSwitch={switchRole} onLogout={logout} /> : <Navigate to='/login' replace /> 
+            user ? <DashboardLayout user={user} onSwitchAccess={handleSwitchAccess} onLogout={logout} /> : <Navigate to='/login' replace /> 
           }
         >
 
@@ -55,7 +77,6 @@ const App = () => {
         <Route path="requests" element={<RequestPage />} />
         <Route path="forecast" element={<ForecastPage />} />
 
-        {/* Manager ONLY */}
           <Route element={<ProtectedRoute user={user} allowedRoles={['manager']} />}>
               <Route path="barcode" element={<BarcodePage />} />
               <Route path="transactions" element={<TransactionsPage />} />
@@ -67,7 +88,7 @@ const App = () => {
         </Route>
         
         <Route element={<ProtectedRoute user={user} allowedRoles={['manager', 'cashier']} />}>
-          <Route path="/pos" element={<PointOfSalePage user={user} onLogout={logout} onSwitchAccess={switchRole} />} />
+          <Route path="/pos" element={<PointOfSalePage user={user} onLogout={logout} onSwitchAccess={handleSwitchAccess} />} />
         </Route>
 
           <Route path="*" element={<Navigate to="/login" replace />} />

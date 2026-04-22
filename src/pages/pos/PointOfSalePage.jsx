@@ -14,8 +14,6 @@ const PointOfSalePage = ({ user, onLogout, onSwitchAccess }) => {
 
   const canSwitchAccess = user.trueRole === 'manager';
 
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-
   const [cart, setCart] = useState([]);
   const [activeType, setActiveType] = useState('ALL'); 
   const [activeGender, setActiveGender] = useState('ALL'); 
