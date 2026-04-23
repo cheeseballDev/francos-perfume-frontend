@@ -30,7 +30,7 @@ const filterSelectionsBottom = [
   { key: "sent_to", label: "Sent To", options: ["All Branches", "Sta. Lucia", "Riverbanks"] },
 ];
 
-const RequestPage = () => {
+const RestockPage = () => {
   const [requests, setRequests] = useState(initialRequestTableData);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({ perfume: "All Perfumes", status: "All Statuses", requested_from: "", sent_to: "", date_created: "" });
@@ -42,43 +42,38 @@ const RequestPage = () => {
 
   const columns = [
     {
-      header: 'REQ ID',
-      accessorKey: 'id',
+      header: 'ID',
+      accessorKey: 'request_display_id',
       enableSorting: true
     },
     {
-      header: 'Perfume',
-      accessorKey: 'perfume',
+      header: 'Perfume ID',
+      accessorKey: 'product_id',
       enableSorting: true
     },
     {
       header: 'Quantity',
-      accessorKey: 'qty',
+      accessorKey: 'request_qty',
       enableSorting: true
     },
     {
       header: 'Requested From',
-      accessorKey: 'requested_from',
+      accessorKey: 'requested_from', // to change
       enableSorting: true
     },
     {
       header: 'Sent To',
-      accessorKey: 'sent_to',
+      accessorKey: 'sent_to', // to change
       enableSorting: true
     },
     {
       header: 'Date Created',
-      accessorKey: 'date_created',
-      enableSorting: true
-    },
-    {
-      header: 'Time',
-      accessorKey: 'time',
+      accessorKey: 'request_date_created', 
       enableSorting: true
     },
     {
       header: 'Status',
-      accessorKey: 'status',
+      accessorKey: 'request_status',
       sortingFns: 'statusSort',
       enableSorting: true
     },
@@ -178,4 +173,4 @@ const RequestPage = () => {
   );
 };
 
-export default RequestPage;
+export default RestockPage;

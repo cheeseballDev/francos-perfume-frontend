@@ -11,7 +11,7 @@ import ForecastPage from './pages/dashboard/ForecastPage';
 import HomePage from './pages/dashboard/HomePage';
 import InventoryPage from './pages/dashboard/InventoryPage';
 import AccountsPage from './pages/dashboard/ManageAccountsPage';
-import RequestPage from './pages/dashboard/RequestPage';
+import RestockPage from './pages/dashboard/RestockPage';
 import TransactionsPage from './pages/dashboard/TransactionsPage';
 import PointOfSalePage from './pages/pos/PointOfSalePage';
 import { UseAuth } from './services/UseAuth';
@@ -77,7 +77,7 @@ const App = () => {
 
         <Route index element={<HomePage role={user?.trueRole} />} />
         <Route path="inventory" element={<InventoryPage role={user?.trueRole} />} />
-        <Route path="requests" element={<RequestPage />} />
+        <Route path="restock" element={<RestockPage />} />
         <Route path="forecast" element={<ForecastPage />} />
 
           <Route element={<ProtectedRoute user={user} allowedRoles={['manager']} />}>
