@@ -67,12 +67,12 @@ const Sidebar = ({ user }) => {
 
         {/* REQUESTS */}
         <Link
-          to="/home/requests"
-          onClick={() => setActiveTab("Requests")}
-          className={getTabClass("/home/requests")}
+          to="/home/restock"
+          onClick={() => setActiveTab("Restock")}
+          className={getTabClass("/home/restock")}
         >
           <HandHelping size={24} />
-          <p className="text-base">Requests</p>
+          <p className="text-base">Restock</p>
         </Link>
 
         {/* FORECAST */}
