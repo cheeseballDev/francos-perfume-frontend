@@ -88,12 +88,14 @@ const RequestPage = () => {
       cell: ({row}) => {
         const item = row.original;
         return (
-          <Button variant="primary" size="sm" onClick={() => { handleOpenDetails(item.id); }}><Eye size={14}/> View Details</Button>    
+          // PASS THE ENTIRE ITEM OBJECT, NOT JUST THE ID
+          <Button variant="primary" size="sm" onClick={() => handleOpenDetails(item)}>
+            <Eye size={14} className="mr-1"/> View Details
+          </Button>    
         )
       }
     }
   ];
-
 
   // --- FILTER ENGINE ---
   const filteredData = requests.filter((item) => {
@@ -101,31 +103,31 @@ const RequestPage = () => {
     const matchesSearch = item.id.toLowerCase().includes(searchLower) || item.perfume.toLowerCase().includes(searchLower);
     const matchesPerfume = !filters.perfume || filters.perfume === "All Perfumes" || item.perfume === filters.perfume;
     const matchesStatus = !filters.status || filters.status === "All Statuses" || item.status.toLowerCase() === filters.status.toLowerCase();
-    const matchesFrom = !filters.requested_from || filters.requested_from === "All Branches" || item.requestedFrom === filters.requested_from;
-    const matchesTo = !filters.sent_to || filters.sent_to === "All Branches" || item.sentTo === filters.sent_to;
+    
+    // FIX: Using correct object keys from initialRequestTableData
+    const matchesFrom = !filters.requested_from || filters.requested_from === "All Branches" || item.requested_from === filters.requested_from;
+    const matchesTo = !filters.sent_to || filters.sent_to === "All Branches" || item.sent_to === filters.sent_to;
+    
     const formattedDate = filters.date_created ? filters.date_created.replace(/-/g, "/") : "";
-    const matchesDate = !formattedDate || item.date === formattedDate;
+    // FIX: Using correct date key
+    const matchesDate = !formattedDate || item.date_created === formattedDate;
 
     return matchesSearch && matchesPerfume && matchesStatus && matchesFrom && matchesTo && matchesDate;
   });
 
-  useEffect(() => {
-  }, [searchQuery, filters, activeTab]);
-
   const handleClearFilters = () => {
-    setFilters({ perfume: "", status: "", requested_from: "", sent_to: "", date_created: "" });
+    setFilters({ perfume: "All Perfumes", status: "All Statuses", requested_from: "", sent_to: "", date_created: "" });
     setSearchQuery("");
   };
-
 
   const handleAddRequest = (newRequest) => {
     setRequests([newRequest, ...requests]);
   };
 
-  const handleOpenDetails = (id) => {
-     const productToEdit = inventory.find((item) => item.id === id);
-    setSelectedRequest(id)
-    setIsDetailsOpen(true)
+  // FIX: Properly accept the full request object and open the modal
+  const handleOpenDetails = (requestObj) => {
+    setSelectedRequest(requestObj);
+    setIsDetailsOpen(true);
   };
 
   return (

@@ -12,34 +12,43 @@ const LoginPage = ({ onLogin }) => {
   const [trueRole, setTrueRole] = useState('');
   const [branchId, setBranchId] = useState('');
 
-  //const [errorMessage, setErrorMessage] = useState('');
-
-  // --- STATE ---
-  
   // --- HANDLERS ---
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       const result = await login(email, password);
+      
+      // FIX: Removed setPassword(result.accessToken)
       setEmail(result.email);
-      setPassword(result.accessToken);
       setTrueRole(result.role);
       setBranchId(result.branch_id);
 
-      if (result.role === 'manager') {
+      // Store token securely
+      sessionStorage.setItem('accessToken', result.accessToken);
+      sessionStorage.setItem('branchId', result.branch_id);
+
+      const normalizedRole = result.role.toLowerCase();
+
+      if (normalizedRole === 'manager') {
         setView('module');
-        sessionStorage.setItem('accessToken', result.accessToken);
-        sessionStorage.setItem('branchId', result.branch_id);
       } else {
         onLogin({
-          email,
+          email: result.email,
           accessToken: result.accessToken,
-          trueRole: result.role,
-          activeRole: result.role,
-          branchId
+          trueRole: normalizedRole,
+          activeRole: normalizedRole,
+          branchId: result.branch_id
         });
-        navigate(result.role === 'cashier' ? '/pos' : '/home');
+
+        // Routing based on new roles
+        if (normalizedRole === 'cashier') {
+          navigate('/pos');
+        } else if (normalizedRole === 'owner' || normalizedRole === 'admin') {
+          navigate('/'); // Assuming '/' is the main Dashboard route
+        } else {
+          navigate('/home'); 
+        }
       } 
 
     } catch (error) {
@@ -57,8 +66,6 @@ const LoginPage = ({ onLogin }) => {
     });
   };
 
-  
-
   const displayName = email ? email.split('@')[0] : 'User';
 
   if (view === 'module') {
@@ -72,8 +79,9 @@ const LoginPage = ({ onLogin }) => {
           <span className="text-sm font-medium">Go Back</span>
         </div>
 
-          <h2 className="text-[24px] font-bold text-[#333] mb-1 tracking-tight">Select A Module</h2>
-          <p className="text-gray-500 mb-10 text-sm">Welcome back {displayName}.</p>
+        <h2 className="text-[24px] font-bold text-[#333] mb-1 tracking-tight">Select A Module</h2>
+        <p className="text-gray-500 mb-10 text-sm">Welcome back {displayName}.</p>
+        
         <div className="w-full max-w-sm flex flex-col gap-4">
           <button 
             onClick={() => handleModuleSelect('cashier')}
@@ -83,21 +91,23 @@ const LoginPage = ({ onLogin }) => {
           </button>
           
           <button 
-            onClick={() => handleModuleSelect('inventory')}
-            className="w-full bg-[#D4C4B0] text-[#333] rounded py-3 font-medium hover:bg-[#c2b09a] transition-colors text-sm shadow-sm"
-          >
-            Access Dashboard
-          </button>
+  onClick={() => handleModuleSelect('manager')}
+  className="w-full bg-[#D4C4B0] text-[#333] rounded py-3 font-medium hover:bg-[#c2b09a] transition-colors text-sm shadow-sm"
+>
+  Access Dashboard
+</button>
         </div>
       </div>
     )
   }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#F7F7F9] font-montserrat p-4">
       <div className="w-full max-w-sm flex flex-col items-center">
         <img src={logo} alt="Franco Perfume" className="h-24 w-auto object-contain mb-4"/>
         <h1 className="text-[28px] font-bold text-[#333] mb-1 tracking-tight">OneFrancoScentHub</h1>
         <p className="text-gray-500 mb-8 text-sm">Welcome back!</p>
+        
         <form onSubmit={handleLogin} className="w-full flex flex-col gap-3">
             <input type="email" placeholder="Enter email" value={email}
                 onChange={(e) => setEmail(e.target.value)} required

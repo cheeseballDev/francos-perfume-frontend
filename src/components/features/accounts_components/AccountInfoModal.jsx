@@ -1,10 +1,113 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const AccountInfoModal = ({ isOpen, onClose, account, onEditClick }) => {
-  if (!isOpen || !account) return null;
+  // State for nested confirmation modals
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
 
+  // If the main modal isn't open, or there's no account, render nothing
+  if (!isOpen || !account) {
+    // Also reset nested states if the main modal closes unexpectedly
+    if (showResetConfirm) setShowResetConfirm(false);
+    if (showDeactivateConfirm) setShowDeactivateConfirm(false);
+    return null;
+  }
+
+  // Handlers for the nested modals
+  const handleResetConfirm = () => {
+    console.log("Password reset confirmed for:", account.email);
+    // Add API call here
+    setShowResetConfirm(false);
+  };
+
+  const handleDeactivateConfirm = () => {
+    console.log("Account deactivated for:", account.email);
+    // Add API call here
+    setShowDeactivateConfirm(false);
+  };
+
+  // --- UI FOR NESTED CONFIRMATION MODALS ---
+  
+  // 1. Reset Password Confirmation
+  if (showResetConfirm) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 font-montserrat">
+        <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
+          <button 
+            onClick={() => setShowResetConfirm(false)} 
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <span className="text-2xl leading-none">✕</span>
+          </button>
+          
+          <div className="p-8 text-center mt-4">
+            <h3 className="text-2xl font-bold text-[#333] mb-4">
+              Are you sure you want to reset the password for this account?
+            </h3>
+            <p className="text-sm text-gray-500 mb-8">
+              The owner of the account will be notified and sent an email for the one-time generated password
+            </p>
+            
+            <div className="flex gap-4 justify-center">
+              <button 
+                onClick={handleResetConfirm}
+                className="bg-[#E5D5C1] hover:bg-[#d4c2ab] text-[#333] font-bold py-3 px-12 rounded-md transition-colors w-32"
+              >
+                YES
+              </button>
+              <button 
+                onClick={() => setShowResetConfirm(false)}
+                className="border-2 border-[#D47B7B] text-[#D47B7B] hover:bg-red-50 font-bold py-3 px-12 rounded-md transition-colors w-32"
+              >
+                NO
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Deactivate Account Confirmation
+  if (showDeactivateConfirm) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 font-montserrat">
+        <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
+          <button 
+            onClick={() => setShowDeactivateConfirm(false)} 
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <span className="text-2xl leading-none">✕</span>
+          </button>
+          
+          <div className="p-8 text-center mt-4">
+            <h3 className="text-2xl font-bold text-[#333] mb-8">
+              Are you sure you want to disable this account?
+            </h3>
+            
+            <div className="flex gap-4 justify-center">
+              <button 
+                onClick={handleDeactivateConfirm}
+                className="bg-[#E5D5C1] hover:bg-[#d4c2ab] text-[#333] font-bold py-3 px-12 rounded-md transition-colors w-32"
+              >
+                YES
+              </button>
+              <button 
+                onClick={() => setShowDeactivateConfirm(false)}
+                className="border-2 border-[#D47B7B] text-[#D47B7B] hover:bg-red-50 font-bold py-3 px-12 rounded-md transition-colors w-32"
+              >
+                NO
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- MAIN ACCOUNT INFO MODAL UI ---
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 font-montserrat">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="flex justify-between items-center p-6 border-b border-gray-100">
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -66,10 +169,16 @@ const AccountInfoModal = ({ isOpen, onClose, account, onEditClick }) => {
             >
               Edit Account
             </button>
-            <button className="border border-[#D47B7B] text-[#D47B7B] hover:bg-red-50 py-2.5 rounded-md font-medium transition-colors">
+            <button 
+              onClick={() => setShowResetConfirm(true)}
+              className="border border-[#D47B7B] text-[#D47B7B] hover:bg-red-50 py-2.5 rounded-md font-medium transition-colors"
+            >
               Reset Password
             </button>
-            <button className="border border-[#D47B7B] text-[#D47B7B] hover:bg-red-50 py-2.5 rounded-md font-medium transition-colors">
+            <button 
+              onClick={() => setShowDeactivateConfirm(true)}
+              className="border border-[#D47B7B] text-[#D47B7B] hover:bg-red-50 py-2.5 rounded-md font-medium transition-colors"
+            >
               Deactivate Account
             </button>
             <button className="border border-[#D47B7B] text-[#D47B7B] hover:bg-red-50 py-2.5 rounded-md font-medium transition-colors">
