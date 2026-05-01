@@ -9,8 +9,6 @@ import SearchBar from "../../components/shared/SearchBar";
 import { fetchAllInventory } from "../../services/InventoryService";
 import { UseAuth } from "../../services/UseAuth";
 
-
-
 const filterSelections = [
   {
     key: "type",
@@ -30,7 +28,7 @@ const filterSelections = [
 
 ];
 
-const Inventory = ({ role }) => {
+const InventoryPage = ({ role }) => {
   const { user } = UseAuth();
   const isManager = role === "manager";
 
@@ -41,30 +39,6 @@ const Inventory = ({ role }) => {
     branch: "All Branches",
     gender: "All Genders",
   });
-
-  const [inventory, setInventory] = useState([]);
-  // add a loading state to prevent rendering the table before data is fetched
-  const [isLoading, setIsLoading] = useState(true);
-
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-  useEffect(() => {
-    const getInventoryData = async (token) => {
-      try {
-        setIsLoading(true);
-        const data = await fetchAllInventory(token);
-        setInventory(data);
-      } catch (error) {
-        alert("Inventory failed: " + error.message);
-      }
-    }
-    getInventoryData(user.accessToken);
-  }, [user.accessToken]);
-
 
   const columns = [
   {
@@ -123,6 +97,29 @@ const Inventory = ({ role }) => {
     }
   ];
 
+  const [inventory, setInventory] = useState([]);
+  // add a loading state to prevent rendering the table before data is fetched
+  const [isLoading, setIsLoading] = useState(true);
+
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  useEffect(() => {
+    const getInventoryData = async (token) => {
+      try {
+        setIsLoading(true);
+        const result = await fetchAllInventory(token);
+        setInventory(result.data || []);
+      } catch (error) {
+        alert("Inventory failed: " + error.message);
+      }
+    }
+    getInventoryData(user.accessToken);
+  }, [user.accessToken]);
+
   const handleAddProduct = (newProduct) => {
     // 1. Give it a temporary fake ID until you connect a real database later
     const productWithId = {
@@ -161,7 +158,7 @@ const Inventory = ({ role }) => {
   }, []); 
 
 
-  const handleOpenEditModal = (id, role) => {
+  const handleOpenEditModal = (id) => {
     const productToEdit = inventory.find((item) => item.id === id);
     setEditingProduct(productToEdit);
     setIsEditModalOpen(true);
@@ -297,4 +294,4 @@ const Inventory = ({ role }) => {
   );
 };
 
-export default Inventory;
+export default InventoryPage;
