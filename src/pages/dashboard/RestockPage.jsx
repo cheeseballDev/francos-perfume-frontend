@@ -48,8 +48,13 @@ const RestockPage = () => {
     },
     {
       header: 'Perfume ID',
-      accessorKey: 'product_id',
+      accessorKey: 'product_display_id',
       enableSorting: true
+    },
+    {
+      header: 'Perfume Name',
+      accessorKey: 'product_name',
+      sortingFn: 'alphanumeric',
     },
     {
       header: 'Quantity',
@@ -62,8 +67,8 @@ const RestockPage = () => {
       enableSorting: true
     },
     {
-      header: 'Sent To',
-      accessorKey: 'sent_to', // to change
+      header: 'Delivered To',
+      accessorKey: 'delivered_to', // to change
       enableSorting: true
     },
     {
