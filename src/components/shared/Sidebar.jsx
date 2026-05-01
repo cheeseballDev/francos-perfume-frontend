@@ -10,16 +10,23 @@ import {
   Tag,
   UserPen
 } from "lucide-react";
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/FrancoPerfumeLogo.png";
 
 const Sidebar = ({ user }) => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("Dashboard");
 
   const companyPictureAlt = "Franco's Logo";
-  const isManager = user.trueRole === "manager";
+  
+  // --- ROLE BASED ACCESS LOGIC ---
+  const normalizedRole = user?.trueRole?.toLowerCase() || "";
+  const isManager = normalizedRole === "manager";
+  const isOwner = normalizedRole === "owner";
+  const isAdmin = normalizedRole === "admin";
+  
+  // Access Groups
+  const hasManagementAccess = isManager || isOwner;
+  const hasFullAccess = isManager || isOwner || isAdmin;
 
   const getTabClass = (path) => {
     const isActive = location.pathname === path;
@@ -45,107 +52,85 @@ const Sidebar = ({ user }) => {
       </div>
 
       <div className="w-full flex flex-col gap-2 overflow-y-auto sidebar-scroll pb-4">
-        {/* DASHBOARD */}
-        <Link
-          to="/home"
-          onClick={() => setActiveTab("Dashboard")}
-          className={getTabClass("/home")}
-        >
+        
+        {/* DASHBOARD - Always visible */}
+        <Link to="/home" className={getTabClass("/home")}>
           <LayoutDashboard size={24} />
           <p className="text-base">Dashboard</p>
         </Link>
 
-        {/* INVENTORY */}
-        <Link
-          to="/home/inventory"
-          onClick={() => setActiveTab("Inventory")}
-          className={getTabClass("/home/inventory")}
-        >
-          <Boxes size={24} />
-          <p className="text-base">Inventory</p>
-        </Link>
+        {/* INVENTORY - Restricted from Admin */}
+        {!isAdmin && (
+          <Link to="/home/inventory" className={getTabClass("/home/inventory")}>
+            <Boxes size={24} />
+            <p className="text-base">Inventory</p>
+          </Link>
+        )}
 
-        {/* REQUESTS */}
-        <Link
-          to="/home/restock"
-          onClick={() => setActiveTab("Restock")}
-          className={getTabClass("/home/restock")}
-        >
-          <HandHelping size={24} />
-          <p className="text-base">Restock</p>
-        </Link>
+        {/* RESTOCK - Restricted from Admin */}
+        {!isAdmin && (
+          <Link to="/home/restock" className={getTabClass("/home/restock")}>
+            <HandHelping size={24} />
+            <p className="text-base">Restock</p>
+          </Link>
+        )}
 
-        {/* FORECAST */}
-        <Link
-          to="/home/forecast"
-          onClick={() => setActiveTab("Forecast")}
-          className={getTabClass("/home/forecast")}
-        >
-          <ChartNoAxesCombined size={24} />
-          <p className="text-base">Forecast</p>
-        </Link>
+        {/* FORECAST - Restricted from Admin */}
+        {!isAdmin && (
+          <Link to="/home/forecast" className={getTabClass("/home/forecast")}>
+            <ChartNoAxesCombined size={24} />
+            <p className="text-base">Forecast</p>
+          </Link>
+        )}
 
+        {/* TRANSACTIONS - Manager & Owner Only */}
+        {hasManagementAccess && (
+          <Link to="/home/transactions" className={getTabClass("/home/transactions")}>
+            <FileClock size={24} />
+            <p className="text-base">Transactions</p>
+          </Link>
+        )}
+
+        {/* BARCODE - Manager Only */}
         {isManager && (
-          <>
-            {/* TRANSACTIONS */}
-            <Link
-              to="/home/transactions"
-              onClick={() => setActiveTab("Transactions")}
-              className={getTabClass("/home/transactions")}
-            >
-              <FileClock size={24} />
-              <p className="text-base">Transactions</p>
-            </Link>
+          <Link to="/home/barcode" className={getTabClass("/home/barcode")}>
+            <Barcode size={24} />
+            <p className="text-base">Barcode</p>
+          </Link>
+        )}
 
-            {/* BARCODE */}
-            <Link
-              to="/home/barcode"
-              onClick={() => setActiveTab("Barcode")}
-              className={getTabClass("/home/barcode")}
-            >
-              <Barcode size={24} />
-              <p className="text-base">Barcode</p>
-            </Link>
+        {/* DISCOUNT - Manager & Owner Only */}
+        {hasManagementAccess && (
+          <Link to="/home/discount" className={getTabClass("/home/discount")}>
+            <Tag size={24} />
+            <p className="text-base">Discount</p>
+          </Link>
+        )}
 
-            {/* DISCOUNT - Restored! */}
-            <Link
-              to="/home/discount"
-              onClick={() => setActiveTab("Discount")}
-              className={getTabClass("/home/discount")}
-            >
-              <Tag size={24} />
-              <p className="text-base">Discount</p>
-            </Link>
+        {/* --- ADMINISTRATIVE SECTION --- */}
 
-            {/* ACCOUNTS */}
-            <Link
-              to="/home/accounts"
-              onClick={() => setActiveTab("Accounts")}
-              className={getTabClass("/home/accounts")}
-            >
-              <UserPen size={24} />
-              <p className="text-base">Accounts</p>
-            </Link>
+        {/* ACCOUNTS - Manager, Owner, and Admin */}
+        {hasFullAccess && (
+          <Link to="/home/accounts" className={getTabClass("/home/accounts")}>
+            <UserPen size={24} />
+            <p className="text-base">Accounts</p>
+          </Link>
+        )}
 
-            <Link
-              to="/home/audit"
-              onClick={() => setActiveTab("Audit Log")}
-              className={getTabClass("/home/audit")}
-            >
-              <Logs size={24} />
-              <p className="text-base">Audit Log</p>
-            </Link>
+        {/* AUDIT LOG - Manager, Owner, and Admin */}
+        {hasFullAccess && (
+          <Link to="/home/audit" className={getTabClass("/home/audit")}>
+            <Logs size={24} />
+            <p className="text-base">Audit Log</p>
+          </Link>
+        )}
 
-            {/* ARCHIVES */}
-            <Link
-              to="/home/archives"
-              onClick={() => setActiveTab("Archives")}
-              className={getTabClass("/home/archives")}
-            >
-              <Archive size={24} />
-              <p className="text-base">Archives</p>
-            </Link>
-          </>
+        {/* ARCHIVES - Manager, Owner, and Admin */}
+        {hasFullAccess && (
+          <Link to="/home/archives" className={getTabClass("/home/archives")}>
+            <Archive size={24} />
+            <p className="text-base">Archives</p>
+          </Link>
         )}
       </div>
     </div>
