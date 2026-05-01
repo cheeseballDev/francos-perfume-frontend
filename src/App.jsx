@@ -87,7 +87,7 @@ const App = () => {
           {/* 2. INVENTORY OPS (Manager, Owner, & Staff) */}
           <Route element={<ProtectedRoute user={user} allowedRoles={['manager', 'owner', 'staff']} />}>
             <Route path="inventory" element={<InventoryPage role={user?.trueRole} />} />
-            <Route path="requests" element={<RestockPage />} />
+            <Route path="restock" element={<RestockPage />} />
             <Route path="forecast" element={<ForecastPage />} />
           </Route>
 
