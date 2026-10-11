@@ -1,4 +1,5 @@
 import { transactionColumns } from '@/components/features/transactions_components/TransactionColumns';
+import TransactionDetailsModal from '@/components/features/transactions_components/TransactionDetailsModal';
 import TransactionTableSkeleton from '@/components/loaders/TransactionTableSkeleton';
 import { SearchBar } from '@/components/shared';
 import DataTable from '@/components/shared/DataTable';
@@ -16,11 +17,13 @@ export default function TransactionsPage() {
         filter, 
         fetchTransactions, 
         updateFilter,
+        fetchTransactionDetails
     } = useTransaction();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
 
     const handleSearchChange = (value) => {
         const query = value?.target ? value.target.value : value;
@@ -29,20 +32,19 @@ export default function TransactionsPage() {
     }
 
     const handleRowClick = async (row) => {
-        if (selectedTransation?.transactionId === row.employeeId) {
-        setSelectedTransaction(null);
-        return;
+        if (selectedTransaction?.salesOrderId === row.salesOrderId) {
+            setSelectedTransaction(null);
+            return;
         }
 
-        setSelectedAccount(row);    
-
-        const profile = await fetchAccount(row.employeeId);
-        if (profile) {
-        setSelectedAccount(prev => prev ? { ...prev, ...profile }: profile);
+        setSelectedTransaction(row);
+        //console.log(selectedTransaction);    
+        const transaction = await fetchTransactionDetails(row.salesOrderId);
+        if (transaction) {
+            setSelectedTransaction(prev => prev ? { ...prev, ...transaction }: transaction);
         }
     }
 
-    
 
     return (
         <div className="bg-background min-h-screen font-montserrat flex flex-col animate-fade-in relative">
@@ -82,6 +84,9 @@ export default function TransactionsPage() {
                     pagination={pagination}
                     filter={filter}
                     updateFilter={updateFilter}
+                    selectedItem={selectedTransaction}
+                    onRowClick={handleRowClick}
+                    onRowDoubleClick={() => setIsTransactionModalOpen(true)}
                 />
             )}
 
@@ -93,7 +98,9 @@ export default function TransactionsPage() {
                     Export
                 </Button>
 
-                <Button>
+                <Button
+                    onClick={() => setIsTransactionModalOpen(true)}
+                >
                     <Eye className='h-8 w-8'/>
                     View Transaction
                 </Button>
@@ -102,6 +109,12 @@ export default function TransactionsPage() {
             <ExportTransactionModal 
                 isOpen={isExportModalOpen} 
                 onClose={() => setIsExportModalOpen(false)}
+            />
+
+            <TransactionDetailsModal 
+                isOpen={isTransactionModalOpen}
+                onClose={() => setIsTransactionModalOpen(false)}
+                selectedTransaction={selectedTransaction}
             />
 
         </div>

@@ -71,8 +71,8 @@ export const useAccount = () => {
     }, [filter]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchAllAccounts();
+        const timer = setTimeout(async () => {
+        await fetchAllAccounts();
         }, 0);
         return () => clearTimeout(timer); 
     }, [fetchAllAccounts])
@@ -89,7 +89,8 @@ export const useAccount = () => {
     const updateAccount = async (id, dto) => {
         try {
             const data = updateAccountDetails(id, dto);
-            fetchAllAccounts();
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            await fetchAllAccounts();
             return data;
         } catch (err) {
             setAsyncState({ error: err });
@@ -113,7 +114,7 @@ export const useAccount = () => {
     const resetPassword = useCallback(async (id) => {
         try {
             await resetAccountPassword(id);
-            fetchAllAccounts();
+            await fetchAllAccounts();
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
@@ -144,7 +145,7 @@ export const useAccount = () => {
         setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             await archiveAccount(id);
-            fetchAllAccounts();
+            await fetchAllAccounts();
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
@@ -182,5 +183,6 @@ export const useAccount = () => {
         filterOptions,
         updateAccount,
         createAccount,
+        fetchAllAccounts,
     };
 }

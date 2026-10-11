@@ -3,6 +3,7 @@ import FormField from '@/components/shared/FormField';
 import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useEffect, useState } from 'react';
 import { useAuth } from "../../../auth/UseAuth";
@@ -37,75 +38,94 @@ const ROLE_RANKS = {
 };
 
 const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = [], updateAccount }) => {
-  
-  const { user } = useAuth();
-  const [config, setConfig] = useState(null);
+    const { user } = useAuth();
+    const { toast } = useToast();
 
-  const [data, setData] = useState(() => getAccountFormData(selectedAccount));
-  const [errors, setErrors] = useState({});
+    const [config, setConfig] = useState(null);
+    const [data, setData] = useState(() => getAccountFormData(selectedAccount));
+    const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isManager = user?.trueRole?.toUpperCase() === 'MANAGER';
+    const isManager = user?.trueRole?.toUpperCase() === 'MANAGER';
 
-  useEffect(() => {
-    if (isOpen && selectedAccount) {
-      setData(getAccountFormData(selectedAccount));
-      setErrors({});
+    useEffect(() => {
+        if (isOpen && selectedAccount) {
+        setData(getAccountFormData(selectedAccount));
+        setErrors({});
+        }
+    }, [isOpen, selectedAccount]);
+
+    if (!isOpen) return null;
+
+    const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
+    const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
+    const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
+
+    const branchOptions = branchOptionData.filter(
+        (option) => option.value !== "" && option.value !== "__all__"
+    );
+
+    const roleOptions = roleOptionData.filter(
+        (option) => {
+        if (!option.value || option.value === "__all__") {
+            return false;
+        }
+
+        const targetRoleRank = ROLE_RANKS[option.value.toUpperCase()] || 0;
+        const currentUserRank = ROLE_RANKS[user?.trueRole?.toUpperCase()] || 0;
+
+        return targetRoleRank < currentUserRank;
+    });
+
+    const employeeShiftOptions = employeeShiftOptionData.filter(
+        (option) => option.value !== "" && option.value !== "__all__"
+    );
+
+
+    const handleChange = (field, value) => {
+        setData((prev) => ({ ...prev, [field]: value }));
+        
+        if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: null }));
+        }
+    };
+
+    const handleSave = () => {
+        const validationErrors = validateForm(data, accountValidationSchema);
+
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+        setConfig({
+        title: "Are you sure you want to save changes for this account?",
+        description: "The user of this account will be notified of the changes made to their account.",
+        confirmText: "Save Changes",
+        onConfirm: async () => {
+            try {
+                setIsSubmitting(true);
+                await updateAccount(selectedAccount.employeeId, data);
+
+                toast({
+                    title: "Success",
+                    description: "Account updated successfully.",
+                });
+
+                onClose();
+            } catch (error) {
+                toast({
+                    title: "Update Failed",
+                    description: error?.message || "An error occurred while updating the account.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsSubmitting(false);
+                setConfig(null);
+                setData(null);
+            }
+        } 
+        })
     }
-  }, [isOpen, selectedAccount]);
-
-  if (!isOpen) return null;
-
-  const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
-  const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
-  const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
-
-  const branchOptions = branchOptionData.filter(
-    (option) => option.value !== "" && option.value !== "__all__"
-  );
-
-  const roleOptions = roleOptionData.filter(
-    (option) => {
-      if (!option.value || option.value === "__all__") {
-        return false;
-      }
-
-    const targetRoleRank = ROLE_RANKS[option.value.toUpperCase()] || 0;
-    const currentUserRank = ROLE_RANKS[user?.trueRole?.toUpperCase()] || 0;
-
-    return targetRoleRank < currentUserRank;
-  });
-
-  const employeeShiftOptions = employeeShiftOptionData.filter(
-    (option) => option.value !== "" && option.value !== "__all__"
-  );
-
-
-  const handleChange = (field, value) => {
-    setData((prev) => ({ ...prev, [field]: value }));
-    
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: null }));
-    }
-  };
-
-  const handleSave = () => {
-      const validationErrors = validateForm(data, accountValidationSchema);
-
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
-      }
-      setConfig({
-      title: "Are you sure you want to save changes for this account?",
-      description: "The user of this account will be notified of the changes made to their account.",
-      confirmText: "Save Changes",
-      onConfirm: async () => {
-        await updateAccount(selectedAccount.employeeId, data);
-        setData(null);
-        onClose();
-      } 
-    })
-  }
 
 
   return (
@@ -213,8 +233,9 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
 
             <Button
               onClick={handleSave}
+              disabled={isSubmitting}
             >
-              Save Changes
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </DialogContent>
@@ -224,6 +245,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
         isOpen={!!config}
         onClose={() => setConfig(null)}
         config={config}
+        isLoading={isSubmitting}
       />
     </>
   );

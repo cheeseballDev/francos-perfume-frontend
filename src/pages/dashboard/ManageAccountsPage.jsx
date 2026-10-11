@@ -1,5 +1,5 @@
 import { accountColumns } from "@/components/features/accounts_components/AccountColumns";
-import AccountInfoModal from "@/components/features/accounts_components/AccountInfoModal";
+import AccountInfoModal from "@/components/features/accounts_components/AccountDetailsModal";
 import CreateAccountModal from "@/components/features/accounts_components/CreateAccountModal";
 import EditAccountModal from "@/components/features/accounts_components/EditAccountModal";
 import AccountTableSkeleton from "@/components/loaders/AccountTableSkeleton";
@@ -12,27 +12,27 @@ import { useState } from "react";
 import SearchBar from "../../components/shared/SearchBar";
 
 const ManageAccountsPage = () => {
-  const { 
-    accounts, 
-    asyncState,
-    pagination,
-    filter,
-    updateFilter,
-    fetchAccount,
-    archive,
-    toggleStatus,
-    resetPassword,
-    filterOptions,
-    updateAccount,
-    createAccount,
-  } = useAccount();
+    const { 
+        accounts, 
+        asyncState,
+        pagination,
+        filter,
+        updateFilter,
+        fetchAccount,
+        archive,
+        toggleStatus,
+        resetPassword,
+        filterOptions,
+        updateAccount,
+        createAccount,
+    } = useAccount();
 
-  const [searchQuery, setSearchQuery] = useState(""); 
-  const [selectedAccount, setSelectedAccount] = useState(null);
-  
-  const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
-  const [isAccountInfoModalOpen, setIsAccountInfoModalOpen] = useState(false);
-  const [isEditAccountModalOpen, setIsEditAccountModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState(""); 
+    const [selectedAccount, setSelectedAccount] = useState(null);
+    
+    const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
+    const [isAccountInfoModalOpen, setIsAccountInfoModalOpen] = useState(false);
+    const [isEditAccountModalOpen, setIsEditAccountModalOpen] = useState(false);
 
   const role = sessionStorage.getItem("trueRole");
 
@@ -98,8 +98,6 @@ const ManageAccountsPage = () => {
     {asyncState?.isLoading ? (
       <AccountTableSkeleton rowCount={10} />
     ) : (
-      <div className="overflow-y-auto h-screen min-h-100"
-        onClick={(e) => e.stopPropagation()}>
         <DataTable 
           columns={accountColumns}
           data={accounts}
@@ -112,7 +110,6 @@ const ManageAccountsPage = () => {
           onRowClick={handleRowClick}
           onRowDoubleClick={() => setIsAccountInfoModalOpen(true)}
         />
-      </div>
     )}
 
     <CreateAccountModal 

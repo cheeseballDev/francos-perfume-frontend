@@ -54,7 +54,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
         }
         
         try {
-        setIsSubmitting(true);
+            setIsSubmitting(true);
             await createProduct(data);
             onClose();
         } catch (error) {

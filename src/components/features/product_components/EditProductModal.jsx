@@ -4,6 +4,7 @@ import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -20,11 +21,12 @@ const productValidationSchema = {
     productName: [isValid.required],
     productType: [isValid.required],
     productGender: [isValid.required],
-    productPrice: [isValid.required, isValid.number],
+    productPrice: [isValid.required, isValid.decimalNumber],
     productDescription: [isValid.required],
 };
 
-const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = [], updateProduct }) => {
+const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = [], updateProduct, onSuccess }) => {
+    const { toast } = useToast();
 
     const [config, setConfig] = useState(null);
     const [data, setData] = useState(() => getProductFormData(selectedProduct));
@@ -59,7 +61,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
         }
     }
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const validationErrors = validateForm(data, productValidationSchema);
 
         if (Object.keys(validationErrors).length > 0) {
@@ -67,18 +69,26 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
             return;
         }
 
-        setConfig({
-            title: "Confirm Changes",
-            description: "The changes made to this product will be saved.",
-            confirmText: "Save Changes",
-            onConfirm: async () => {
-                setIsSubmitting(true);
-                await updateProduct(selectedProduct.productId, data);
-                setIsSubmitting(false);
-                setData(null);
-                onClose();
-            } 
-        });
+        try {
+            setIsSubmitting(true);
+            await updateProduct(selectedProduct.productId, data);
+            
+            if (onSuccess) {
+                onSuccess();
+            }
+
+            onClose();
+        } catch (error) {
+            toast({
+                title: "Update Failed",
+                description: error?.message || "An error occurred while updating the product.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmitting(false);
+            setConfig(null);
+            setData(null);
+        }
     }
 
     return (
@@ -118,7 +128,9 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
 
                         <FormField 
                             label="Price (₱):"
+                            value={data.productPrice}
                             type="number"
+                            step="0.01"
                             onChange={e => handleChange('productPrice', e.target.value)}
                             placeholder="Enter Price"
                             error={errors.productPrice}
