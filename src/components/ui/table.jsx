@@ -1,6 +1,5 @@
 "use client"
 
-
 import { cn } from "@/lib/utils";
 
 function Table({
@@ -61,7 +60,8 @@ function TableRow({
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover: cursor-pointer has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        // FIXED: Removed the invalid space in hover: cursor-pointer and added hover:bg-muted/50 for a visual row highlight
+        "border-b transition-colors cursor-pointer hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
         className
       )}
       {...props} />
@@ -114,4 +114,3 @@ export {
   Table, TableBody, TableCaption, TableCell, TableFooter,
   TableHead, TableHeader, TableRow
 };
-

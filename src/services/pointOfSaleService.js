@@ -5,7 +5,8 @@ const PATH = "/pos";
 
 export const getAllProductsPOS = async (filter) => {
   const cleanedFilter = cleanFilters(filter);
-  const response = await apiClient.get(`${PATH}`, {
+  // FIXED: Appended the specific endpoint name required by the backend
+  const response = await apiClient.get(`${PATH}/displayProductsPOS`, {
     params: cleanedFilter,
   });
   return response.data;

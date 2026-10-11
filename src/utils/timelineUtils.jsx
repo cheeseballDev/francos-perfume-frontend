@@ -1,69 +1,4 @@
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, XCircle } from "lucide-react";
-
-export const renderBadgeForRequestTimeline = (status) => {
-    switch (status) {
-        case "APPROVED":
-        case "COMPLETED":
-        case "DISPATCHED":
-        return (
-            <Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-none px-3 py-0.5 font-medium rounded-md text-xs">
-                {status === "APPROVED" ? "Approved" : status}
-            </Badge>
-        );
-
-        case "REJECTED":
-            return (
-                <Badge variant="outline" className="bg-red-100 text-red-700 border-none px-3 py-0.5 font-medium rounded-md text-xs">
-                    Rejected
-                </Badge>
-            );
-
-        case "PENDING":
-        default:
-            return (
-                <Badge variant="outline" className="bg-amber-100 text-amber-600 border-none px-3 py-0.5 font-medium rounded-md text-xs">
-                    Pending
-                </Badge>
-            );
-    };
-}
-
-export const renderTimelineIcon = (status) => {
-    if (status === "APPROVED" || status === "COMPLETED" || status === "DISPATCHED") {
-        return <CheckCircle2 className="w-6 h-6 text-emerald-500 bg-white rounded-full" />;
-    }
-    if (status === "REJECTED") {
-        return <XCircle className="w-6 h-6 text-red-500 bg-white rounded-full" />;
-    }
-    return <Clock className="w-6 h-6 text-amber-500 bg-white rounded-full" />;
-};
-
-export const buildTimeline = (approvalSteps, requestStatus) => {
-    const isDispatched = requestStatus === "IN TRANSIT" || requestStatus === "COMPLETED";
-    const isCompleted = requestStatus === "COMPLETED";
-
-    const fullTimeline = [
-        ...approvalSteps,
-        {
-            title: "For Dispatch",
-            subtitle: isDispatched ? "Dispatched and on the way" : "Waiting for dispatch",
-            status: isDispatched ? "DISPATCHED" : "PENDING",
-        },
-        {
-            title: "Stock Received",
-            subtitle: isCompleted ? "Delivery acknowledged" : "Waiting to be dispatched",
-            status: isCompleted ? "COMPLETED" : "PENDING",
-        },
-    ];
-
-    let rejectionFound = false;
-    return fullTimeline.map((item) => {
-        if (rejectionFound) return { ...item, isSkipped: true };
-        if (item.status === "REJECTED") rejectionFound = true;
-        return { ...item, isSkipped: false };
-    });
-};
+import { CheckCircle2, Clock, Truck, XCircle } from "lucide-react";
 
 export const buildApprovalSteps = (approvals, requestedFrom) => {
     const isWarehousePush = requestedFrom?.toUpperCase() === "WAREHOUSE";
@@ -81,4 +16,82 @@ export const buildApprovalSteps = (approvals, requestedFrom) => {
                 status: approval.status,
             };
         });
+};
+
+export const renderTimelineSubtitle = (stage, status, approver) => {
+    if (stage != "DISPATCH" && stage != "IN TRANSIT") {
+        if (status != "PENDING") {
+            return `Approved by ${approver}`;
+        }
+        return "Waiting for approval";
+    }
+
+    if (stage === "DISPATCH" || status === "DISPATCHED") {
+        if (status != "PENDING") {
+            return `Dispatched by ${approver}`;
+        }
+        return `To be dispatched`;
+    }
+
+    if (stage === "TRANSIT") {
+        if (status === "RECEIVED") {
+            return `Received by ${approver}`;
+        }
+        return `Sent by: ${approver}`;
+    }
+    
+    return "Unknown status";
+}
+
+export const renderBadgeForRequestTimeline = (status) => {
+    switch (status) {
+        case "APPROVED":
+        case "DISPATCHED":
+        case "RECEIVED":
+            return (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    {status}
+                </span>
+            );
+        case "REJECTED":
+            return (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                    {status}
+                </span>
+            );
+        case "IN TRANSIT":
+            return (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                    {status}
+                </span>
+            );
+        case "PENDING":
+            return (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                    {status}
+                </span>
+            );
+        default:
+            return (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                    {status || "UNKNOWN"}
+                </span>
+            );
+    }
+};
+
+// Helper to render step icons
+export const renderTimelineIcon = (status) => {
+    switch (status?.toUpperCase()) {
+        case "APPROVED":
+        case "COMPLETED":
+        case "RECEIVED":
+            return <CheckCircle2 className="w-6 h-6 text-emerald-600 bg-white rounded-full" />;
+        case "DISPATCHED":
+            return <Truck className="w-6 h-6 text-blue-600 bg-white rounded-full" />;
+        case "REJECTED":
+            return <XCircle className="w-6 h-6 text-red-600 bg-white rounded-full" />;
+        default:
+            return <Clock className="w-6 h-6 text-amber-500 bg-white rounded-full" />;
+    }
 };

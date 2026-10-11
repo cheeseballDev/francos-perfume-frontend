@@ -7,25 +7,36 @@ export const useCart = () => {
 
     const handleAddToCart = (product, quantity) => {
         setCart(prevCart => {
-        const existing = prevCart.find(item => item.product_id === product.product_id);
-        if (existing) {
-            return prevCart.map(item => 
-            item.product_id === product.product_id 
-                ? { ...item, cartQty: item.cartQty + quantity } 
-                : item
+            // Standardize the ID check so it never misses a duplicate
+            const targetId = product.product_id || product.productId || product.id;
+            
+            const existing = prevCart.find(item => 
+                (item.product_id || item.productId || item.id) === targetId
             );
-        }
-        return [...prevCart, 
-            { ...product, 
-                name: product.product_name || 'Unknown Item', 
-                price: product.product_price || 0, 
+            
+            if (existing) {
+                return prevCart.map(item => 
+                    (item.product_id || item.productId || item.id) === targetId 
+                        ? { ...item, cartQty: item.cartQty + quantity } 
+                        : item
+                );
+            }
+            
+            return [...prevCart, { 
+                ...product, 
+                // Force standardize the properties for the cart
+                product_id: targetId,
+                name: product.name || product.productName || product.product_name || 'Unknown Item', 
+                price: product.price || product.productPrice || product.product_price || 0, 
                 cartQty: quantity 
             }];
         });
     };
 
     const handleRemoveFromCart = (productId) => {
-        setCart(prevCart => prevCart.filter(item => item.product_id !== productId));
+        setCart(prevCart => prevCart.filter(item => 
+            (item.product_id || item.productId || item.id) !== productId
+        ));
     };
 
     const handleClearCart = () => {

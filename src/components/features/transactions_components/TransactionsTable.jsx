@@ -27,11 +27,11 @@ const TransactionsTable = ({ transactions, asyncState, pagination, filter, updat
     */
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden">
+        <div className="bg-card border border-border rounded-lg shadow-sm flex flex-col overflow-hidden">
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
-                    <TableRow className="bg-gray-50/80">
+                    <TableRow className="bg-muted/50">
                         <TableHead className="font-semibold text-muted-foreground">Date Received</TableHead>
                         <TableHead className="font-semibold text-muted-foreground">Sales Order ID</TableHead>
                         <TableHead className="font-semibold text-muted-foreground">Perfume Sold</TableHead>
@@ -44,18 +44,18 @@ const TransactionsTable = ({ transactions, asyncState, pagination, filter, updat
                     <TableBody>
                     {(transactions || []).map((transaction) => (
                         <TableRow key={transaction.salesOrderId}>
-                        <TableCell className="text-primary-foreground">{formatDateTimeForTable(transaction.transactionDate) || 'Unknown'}</TableCell>
-                        <TableCell className="font-medium text-primary-foreground">{transaction.salesOrderId || 0}</TableCell>
-                        <TableCell className="text-primary-foreground">
+                        <TableCell className="text-foreground">{formatDateTimeForTable(transaction.transactionDate) || 'Unknown'}</TableCell>
+                        <TableCell className="font-medium text-foreground">{transaction.salesOrderId || 0}</TableCell>
+                        <TableCell className="text-foreground">
                             {transaction.productList?.length > 0 
                                 ? transaction.productList.map(product => product.productName).join(', ')
                                 : 'No products'
                             }
                         </TableCell>
-                        <TableCell className="text-center text-primary-foreground">{transaction.processedBy}</TableCell>
-                        <TableCell className="text-center text-primary-foreground">{transaction.paymentMethod}</TableCell>
-                        <TableCell className="text-center text-primary-foreground">{transaction.discountName}</TableCell>
-                        <TableCell className="text-center text-primary-foreground"><span className="text-custom-green">+ ₱ {transaction.amount}</span></TableCell>
+                        <TableCell className="text-center text-foreground">{transaction.processedBy}</TableCell>
+                        <TableCell className="text-center text-foreground">{transaction.paymentMethod}</TableCell>
+                        <TableCell className="text-center text-foreground">{transaction.discountName}</TableCell>
+                        <TableCell className="text-center text-foreground"><span className="text-emerald-500">+ ₱ {transaction.amount}</span></TableCell>
                         </TableRow>
                         ))}
                     </TableBody>

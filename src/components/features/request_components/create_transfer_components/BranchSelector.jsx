@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 
 const BranchSelector = ({ fromBranch, toBranch, setFromBranch, setToBranch, onClear, branchOptions }) => {
     return (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-foreground mb-4">Branch Information</h2>
             
             <div className="grid grid-cols-2 gap-4 mb-4">
@@ -28,11 +28,11 @@ const BranchSelector = ({ fromBranch, toBranch, setFromBranch, setToBranch, onCl
 
             <Button
                 variant="outline"
-                className="w-full border-dashed border-rose-300 text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+                className="w-full border-dashed border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 onClick={onClear}
                 disabled={!fromBranch && !toBranch}
             >
-                <X size={14} /> Clear selected branches
+                <X size={14} className="mr-2" /> Clear selected branches
             </Button>
         </div>
     );

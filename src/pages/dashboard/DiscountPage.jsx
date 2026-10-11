@@ -3,11 +3,12 @@ import CreateDiscountModal from "@/components/features/discount_components/Creat
 import { discountColumns } from "@/components/features/discount_components/DiscountColumns";
 import DiscountInfoModal from "@/components/features/discount_components/DiscountInfoModal";
 import EditDiscountModal from "@/components/features/discount_components/EditDiscountModal";
+import DiscountTableSkeleton from "@/components/loaders/DiscountTableSkeleton";
 import { FilterDropDown, SearchBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useDiscounts } from "@/hooks/discount_hooks/useDiscount";
-import { Eye, Plus } from "lucide-react";
+import { Eye, Plus } from "lucide-react"; 
 import { useState } from "react";
 
 const DiscountPage = () => {
@@ -58,8 +59,10 @@ const DiscountPage = () => {
   return (
     <div className="flex flex-col h-full animate-fade-in relative font-montserrat">
 
-      <h1 className="text-3xl font-bold text-custom-black mb-1 leading-none tracking-tight">Discount Management</h1>
-      <p className="text-gray-400 text-sm mb-8">Create, remove, and change discounts</p>
+      <h1 className="text-3xl font-bold text-foreground mb-1 leading-none tracking-tight">Discount Management</h1>
+      
+      <p className="text-muted-foreground text-sm mb-8">Create, remove, and change discounts</p>
+        
         <div className="flex flex-col gap-4 mb-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="w-full sm:max-w-xl">
@@ -88,25 +91,29 @@ const DiscountPage = () => {
         </div>
     </div>
 
-    <h2 className="text-2xl font-bold text-custom-black mb-6">Discounts List</h2>
+    <h2 className="text-2xl font-bold text-foreground mb-6">Discounts List</h2>
 
-    <div className="overflow-y-auto h-screen min-h-100"
-      onClick={(e) => e.stopPropagation()}>
-      <DataTable 
-        columns={discountColumns}
-        data={discounts}
-        keyField="discountId"
-        asyncState={asyncState}
-        pagination={pagination}
-        filter={filter}
-        updateFilter={updateFilter}
-        selectedItem={selectedDiscount}
-        onRowClick={handleRowClick}
-        onRowDoubleClick={() => setIsDiscountInfoModalOpen(true)}
-      />
-    </div>
+    {asyncState?.isLoading ? (
+      <DiscountTableSkeleton rowCount={5} />
+    ) : (
+      <div className="overflow-y-auto h-screen min-h-100"
+        onClick={(e) => e.stopPropagation()}>
+        <DataTable 
+          columns={discountColumns}
+          data={discounts}
+          keyField="discountId"
+          asyncState={asyncState}
+          pagination={pagination}
+          filter={filter}
+          updateFilter={updateFilter}
+          selectedItem={selectedDiscount}
+          onRowClick={handleRowClick}
+          onRowDoubleClick={() => setIsDiscountInfoModalOpen(true)}
+        />
+      </div>
+    )}
 
-    <div className="flex justify-end">
+    <div className="flex justify-end mt-4">
       <Button
         variant={selectedDiscount ? "default" : "ghost"}
         disabled={!selectedDiscount}

@@ -1,49 +1,37 @@
+import { useAuth } from "@/auth/UseAuth";
+import ConfirmDialog from "@/components/shared/ConfirmDialog"; // ADDED: Import ConfirmDialog
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
-import { useRequest } from "@/hooks/request_hooks/useRequest";
+import { useRequestDetails } from "@/hooks/request_hooks/useRequestDetails";
 import { approveRequest, cancelRequest, rejectRequest } from "@/services/RequestService";
-import { ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { canUserApproveRequest } from "@/utils/requestAuthorizationUtils";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { RequestApprovalActions } from "./request_detail_components/RequestApprovalActions";
 import RequestInformation from "./request_detail_components/RequestInformation";
 import RequestTimeline from "./request_detail_components/RequestTimeline";
 import { requestedProductsColumns } from "./request_detail_components/RequestedProductsColumns";
 
 export default function RequestDetailsPage() {
-    const { 
-        fetchRequestDetails,
-    } = useRequest();
+
+    const { user } = useAuth();
 
     const { requestId } = useParams();
     const navigate = useNavigate();
     const [requestPayload, setRequestPayload] = useState({});
     const [remarks, setRemarks] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    const [config, setConfig] = useState(null);
 
-    const [selectedRequest, setRequestDetails] = useState(null);
-    const [itemApprovals, setItemApprovals] = useState({});
+    const { selectedRequest, itemApprovals, setItemApprovals } = useRequestDetails(requestId);
 
-    useEffect(() => {
-        if (requestId) {
-            fetchRequestDetails(requestId).then((data) => {
-                if (data) {
-                    setRequestDetails(data);
-                    const initialApprovals = {};
-                    (data.items || []).forEach((item) => {
-                        initialApprovals[item.requestItemId] = {
-                            isApproved: true,
-                            approvedQty: item.requestedQty,
-                        };
-                    });
-                    setItemApprovals(initialApprovals);
-                }
-            });
-        }
-    }, [requestId, fetchRequestDetails]);
+    const data = selectedRequest?.data || {};
 
     const handleApproveToggle = (requestItemId, isApproved) => {
         setItemApprovals((prev) => {
-            const requestedQty = selectedRequest?.items?.find((item) => item.requestItemId === requestItemId)?.requestedQty || 0;
+            const requestedQty = data.items?.find((item) => item.requestItemId === requestItemId)?.requestedQty || 0;
 
             return {
                 ...prev,
@@ -57,7 +45,7 @@ export default function RequestDetailsPage() {
     };
 
     const handleQtyChange = (requestItemId, approvedQty) => {
-        const requestedQty = selectedRequest.items.find(
+        const requestedQty = data.items.find(
             item => item.requestItemId === requestItemId
         ).requestedQty || 0;
 
@@ -72,11 +60,11 @@ export default function RequestDetailsPage() {
                 },
             }));
     };
+    
+    const allProductsApproved = Object.values(itemApprovals).length > 0 && 
+    Object.values(itemApprovals).every((item) => item.isApproved);
 
-
-    const allProductsApproved = Object.values(itemApprovals).some((item) => item.isApproved);
-
-    const isPending = selectedRequest?.requestStatus === "PENDING";
+    const isPending = data.requestStatus === "PENDING";
 
     const handleRejectRequest = async () => {
         if (!remarks.trim()) return;
@@ -84,6 +72,16 @@ export default function RequestDetailsPage() {
         try {
             await rejectRequest(requestId, remarks);
             navigate(0);
+        } catch (err) {
+            console.error("Failed to reject request:", err);
+            setConfig({
+                isAlert: true,
+                title: "Action Failed",
+                description: err.message || "Failed to reject the request.",
+                confirmVariant: "destructive",
+                confirmText: "Acknowledge",
+                onConfirm: () => setConfig(null) 
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -93,7 +91,7 @@ export default function RequestDetailsPage() {
         setIsSubmitting(true);
         try {
 
-            const payload = (selectedRequest?.items || []).map((item) => {
+            const payload = (data.items || []).map((item) => {
             const approvalState = itemApprovals[item.requestItemId];
             return {
                     remarks: remarks || "N/A",
@@ -108,6 +106,16 @@ export default function RequestDetailsPage() {
             console.log(payload);
             await approveRequest(requestId, payload);
             navigate(0);
+        } catch (err) {
+            console.error("Failed to approve request:", err);
+            setConfig({
+                isAlert: true,
+                title: "Action Failed",
+                description: err.message || "Failed to approve the request.",
+                confirmVariant: "destructive",
+                confirmText: "Acknowledge",
+                onConfirm: () => setConfig(null) 
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -118,14 +126,31 @@ export default function RequestDetailsPage() {
         try {
             await cancelRequest(requestId);
             navigate("/home/requests");
+        } catch (err) {
+            console.error("Failed to cancel request:", err);
+            setConfig({
+                isAlert: true,
+                title: "Action Failed",
+                description: err.message || "Failed to cancel the request.",
+                confirmVariant: "destructive",
+                confirmText: "Acknowledge",
+                onConfirm: () => setConfig(null) 
+            });
         } finally {
             setIsSubmitting(false);
         }
     };
 
     if (!selectedRequest) {
-        return <div className="p-6 text-custom-gray font-montserrat">Loading request details...</div>;
+        return (
+            <div className="flex flex-col gap-4 items-center justify-center min-h-screen p-6 font-montserrat text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                Loading request details...
+            </div>
+        );
     }
+
+    const isEditable = canUserApproveRequest(user, { ...data });
 
     return (
         <div className="p-6 min-h-screen font-montserrat">
@@ -138,11 +163,11 @@ export default function RequestDetailsPage() {
                     >
                         <ArrowLeft className="w-4 h-4" /> Back
                     </Button>
-                    <h1 className="text-2xl font-bold text-custom-black">
+                    <h1 className="text-2xl font-bold text-foreground">
                         {selectedRequest.requestDisplayId}
                     </h1>
-                    <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full uppercase">
-                        {selectedRequest.requestStatus}
+                    <span className="px-3 py-1 bg-amber-500/10 text-amber-500 text-xs font-bold rounded-full uppercase">
+                        {data.requestDirection}
                     </span>
                 </div>
 
@@ -160,18 +185,19 @@ export default function RequestDetailsPage() {
                 <div className="lg:col-span-2 space-y-6">
 
                     <RequestInformation 
-                        request={selectedRequest} 
+                        request={data} 
                     />
 
-                    <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">Requested Products</h2>
+                    <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+                        <h2 className="text-xl font-bold text-foreground mb-4">Requested Products</h2>
                         <DataTable
                             columns={requestedProductsColumns(
                                 itemApprovals, 
                                 handleApproveToggle, 
-                                handleQtyChange
+                                handleQtyChange,
+                                isEditable
                             )}
-                            data={selectedRequest.items || []}
+                            data={data.items || []}
                             keyField="requestItemId"
                             showPagination={false}
                             showSearch={false}
@@ -179,19 +205,28 @@ export default function RequestDetailsPage() {
                     </div>
                 </div>
 
-                <div>
+                <div className="lg:col-span-1 space-y-6">
                     <RequestTimeline
-                        selectedRequest={selectedRequest}
-                        setRequestPayload={setRequestPayload}
-                        isPending={isPending}
+                        selectedRequest={data}
+                    />
+
+                    <RequestApprovalActions
+                        user={user}
                         allProductsApproved={allProductsApproved}
-                        handleRejectRequest={handleRejectRequest}
-                        handleApproveRequest={handleApproveRequest}
                         remarks={remarks}
                         setRemarks={setRemarks}
+                        handleApproveRequest={handleApproveRequest}
+                        handleRejectRequest={handleRejectRequest}
+                        selectedRequest={data}
                     />
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={!!config}
+                onClose={() => setConfig(null)}
+                config={config}
+            />
         </div>
     );
 }

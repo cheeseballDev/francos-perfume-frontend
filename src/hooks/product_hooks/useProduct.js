@@ -83,7 +83,7 @@ export const useProduct = () => {
         }
     }
 
-    const updateDetails = async (id, dto) => {
+    const updateProduct = async (id, dto) => {
         try {
             const data = updateProductDetails(id, dto);
             fetchAllProducts();
@@ -128,7 +128,7 @@ export const useProduct = () => {
       updateFilter,
       filterOptions,
       getProduct,
-      updateDetails,
+      updateProduct,
       createProduct
     };
 }

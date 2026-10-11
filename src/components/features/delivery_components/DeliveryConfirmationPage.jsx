@@ -3,12 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { receiveDelivery } from "@/services/DeliveryService";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-// Reason options for partial/missing items
-// TODO: Confirm these reason options with your backend enum values
 const REASON_OPTIONS = [
     { label: "Select reason...", value: "" },
     { label: "Damaged", value: "DAMAGED" },
@@ -27,8 +25,6 @@ const DeliveryConfirmationPage = () => {
     const [remarks, setRemarks] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Track per-item received state
-    // { [itemId]: { isReceived: bool, receivedQty: number, reason: string } }
     const [itemReceipts, setItemReceipts] = useState({});
 
     useEffect(() => {
@@ -126,7 +122,8 @@ const DeliveryConfirmationPage = () => {
 
     if (!delivery) {
         return (
-            <div className="flex items-center justify-center h-full font-montserrat text-muted-foreground">
+            <div className="flex flex-col gap-4 items-center justify-center h-full font-montserrat text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 Loading delivery details...
             </div>
         );
@@ -137,7 +134,6 @@ const DeliveryConfirmationPage = () => {
     return (
         <div className="flex flex-col h-full font-montserrat animate-fade-in">
 
-            {/* Header */}
             <div className="flex items-center gap-4 mb-6">
                 <Button
                     variant="outline"
@@ -147,7 +143,7 @@ const DeliveryConfirmationPage = () => {
                     <ArrowLeft size={16} /> Back
                 </Button>
 
-                <h1 className="text-2xl font-bold text-custom-black">
+                <h1 className="text-2xl font-bold text-foreground">
                     {delivery.deliveryDisplayId}
                 </h1>
 
@@ -163,14 +159,13 @@ const DeliveryConfirmationPage = () => {
                 </Badge>
             </div>
 
-            {/* Requested Products Table */}
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-6">
-                <h2 className="text-lg font-bold text-custom-black mb-4">Requested Products</h2>
+            <div className="bg-card border border-border rounded-xl shadow-sm p-6 mb-6">
+                <h2 className="text-lg font-bold text-foreground mb-4">Requested Products</h2>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 text-muted-foreground">
+                            <tr className="border-b border-border text-muted-foreground">
                                 <th className="pb-3 text-left font-medium">ID</th>
                                 <th className="pb-3 text-left font-medium">Perfume Name</th>
                                 <th className="pb-3 text-center font-medium">Requested Qty</th>
@@ -183,10 +178,10 @@ const DeliveryConfirmationPage = () => {
                             {(delivery.items || []).map((item) => {
                                 const receipt = itemReceipts[item.deliveryItemId] || {};
                                 return (
-                                    <tr key={item.deliveryItemId} className="border-b border-gray-50 last:border-0">
+                                    <tr key={item.deliveryItemId} className="border-b border-border last:border-0">
                                         <td className="py-4 text-muted-foreground">{item.productDisplayId}</td>
-                                        <td className="py-4 font-medium text-custom-black">{item.productName}</td>
-                                        <td className="py-4 text-center font-bold">{item.quantity}</td>
+                                        <td className="py-4 font-medium text-foreground">{item.productName}</td>
+                                        <td className="py-4 text-center font-bold text-foreground">{item.quantity}</td>
                                         <td className="py-4 text-center">
                                             <input
                                                 type="checkbox"
@@ -201,7 +196,7 @@ const DeliveryConfirmationPage = () => {
                                                 value={receipt.receivedQty ?? item.quantity}
                                                 onChange={e => handleQtyChange(item.deliveryItemId, e.target.value)}
                                                 disabled={!receipt.isReceived}
-                                                className="w-20 text-center border border-gray-200 rounded px-2 py-1 disabled:bg-gray-50 disabled:text-gray-300"
+                                                className="w-20 text-center border border-input bg-transparent text-foreground rounded px-2 py-1 disabled:opacity-50 disabled:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
                                                 min={0}
                                                 max={item.quantity}
                                             />
@@ -211,10 +206,10 @@ const DeliveryConfirmationPage = () => {
                                                 value={receipt.reason || ""}
                                                 onChange={e => handleReasonChange(item.deliveryItemId, e.target.value)}
                                                 disabled={receipt.isReceived}
-                                                className="border border-gray-200 rounded px-2 py-1 text-sm disabled:bg-gray-50 disabled:text-gray-300 w-full"
+                                                className="border border-input bg-transparent text-foreground rounded px-2 py-1 text-sm disabled:opacity-50 disabled:bg-muted focus:outline-none focus:ring-2 focus:ring-ring w-full"
                                             >
                                                 {REASON_OPTIONS.map(opt => (
-                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                    <option key={opt.value} value={opt.value} className="bg-background text-foreground">{opt.label}</option>
                                                 ))}
                                             </select>
                                         </td>
@@ -226,13 +221,13 @@ const DeliveryConfirmationPage = () => {
                 </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-6">
-                <h2 className="text-lg font-bold text-custom-black mb-4">Additional Remarks</h2>
+            <div className="bg-card border border-border rounded-xl shadow-sm p-6 mb-6">
+                <h2 className="text-lg font-bold text-foreground mb-4">Additional Remarks</h2>
                 <textarea
                     value={remarks}
                     onChange={e => setRemarks(e.target.value)}
                     placeholder="Add your comments or message for this request...."
-                    className="w-full border border-gray-200 rounded-lg p-3 text-sm resize-none h-28 outline-none focus:border-gray-400 transition-colors"
+                    className="w-full border border-input bg-transparent text-foreground rounded-lg p-3 text-sm resize-none h-28 outline-none focus:ring-2 focus:ring-ring transition-colors"
                 />
             </div>
 
@@ -250,7 +245,8 @@ const DeliveryConfirmationPage = () => {
                     onClick={handleConfirm}
                     disabled={isSubmitting}
                 >
-                    <CheckCircle size={18} /> Confirm Delivery
+                    {isSubmitting ? <Loader2 size={18} className="mr-2 animate-spin" /> : <CheckCircle size={18} className="mr-2" />}
+                    {isSubmitting ? "Processing..." : "Confirm Delivery"}
                 </Button>
             </div>
 

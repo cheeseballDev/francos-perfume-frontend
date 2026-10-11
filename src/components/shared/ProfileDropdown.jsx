@@ -1,4 +1,4 @@
-import { useAuth } from '@/auth/useAuth';
+import { useAuth } from '@/auth/UseAuth';
 import { ArrowRightLeft, LogOut, Settings, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -6,24 +6,17 @@ import LogoutModal from './LogoutModal';
 
 const ProfileDropdown = () => {
   const { user, handleSwitchAccess } = useAuth();
-  const canSwitchAccess = user.trueRole === 'manager';
-
   const navigate = useNavigate();
+  
+  const canSwitchAccess = 
+    user?.trueRole?.toLowerCase() === 'manager' || 
+    user?.role?.toLowerCase() === 'manager';
+
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const displayUsername = user.email ? user.email.split('@')[0] : 'Employee Name';
-
-  /* 
-  i dont know what this does
-
-  Adapts the text color based on where you put the component
-  const triggerTextColor = theme === 'dark'
-    ? 'text-custom-gray hover:text-custom-white'
-    : 'text-custom-black hover:text-custom-black/70';
-  */
-
+  const displayUsername = user?.email ? user.email.split('@')[0] : 'Employee Name';
     
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -37,21 +30,27 @@ const ProfileDropdown = () => {
 
   return (
     <div className="relative z-50 pt-2" ref={dropdownRef}>
-
-      {/* The Clickable Trigger */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 cursor-pointer transition-colors text-custom-gray hover:text-custom-white`}
+        className="flex items-center gap-2 cursor-pointer transition-colors text-muted-foreground hover:text-foreground"
       >
         <User size={20} />
         <span className="font-medium text-[15px]">{displayUsername}</span>
         <span className="text-xs">▼</span>
       </div>
-      {/* The Floating Menu */}
+      
       {isOpen && (
-        <div className="absolute right-0 top-full mt-3 w-48 bg-custom-black text-custom-white rounded shadow-2xl overflow-hidden flex flex-col border border-white/10">
-          <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/10 transition-colors">
-            <Settings size={18} className="text-custom-gray-2" />
+        <div className="absolute right-0 top-full mt-3 w-48 bg-card text-card-foreground rounded shadow-2xl overflow-hidden flex flex-col border border-border">
+          
+          <div 
+            onClick={() => {
+              setIsOpen(false);
+              // FIXED: Only route cashiers to /pos/settings. Everyone else goes to /home/settings.
+              navigate(user?.activeRole === 'CASHIER' ? '/pos/settings' : '/home/settings');
+            }}
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+          >
+            <Settings size={18} className="text-muted-foreground" />
             <span className="text-sm font-medium">Settings</span>
           </div>
 
@@ -61,10 +60,10 @@ const ProfileDropdown = () => {
                 setIsOpen(false);
                 handleSwitchAccess();
               }}
-              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/10 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
             >
-              <ArrowRightLeft size={18} className="text-custom-gray-2" />
-              <span className="text-sm font-medium">Switch Access</span>
+              <ArrowRightLeft size={18} className="text-muted-foreground" />
+              <span className="text-sm font-medium">Switch Module</span>
             </div>
           )}
 
@@ -73,18 +72,16 @@ const ProfileDropdown = () => {
               setIsOpen(false);
               setShowLogoutModal(true);
             }}
-            className="flex items-center gap-3 px-4 py-3 cursor-pointer bg-custom-red hover:bg-custom-red/80 transition-colors"
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer bg-destructive hover:bg-destructive/90 transition-colors"
           >
-            <LogOut size={18} className="text-custom-white" />
-            <span className="text-sm font-medium">Logout</span>
+            <LogOut size={18} className="text-destructive-foreground" />
+            <span className="text-sm font-medium text-destructive-foreground">Logout</span>
           </div>
         </div>
       )}
 
       {showLogoutModal && (
-        <LogoutModal
-          setShowLogoutModal={setShowLogoutModal}
-          />
+        <LogoutModal setShowLogoutModal={setShowLogoutModal} />
       )}
     </div>
   );

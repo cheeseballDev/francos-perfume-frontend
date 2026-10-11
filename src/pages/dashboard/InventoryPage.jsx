@@ -1,5 +1,6 @@
 import { useAuth } from "@/auth/UseAuth";
 import InventoryTable from "@/components/features/inventory_components/InventoryTable";
+import TableSkeleton from "@/components/loaders/TableSkeleton";
 import { Button } from "@/components/ui/button";
 import { formatDateForInput } from "@/utils/formattingUtils";
 import { Plus } from "lucide-react";
@@ -45,10 +46,10 @@ const InventoryPage = () => {
     <div className="flex flex-col h-screen overflow-auto-y animate-fade-in relative font-montserrat">
       <div className="flex justify-between items-end mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-custom-black tracking-tight leading-none mb-2">
+          <h1 className="text-3xl font-bold text-foreground tracking-tight leading-none mb-2">
             Inventory
           </h1>
-          <p className="text-foreground text-sm">
+          <p className="text-muted-foreground text-sm">
             Overview of all available parfum products
           </p>
         </div>
@@ -84,18 +85,22 @@ const InventoryPage = () => {
     </div>
 
       <div className="flex flex-col gap-4 pb-4 flex-1">
-        <InventoryTable
-          inventory={inventory}
-          asyncState={asyncState}
-          pagination={pagination}
-          batchMap={batchMap}
-          setBatchMap={setBatchMap}
-          fetchBatchesForProduct={fetchBatchesForProduct}
-          handleSaveBatchEdit={saveBatchEdit}
-          filter={filter}
-          updateFilter={updateFilter}
-          handleOpenEditBatchModal={handleOpenEditBatchModal}
-        />
+        {asyncState?.isLoading ? (
+          <TableSkeleton rowCount={8} columnCount={6} />
+        ) : (
+          <InventoryTable
+            inventory={inventory}
+            asyncState={asyncState}
+            pagination={pagination}
+            batchMap={batchMap}
+            setBatchMap={setBatchMap}
+            fetchBatchesForProduct={fetchBatchesForProduct}
+            handleSaveBatchEdit={saveBatchEdit}
+            filter={filter}
+            updateFilter={updateFilter}
+            handleOpenEditBatchModal={handleOpenEditBatchModal}
+          />
+        )}
       </div>
 
       <EditBatchModal

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
-import { ArrowLeft, Truck, XCircle, CheckCircle, Eye } from "lucide-react";
+import { ArrowLeft, Truck, XCircle, CheckCircle, Eye, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DeliveryInformation from "./delivery_detail_components/DeliveryInformation";
@@ -29,7 +29,8 @@ export default function DeliveryDetailsPage() {
 
     if (!selectedDelivery) {
         return (
-            <div className="p-6 text-custom-gray font-montserrat">
+            <div className="flex flex-col gap-4 items-center justify-center min-h-screen p-6 font-montserrat text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 Loading delivery details...
             </div>
         );
@@ -37,13 +38,13 @@ export default function DeliveryDetailsPage() {
 
     const isInbound = selectedDelivery.direction === "INBOUND";
     const isOutbound = selectedDelivery.direction === "OUTBOUND";
-    const isForDispatch = !isInbound && !isOutbound; // Backend sends a generic status before dispatch
+    const isForDispatch = !isInbound && !isOutbound;
 
     const totalProducts = selectedDelivery.items?.length || 0;
     const totalUnits = selectedDelivery.items?.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
     return (
-        <div className="p-6 min-h-screen font-montserrat">
+        <div className="p-6 min-h-screen font-montserrat bg-background text-foreground">
             <div className="flex items-center gap-4 mb-6">
                 <Button
                     variant="outline"
@@ -52,7 +53,7 @@ export default function DeliveryDetailsPage() {
                 >
                     <ArrowLeft className="w-4 h-4" /> Back
                 </Button>
-                <h1 className="text-2xl font-bold text-custom-black">
+                <h1 className="text-2xl font-bold text-foreground">
                     {selectedDelivery.deliveryDisplayId}
                 </h1>
                 <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${
@@ -68,13 +69,12 @@ export default function DeliveryDetailsPage() {
                 <div className="lg:col-span-2 space-y-6">
                     <DeliveryInformation delivery={selectedDelivery} />
 
-                    {/* Products Table */}
-                    <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">Products</h2>
+                    <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+                        <h2 className="text-xl font-bold text-foreground mb-4">Products</h2>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-gray-100 text-muted-foreground">
+                                    <tr className="border-b border-border text-muted-foreground">
                                         <th className="pb-3 text-left font-medium">ID</th>
                                         <th className="pb-3 text-left font-medium">Perfume Name</th>
                                         <th className="pb-3 text-center font-medium">Quantity</th>
@@ -84,11 +84,11 @@ export default function DeliveryDetailsPage() {
                                     {(selectedDelivery.items || []).map((item, index) => (
                                         <tr
                                             key={item.deliveryItemId || index}
-                                            className="border-b border-gray-50 last:border-0"
+                                            className="border-b border-border last:border-0"
                                         >
                                             <td className="py-4 text-muted-foreground">{item.productDisplayId}</td>
-                                            <td className="py-4 font-medium text-custom-black">{item.productName}</td>
-                                            <td className="py-4 text-center font-bold">{item.quantity}</td>
+                                            <td className="py-4 font-medium text-foreground">{item.productName}</td>
+                                            <td className="py-4 text-center font-bold text-foreground">{item.quantity}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -97,26 +97,25 @@ export default function DeliveryDetailsPage() {
                     </div>
                 </div>
 
-                {/* Sidebar: Summary + Actions */}
                 <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">Summary</h2>
+                    <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+                        <h2 className="text-xl font-bold text-foreground mb-4">Summary</h2>
                         <div className="space-y-2 text-sm font-medium">
                             <div className="flex justify-between">
-                                <span className="text-gray-400">Products:</span>
-                                <span className="font-bold text-gray-900">{totalProducts}</span>
+                                <span className="text-muted-foreground">Products:</span>
+                                <span className="font-bold text-foreground">{totalProducts}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-400">Total Units:</span>
-                                <span className="font-bold text-gray-900">{totalUnits}</span>
+                                <span className="text-muted-foreground">Total Units:</span>
+                                <span className="font-bold text-foreground">{totalUnits}</span>
                             </div>
                         </div>
                     </div>
 
                     {isForDispatch && (
-                        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-3">
-                            <h2 className="text-base font-bold text-gray-900">Required Action</h2>
-                            <p className="text-xs text-gray-500">Mark as in transit to notify the receiving branch.</p>
+                        <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
+                            <h2 className="text-base font-bold text-foreground">Required Action</h2>
+                            <p className="text-xs text-muted-foreground">Mark as in transit to notify the receiving branch.</p>
                             <Button
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                                 onClick={() => navigate("/home/deliveries")}
@@ -134,9 +133,9 @@ export default function DeliveryDetailsPage() {
                     )}
 
                     {isInbound && (
-                        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-3">
-                            <h2 className="text-base font-bold text-gray-900">Required Action</h2>
-                            <p className="text-xs text-gray-500">Accept or reject this inbound request.</p>
+                        <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
+                            <h2 className="text-base font-bold text-foreground">Required Action</h2>
+                            <p className="text-xs text-muted-foreground">Accept or reject this inbound request.</p>
                             <Button
                                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                                 onClick={() => navigate("/home/deliveries")}
@@ -154,11 +153,11 @@ export default function DeliveryDetailsPage() {
                     )}
 
                     {isOutbound && (
-                        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-3">
-                            <h2 className="text-base font-bold text-gray-900">Required Action</h2>
-                            <p className="text-xs text-gray-500">View or follow up on this outbound delivery.</p>
+                        <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
+                            <h2 className="text-base font-bold text-foreground">Required Action</h2>
+                            <p className="text-xs text-muted-foreground">View or follow up on this outbound delivery.</p>
                             <Button
-                                className="w-full bg-custom-primary text-custom-black hover:bg-custom-primary/80"
+                                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                                 onClick={() => navigate("/home/deliveries")}
                             >
                                 <Eye className="w-4 h-4 mr-2" /> View Details

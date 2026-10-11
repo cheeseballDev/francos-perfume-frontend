@@ -21,7 +21,7 @@ export const addNewProduct = async (dto) => {
 };
 
 export const updateProductDetails = async (id, dto) => {
-  const response = await apiClient.patch(`${PATH}/update/${id}`, dto);
+  const response = await apiClient.patch(`${PATH}/${id}`, dto);
   return response.data;
 };
 

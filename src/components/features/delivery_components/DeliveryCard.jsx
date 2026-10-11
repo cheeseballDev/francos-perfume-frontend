@@ -30,19 +30,19 @@ const DeliveryCard = ({
         if (activeTab === "FOR_DISPATCH") {
             if (!isInbound) {
                 return (
-                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-background p-4 rounded-xl border border-border shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {deliveryStatus == "PENDING" && (
                             <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => onMarkInTransit(delivery.deliveryId)}>
-                                <Truck size={15} /> Mark as In Transit
+                                <Truck size={15} className="mr-2" /> Mark as In Transit
                             </Button>
                         )}
                         {deliveryStatus !== "IN TRANSIT" && deliveryStatus !== "COMPLETED" && deliveryStatus !== "CANCELLED" && (
                             <Button variant="destructive" onClick={() => onCancelRequest(delivery.deliveryId)}>
-                                <XCircle size={15} /> Cancel Request
+                                <XCircle size={15} className="mr-2" /> Cancel Request
                             </Button>
                         )}
-                        <Button className="bg-custom-primary text-custom-black hover:bg-custom-primary/80" onClick={handleViewDetails}>
-                            <Eye size={15} /> View Details
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleViewDetails}>
+                            <Eye size={15} className="mr-2" /> View Details
                         </Button>
                     </div>
                 );
@@ -51,16 +51,16 @@ const DeliveryCard = ({
                 <div className="grid grid-cols-3 gap-2 mt-3">
                     {deliveryStatus !== "ACCEPTED" && deliveryStatus !== "COMPLETED" && (
                         <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => onAcceptRequest(delivery.deliveryId)}>
-                            <CheckCircle size={15} /> Accept Request
+                            <CheckCircle size={15} className="mr-2" /> Accept Request
                         </Button>
                     )}
                     {deliveryStatus !== "ACCEPTED" && deliveryStatus !== "COMPLETED" && (
                         <Button variant="destructive" onClick={() => onRejectRequest(delivery.deliveryId)}>
-                            <XCircle size={15} /> Reject Request
+                            <XCircle size={15} className="mr-2" /> Reject Request
                         </Button>
                     )}
-                    <Button className="bg-custom-primary text-custom-black hover:bg-custom-primary/80" onClick={handleViewDetails}>
-                        <Eye size={15} /> View Details
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleViewDetails}>
+                        <Eye size={15} className="mr-2" /> View Details
                     </Button>
                 </div>
             );
@@ -68,8 +68,8 @@ const DeliveryCard = ({
 
         if (activeTab === "OUTBOUND") {
             return (
-                <Button className="w-full bg-custom-primary text-custom-black hover:bg-custom-primary/80 mt-3" onClick={handleViewDetails}>
-                    <Eye size={15} /> View Details
+                <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-3" onClick={handleViewDetails}>
+                    <Eye size={15} className="mr-2" /> View Details
                 </Button>
             );
         }
@@ -79,11 +79,11 @@ const DeliveryCard = ({
                 <div className="grid grid-cols-2 gap-2 mt-3">
                     {deliveryStatus !== "COMPLETED" && (
                         <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => onConfirmDelivery(delivery.deliveryId)}>
-                            <CheckCircle size={15} /> Confirm Delivery
+                            <CheckCircle size={15} className="mr-2" /> Confirm Delivery
                         </Button>
                     )}
-                    <Button className="bg-custom-primary text-custom-black hover:bg-custom-primary/80" onClick={handleViewDetails}>
-                        <Eye size={15} /> View Details
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleViewDetails}>
+                        <Eye size={15} className="mr-2" /> View Details
                     </Button>
                 </div>
             );
@@ -91,15 +91,15 @@ const DeliveryCard = ({
     };
 
     return (
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
             <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-4">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                        <ShoppingCart size={28} className="text-gray-600" />
+                    <div className="p-2 bg-muted rounded-lg">
+                        <ShoppingCart size={28} className="text-muted-foreground" />
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-lg text-custom-black">{deliveryId}</h3>
+                            <h3 className="font-bold text-lg text-foreground">{deliveryId}</h3>
                             <StatusBadge
                                 status={delivery.direction}
                             />
@@ -116,7 +116,7 @@ const DeliveryCard = ({
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="font-bold text-custom-black">{productCount} products</p>
+                    <p className="font-bold text-foreground">{productCount} products</p>
                     <p className="text-xs text-muted-foreground">{unitCount} units</p>
                 </div>
             </div>

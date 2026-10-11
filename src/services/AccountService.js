@@ -21,12 +21,12 @@ export const addNewAccount = async (dto) => {
     return response.data;
 };
 
-export const patchAccountDetails = async (id, dto) => {
+export const updateAccountDetails = async (id, dto) => {
     const response = await apiClient.patch(`${PATH}/update/${id}`, dto);
     return response.data;
 };
 
-export const patchAccountPassword = async (id, dto) => {
+export const updateAccountPassword = async (id, dto) => {
     const response = await apiClient.patch(`${PATH}/update/password/${id}`, dto);
     return response.data;
 };

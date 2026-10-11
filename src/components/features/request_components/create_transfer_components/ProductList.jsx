@@ -5,13 +5,13 @@ const ProductList = ({ products, onRemove }) => {
     if (!products.length) return null;
 
     return (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-foreground mb-4">Added Products</h2>
             <div className="space-y-2">
                 {products.map((product) => (
                     <div
                         key={product.productId}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100"
+                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border"
                     >
                         <div>
                             <p className="font-medium text-foreground text-sm">{product.productName}</p>
@@ -24,7 +24,7 @@ const ProductList = ({ products, onRemove }) => {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                                className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                                 onClick={() => onRemove(product.productId)}
                             >
                                 <Trash2 size={14} />

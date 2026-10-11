@@ -1,5 +1,5 @@
-import { getAllProductsPOS } from "@/services/PointOfSaleService";
-import { useEffect, useState } from "react";
+import { getAllProductsPOS } from "@/services/pointOfSaleService"; // FIXED: lowercase 'p' to match disk
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../auth/UseAuth";
 
 export const usePointOfSale = () => {
@@ -12,14 +12,25 @@ export const usePointOfSale = () => {
         search: '',
         product_type: '',
         product_gender: '',
-    })
+    });
+
+    // FIXED: Extracted to a callable function that returns a Promise
+    const fetchProducts = useCallback(async () => {
+        if (!user?.accessToken) return;
+        setIsLoading(true);
+        try {
+            const response = await getAllProductsPOS(filter, user.accessToken);
+            setProducts(response.data);
+        } catch (err) {
+            setError(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [filter, user?.accessToken]);
 
     useEffect(() => {
-        getAllProductsPOS(filter, user?.accessToken)
-            .then(response => setProducts(response.data))
-            .catch(setError)
-            .finally(() => setIsLoading(false));
-    }, [filter, user]);
+        fetchProducts();
+    }, [fetchProducts]);
 
     const updateFilter = (key, value) =>  {
         setFilter(prev => {
@@ -30,5 +41,6 @@ export const usePointOfSale = () => {
         });
     };
         
-    return { products, isLoading, error, filter, updateFilter };
+    // FIXED: Exporting fetchProducts so the main page can call it
+    return { products, isLoading, error, filter, updateFilter, fetchProducts }; 
 }

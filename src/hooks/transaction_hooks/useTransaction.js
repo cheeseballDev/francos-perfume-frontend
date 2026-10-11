@@ -1,4 +1,4 @@
-import { getAllTransactions } from "@/services/TransactionService";
+import { getAllTransactions, getTransactionDetails } from "@/services/TransactionService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
@@ -61,6 +61,15 @@ export const useTransaction = () => {
       return () => clearTimeout(timer);
     }, [fetchTransactions]);
 
+    const fetchTransactionDetails = useCallback(async (transactionId) => {
+        try {
+            const data = await getTransactionDetails(transactionId);
+            return data;
+        } catch (err) {
+            setAsyncState({ error: err });
+        }
+    }, []) 
+
     return { 
         transactions, 
         asyncState, 
@@ -68,5 +77,6 @@ export const useTransaction = () => {
         filter,
         fetchTransactions, 
         updateFilter,
+        fetchTransactionDetails,
     }
 }

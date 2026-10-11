@@ -1,7 +1,8 @@
 import { accountColumns } from "@/components/features/accounts_components/AccountColumns";
-import AccountInfoModal from "@/components/features/accounts_components/AccountInfoModal";
+import AccountInfoModal from "@/components/features/accounts_components/AccountDetailsModal";
 import CreateAccountModal from "@/components/features/accounts_components/CreateAccountModal";
 import EditAccountModal from "@/components/features/accounts_components/EditAccountModal";
+import AccountTableSkeleton from "@/components/loaders/AccountTableSkeleton";
 import { FilterDropDown } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
@@ -11,27 +12,27 @@ import { useState } from "react";
 import SearchBar from "../../components/shared/SearchBar";
 
 const ManageAccountsPage = () => {
-  const { 
-    accounts, 
-    asyncState,
-    pagination,
-    filter,
-    updateFilter,
-    fetchAccount,
-    archive,
-    toggleStatus,
-    resetPassword,
-    filterOptions,
-    updateDetails,
-    createAccount,
-  } = useAccount();
+    const { 
+        accounts, 
+        asyncState,
+        pagination,
+        filter,
+        updateFilter,
+        fetchAccount,
+        archive,
+        toggleStatus,
+        resetPassword,
+        filterOptions,
+        updateAccount,
+        createAccount,
+    } = useAccount();
 
-  const [searchQuery, setSearchQuery] = useState(""); 
-  const [selectedAccount, setSelectedAccount] = useState(null);
-  
-  const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
-  const [isAccountInfoModalOpen, setIsAccountInfoModalOpen] = useState(false);
-  const [isEditAccountModalOpen, setIsEditAccountModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState(""); 
+    const [selectedAccount, setSelectedAccount] = useState(null);
+    
+    const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
+    const [isAccountInfoModalOpen, setIsAccountInfoModalOpen] = useState(false);
+    const [isEditAccountModalOpen, setIsEditAccountModalOpen] = useState(false);
 
   const role = sessionStorage.getItem("trueRole");
 
@@ -57,10 +58,10 @@ const ManageAccountsPage = () => {
 
   return (
     <div className="flex flex-col animate-fade-in font-montserrat h-screen overflow-y-auto">
-      <h1 className="text-3xl font-bold text-custom-black mb-1 tracking-tight leading-none">
+      <h1 className="text-3xl font-bold text-foreground mb-1 tracking-tight leading-none">
         Manage Accounts
       </h1>
-      <p className="text-foreground text-sm mb-8">
+      <p className="text-muted-foreground text-sm mb-8">
         Manage, create, and modify accounts of each user
       </p>
 
@@ -92,23 +93,24 @@ const ManageAccountsPage = () => {
       </div>
     </div>
 
-    <h2 className="text-2xl font-bold text-custom-black mb-6">Accounts List</h2>
+    <h2 className="text-2xl font-bold text-foreground mb-6">Accounts List</h2>
 
-    <div className="overflow-y-auto h-screen min-h-100"
-      onClick={(e) => e.stopPropagation()}>
-      <DataTable 
-        columns={accountColumns}
-        data={accounts}
-        keyField="employeeId"
-        asyncState={asyncState}
-        pagination={pagination}
-        filter={filter}
-        updateFilter={updateFilter}
-        selectedItem={selectedAccount}
-        onRowClick={handleRowClick}
-        onRowDoubleClick={() => setIsAccountInfoModalOpen(true)}
-      />
-    </div>
+    {asyncState?.isLoading ? (
+      <AccountTableSkeleton rowCount={10} />
+    ) : (
+        <DataTable 
+          columns={accountColumns}
+          data={accounts}
+          keyField="employeeId"
+          asyncState={asyncState}
+          pagination={pagination}
+          filter={filter}
+          updateFilter={updateFilter}
+          selectedItem={selectedAccount}
+          onRowClick={handleRowClick}
+          onRowDoubleClick={() => setIsAccountInfoModalOpen(true)}
+        />
+    )}
 
     <CreateAccountModal 
       isOpen={isCreateAccountModalOpen} 
@@ -133,10 +135,10 @@ const ManageAccountsPage = () => {
       onClose={() => setIsEditAccountModalOpen(false)}
       selectedAccount={selectedAccount}
       filterOptions={filterOptions}
-      updateDetails={updateDetails}
+      updateAccount={updateAccount}
     />
 
-    <div className="flex justify-end">
+    <div className="flex justify-end mt-4">
       <Button
         variant={selectedAccount ? "default" : "ghost"}
         disabled={!selectedAccount}

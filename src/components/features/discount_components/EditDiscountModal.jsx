@@ -17,7 +17,6 @@ const getDiscountFormData = (discount) => {
     };
   }
 
-  // Handle case where discountPercent in DB is decimal representation (0.12 -> 12)
   const percentVal = discount.discountPercent 
     ? (discount.discountPercent > 0 && discount.discountPercent <= 1 
         ? discount.discountPercent * 100 

@@ -1,6 +1,6 @@
-
 import { useAuth } from "@/auth/UseAuth";
 import { requestColumns } from "@/components/features/request_components/RequestColumns";
+import RequestTableSkeleton from "@/components/loaders/RequestTableSkeleton";
 import { FilterDropDown, SearchBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
@@ -73,8 +73,8 @@ const RequestPage = () => {
         <div className="flex justify-between items-end mb-6">
 
             <div>
-                <h1 className="text-3xl font-bold text-custom-black mb-1 leading-none tracking-tight">Requests</h1>
-                <p className="text-foreground text-sm">View and manage inventory transfer requests</p>
+                <h1 className="text-3xl font-bold text-foreground mb-1 leading-none tracking-tight">Requests</h1>
+                <p className="text-muted-foreground text-sm">View and manage inventory transfer requests</p>
             </div>
 
                 <Button 
@@ -132,22 +132,27 @@ const RequestPage = () => {
 
         </div>
 
-            <DataTable 
-                columns={requestColumns}
-                data={requests}
-                keyField="requestId"
-                asyncState={asyncState}
-                pagination={pagination}
-                filter={filter}
-                updateFilter={updateFilter}
-                selectedItem={selectedRequest}
-                onRowClick={handleRowClick}
-                onRowDoubleClick={(row) => {
-                    handleRowClick(row);
-                    handleViewRequest(row);
-                }}
-            />
-        <div className="flex justify-end">
+            {asyncState?.isLoading ? (
+                <RequestTableSkeleton rowCount={10} />
+            ) : (
+                <DataTable 
+                    columns={requestColumns}
+                    data={requests}
+                    keyField="requestId"
+                    asyncState={asyncState}
+                    pagination={pagination}
+                    filter={filter}
+                    updateFilter={updateFilter}
+                    selectedItem={selectedRequest}
+                    onRowClick={handleRowClick}
+                    onRowDoubleClick={(row) => {
+                        handleRowClick(row);
+                        handleViewRequest(row);
+                    }}
+                />
+            )}
+            
+        <div className="flex justify-end mt-4">
             <Button
                 variant={selectedRequest ? "default" : "ghost"}
                 disabled={!selectedRequest}
@@ -159,7 +164,7 @@ const RequestPage = () => {
         </div>
         
         </div>
-  );
+    );
 };
 
 export default RequestPage;

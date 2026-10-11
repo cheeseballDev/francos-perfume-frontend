@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Loader2 } from "lucide-react"; // ADDED: Import for the loading spinner
 
 const DataTable = ({
         columns = [],
@@ -25,7 +26,8 @@ const DataTable = ({
         const hasData = Array.isArray(data) && data.length > 0;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col mb-4">
+    // FIXED: Replaced bg-white and border-gray-200 with semantic bg-card and border-border
+    <div className="bg-card border border-border rounded-lg shadow-sm flex flex-col mb-4">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -43,18 +45,23 @@ const DataTable = ({
           <TableBody>
             {isLoading ? (
               <TableRow>
+                {/* FIXED: Replaced text-custom-gray and added flex container for the spinner */}
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-10 text-custom-gray"
+                  className="text-center py-10 text-muted-foreground"
                 >
-                  Loading data...
+                  <div className="flex flex-col items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary mb-2" />
+                    <span>Loading data...</span>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : !hasData ? (
               <TableRow>
+                {/* FIXED: Replaced text-custom-gray with text-muted-foreground */}
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-10 text-custom-gray font-medium"
+                  className="text-center py-10 text-muted-foreground font-medium"
                 >
                   {emptyMessage}
                 </TableCell>
@@ -67,19 +74,21 @@ const DataTable = ({
                       key={row[keyField]}
                       onClick={() => onRowClick && onRowClick(row)}
                       onDoubleClick={() => onRowDoubleClick && onRowDoubleClick(row)}
+                      // FIXED: Replaced hardcoded hover:bg-slate-50 and bg-blue-200 with semantic hover:bg-muted and bg-primary/20
                       className={`transition-colors ${
-                        onRowClick || onRowDoubleClick ? "hover: cursor-pointer" : ""
+                        onRowClick || onRowDoubleClick ? "hover:cursor-pointer" : ""
                       } 
                       ${
                         isSelected
-                          ? "bg-blue-200! hover:bg-blue-200!"
-                          : "hover:bg-slate-50"
+                          ? "bg-primary/20 hover:bg-primary/30"
+                          : "hover:bg-muted"
                       }`}
                     >
                     {columns.map((col, idx) => (
                       <TableCell
                         key={col.key || col.accessorKey || idx}
-                        className={col.className || "text-custom-gray"}
+                        // FIXED: Replaced text-custom-gray with text-muted-foreground
+                        className={col.className || "text-muted-foreground"}
                       >
                         {col.render ? col.render(row) : row[col.accessorKey]}
                       </TableCell>

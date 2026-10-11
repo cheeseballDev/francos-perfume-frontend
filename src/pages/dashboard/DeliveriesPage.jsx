@@ -1,5 +1,6 @@
 import { useAuth } from "@/auth/UseAuth";
 import DeliveryCard from "@/components/features/delivery_components/DeliveryCard";
+import DeliverySkeletonList from "@/components/loaders/DeliverySkeletonList";
 import { FilterDropDown } from "@/components/shared";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import PaginationBar from "@/components/shared/PaginationBar";
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { cancelDelivery, dispatchDelivery, receiveDelivery } from "@/services/DeliveryService";
 import { ArrowDownLeft, ArrowUpRight, Clock, ListFilter } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 const DeliveriesPage = () => {
@@ -28,8 +29,15 @@ const DeliveriesPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [config, setConfig] = useState(null);
 
-    const activeTab = searchParams.get("direction") || "FOR_DISPATCH";
+    // Extract active tab and search query directly from URL state
+    const activeTab = searchParams.get("direction") || "";
+    const searchQuery = searchParams.get("search") || "";
 
+    // Sync URL parameters with the backend filter hook
+    useEffect(() => {
+        updateFilter('direction', activeTab);
+        updateFilter('search', searchQuery);
+    }, [activeTab, searchQuery]);
 
     const handleTabChange = (direction) => {
              setSearchParams(prev => {
@@ -50,7 +58,6 @@ const DeliveriesPage = () => {
         updateFilter("search", query);
     };
 
-
     const handleMarkInTransit = (deliveryId) => {
         setConfig({
             title: "Mark as In Transit?",
@@ -60,10 +67,18 @@ const DeliveriesPage = () => {
                 try {
                     await dispatchDelivery(deliveryId);
                     fetchDeliveries();
+                    setConfig(null);
                 } catch (err) {
                     console.error("Failed to mark as in transit:", err);
+                    setConfig({
+                        isAlert: true,
+                        title: "Action Failed",
+                        description: err.message || "Failed to mark as in transit.",
+                        confirmVariant: "destructive",
+                        confirmText: "Acknowledge",
+                        onConfirm: () => setConfig(null) 
+                    });
                 }
-                setConfig(null);
             },
             onCancel: () => setConfig(null),
         });
@@ -78,10 +93,18 @@ const DeliveriesPage = () => {
                 try {
                     await cancelDelivery(deliveryId);
                     fetchDeliveries();
+                    setConfig(null);
                 } catch (err) {
                     console.error("Failed to cancel delivery:", err);
+                    setConfig({
+                        isAlert: true,
+                        title: "Action Failed",
+                        description: err.message || "Failed to cancel the delivery request.",
+                        confirmVariant: "destructive",
+                        confirmText: "Acknowledge",
+                        onConfirm: () => setConfig(null) 
+                    });
                 }
-                setConfig(null);
             },
             onCancel: () => setConfig(null),
         });
@@ -96,10 +119,18 @@ const DeliveriesPage = () => {
                 try {
                     await receiveDelivery(deliveryId, { accepted: true });
                     fetchDeliveries();
+                    setConfig(null);
                 } catch (err) {
                     console.error("Failed to accept delivery:", err);
+                    setConfig({
+                        isAlert: true,
+                        title: "Action Failed",
+                        description: err.message || "Failed to accept the delivery request.",
+                        confirmVariant: "destructive",
+                        confirmText: "Acknowledge",
+                        onConfirm: () => setConfig(null) 
+                    });
                 }
-                setConfig(null);
             },
             onCancel: () => setConfig(null),
         });
@@ -114,10 +145,18 @@ const DeliveriesPage = () => {
                 try {
                     await receiveDelivery(deliveryId, { accepted: false });
                     fetchDeliveries();
+                    setConfig(null);
                 } catch (err) {
                     console.error("Failed to reject delivery:", err);
+                    setConfig({
+                        isAlert: true,
+                        title: "Action Failed",
+                        description: err.message || "Failed to reject the delivery request.",
+                        confirmVariant: "destructive",
+                        confirmText: "Acknowledge",
+                        onConfirm: () => setConfig(null) 
+                    });
                 }
-                setConfig(null);
             },
             onCancel: () => setConfig(null),
         });
@@ -132,10 +171,18 @@ const DeliveriesPage = () => {
                 try {
                     await receiveDelivery(deliveryId, { received: true });
                     fetchDeliveries();
+                    setConfig(null);
                 } catch (err) {
                     console.error("Failed to confirm delivery:", err);
+                    setConfig({
+                        isAlert: true,
+                        title: "Action Failed",
+                        description: err.message || "Failed to confirm the delivery.",
+                        confirmVariant: "destructive",
+                        confirmText: "Acknowledge",
+                        onConfirm: () => setConfig(null) 
+                    });
                 }
-                setConfig(null);
             },
             onCancel: () => setConfig(null),
         });
@@ -144,7 +191,7 @@ const DeliveriesPage = () => {
     return (
         <div className="flex flex-col h-full animate-fade-in font-montserrat overflow-y-auto">
             <div className="mb-6">
-                <h1 className="text-3xl font-bold text-custom-black tracking-tight leading-none mb-1">
+                <h1 className="text-3xl font-bold text-foreground tracking-tight leading-none mb-1">
                     Deliveries
                 </h1>
                 <p className="text-muted-foreground text-sm">Manage transfer deliveries</p>
@@ -209,7 +256,7 @@ const DeliveriesPage = () => {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="w-full sm:max-w-xl">
                         <SearchBar
-                            value={filter.search}
+                            value={searchQuery}
                             onChange={handleSearchChange}
                         />
                     </div>
@@ -226,9 +273,7 @@ const DeliveriesPage = () => {
 
             <div className="space-y-4">
                 {asyncState.isLoading ? (
-                    <div className="text-center py-16 text-muted-foreground">
-                        Loading deliveries...
-                    </div>
+                    <DeliverySkeletonList rowCount={4} />
                 ) : deliveries.length === 0 ? (
                     <div className="text-center py-16 text-muted-foreground">
                         No deliveries found.

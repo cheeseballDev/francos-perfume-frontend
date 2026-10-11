@@ -24,7 +24,7 @@ const ProductSelector = ({
     const displayQty = isWarehouse ? '99' : (availableQty ?? '--');
 
     return (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-foreground mb-4">Select Products to Request</h2>
             
             <div className="flex items-end gap-4 mb-4">
@@ -46,7 +46,6 @@ const ProductSelector = ({
                     </p>
                 </div>
 
-                {/* Qty Controls */}
                 <div className="text-center">
                     <p className="text-xs text-muted-foreground mb-1">Qty to Request</p>
                     <div className="flex items-center gap-2">
@@ -65,7 +64,7 @@ const ProductSelector = ({
                                 const val = Number(e.target.value);
                                 setQuantity(isWarehouse ? Math.max(1, val) : Math.min(maxQty, Math.max(1, val)));
                             }}
-                            className="w-14 text-center border border-gray-300 rounded-md p-1 text-sm font-bold"
+                            className="w-14 text-center border border-input bg-transparent text-foreground rounded-md p-1 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ring"
                             min={1}
                             max={isWarehouse ? undefined : availableQty}
                         />
@@ -84,7 +83,7 @@ const ProductSelector = ({
             </div>
 
             <Button
-                className="w-full bg-custom-primary text-custom-black hover:bg-custom-primary-50-opacity"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={handleAddProduct}
                 disabled={!selectedProduct}
             >

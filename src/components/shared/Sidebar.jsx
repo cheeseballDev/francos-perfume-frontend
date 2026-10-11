@@ -1,26 +1,24 @@
 import { useAuth } from "@/auth/UseAuth";
 import {
-    Archive,
-    Barcode,
-    Boxes,
-    ChartNoAxesCombined,
-    FileClock,
-    HandHelping,
-    LayoutDashboard,
-    Logs,
-    ShoppingBag,
-    Tag,
-    Truck,
-    UserPen
+  Archive,
+  Barcode,
+  Boxes,
+  ChartNoAxesCombined,
+  FileClock,
+  HandHelping,
+  LayoutDashboard,
+  Logs,
+  ShoppingBag,
+  Tag,
+  Truck,
+  UserPen
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/FrancoPerfumeLogo.png";
 
 const SideBar = () => {
   const location = useLocation();
-
   const { user } = useAuth();
-
   const companyPictureAlt = "Franco's Logo";
   
   const normalizedRole = user?.trueRole || "";
@@ -39,22 +37,28 @@ const SideBar = () => {
     ? location.pathname === "/home" 
     : isActive;
 
+    // FIXED: Replaced custom colors with semantic background, foreground, and primary variables
     return `flex items-center w-full gap-2 cursor-pointer p-5 transition-colors duration-300
     ${isActuallyActive
-      ? "bg-custom-primary/20 text-custom-white border-r-4 border-custom-primary"
-      : "hover:bg-white/10 text-custom-gray"
+      ? "bg-primary/20 text-foreground border-r-4 border-primary"
+      : "hover:bg-muted text-muted-foreground hover:text-foreground"
     }`;
   };
 
   return (
-    <div className="w-64 bg-custom-black text-custom-white flex flex-col z-20 shrink-0 h-full">
-      <div className="py-6 px-6 border-b border-white/10 flex flex-col items-center justify-center ">
+    // FIXED: Replaced bg-custom-black with bg-sidebar/bg-card, added border-r to separate from main content
+    <div className="w-64 bg-card border-r border-border text-card-foreground flex flex-col z-20 shrink-0 h-full">
+      
+      {/* FIXED: Replaced border-white/10 with standard border-border */}
+      <div className="py-6 px-6 border-b border-border flex flex-col items-center justify-center">
+        {/* FIXED: Added max-w-[160px] to physically stop the logo from blowing up the layout */}
         <img
           src={logo}
           alt={companyPictureAlt}
-          className="h-24 w-auto object-contain mb-6"
+          className="h-24 w-auto max-w-[160px] object-contain mb-6"
         />
-        <span className="text-sm tracking-widest text-custom-gray font-semibold uppercase">
+        {/* FIXED: Replaced text-custom-gray with text-muted-foreground */}
+        <span className="text-sm tracking-widest text-muted-foreground font-semibold uppercase">
           Main Menu
         </span>
       </div>

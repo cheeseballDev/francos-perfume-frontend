@@ -3,7 +3,7 @@ import { ProductCard } from "./ProductCard";
 const ProductGrid = ({ products = [], isOwner, openEditModal }) => {
   if (products.length === 0) {
     return (
-      <div className="text-center py-20 text-foreground bg-white rounded-xl border border-gray-200 shadow-sm flex-1">
+      <div className="text-center py-20 text-muted-foreground bg-card rounded-xl border border-border shadow-sm flex-1">
         No products found matching your filters.
       </div>
     );

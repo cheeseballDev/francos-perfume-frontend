@@ -7,7 +7,7 @@ export const transactionColumns = [
     },
     {
         header: "Sales Order ID",
-        accessorKey: "salesOrderId"
+        accessorKey: "salesOrderDisplayId"
     },
     {
         header: "Perfume Sold",
@@ -22,7 +22,8 @@ export const transactionColumns = [
         header: "Amount",
         render: (row) => {
             return (
-                <span className="text-custom-green">
+                // FIXED: Replaced text-custom-green with text-emerald-500
+                <span className="text-emerald-500">
                     ₱ {Math.abs(row.amount ?? 0).toLocaleString()}
                 </span>
             )
