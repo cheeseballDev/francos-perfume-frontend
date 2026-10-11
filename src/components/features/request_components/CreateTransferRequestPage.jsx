@@ -71,7 +71,7 @@ const CreateTransferRequestPage = () => {
                 availableQty: p.productQty || 0,
             })));
         });
-    }, [data.fromBranch]);
+    }, [data.fromBranch, fetchRequestFilters]);
 
     const handleAddProduct = () => {
     if (!selectedProduct) return;
@@ -138,8 +138,8 @@ const CreateTransferRequestPage = () => {
     const executeSubmission = async () => {
         setIsSubmitting(true);
         try {
-            const fromBranchStr = branchOptions.find(b => b.value === data.fromBranch)?.label;
-            const toBranchStr = branchOptions.find(b => b.value === data.toBranch)?.label;
+            const fromBranchStr = branchOptions.find(b => b.value === data.fromBranch)?.label || "";
+            const toBranchStr = branchOptions.find(b => b.value === data.toBranch)?.label || "";
 
             const payload = {
                 fromBranch: fromBranchStr,

@@ -1,13 +1,15 @@
 import {
-    AlertTriangle,
-    BarChart2,
-    ChevronDown,
-    ChevronsUp,
-    Eye,
-    FileUp,
-    TrendingDown,
-    TrendingUp,
-    X,
+  AlertTriangle,
+  BarChart2,
+  ChevronDown,
+  ChevronsUp,
+  Eye,
+  FileUp,
+  TrendingDown,
+  TrendingUp,
+  Sparkles,
+  X,
+  Package,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -18,85 +20,21 @@ import { Separator } from "@/components/ui/separator";
 import StatusCard from "../../components/shared/StatusCard";
 import { useForecast } from "@/hooks/forecast_hooks/useForecast";
 
-const DEFAULT_CHART_DATA = [
-  { month: "Oct '24", value: 28500, upper: 35625, lower: 22800, isActual: true  },
-  { month: "Nov '24", value: 31200, upper: 39000, lower: 24960, isActual: true  },
-  { month: "Dec '24", value: 45800, upper: 57250, lower: 36640, isActual: true  },
-  { month: "Jan '25", value: 22100, upper: 27625, lower: 17680, isActual: true  },
-  { month: "Feb '25", value: 27400, upper: 34250, lower: 21920, isActual: true  },
-  { month: "Mar '25", value: 31000, upper: 38750, lower: 24800, isActual: true  },
-  { month: "Apr '25", value: 34200, upper: 42750, lower: 27360, isActual: false },
-  { month: "May '25", value: 37800, upper: 47250, lower: 30240, isActual: false },
+const MONTHS = [
+  { value: 1, label: "January" }, { value: 2, label: "February" },
+  { value: 3, label: "March" }, { value: 4, label: "April" },
+  { value: 5, label: "May" }, { value: 6, label: "June" },
+  { value: 7, label: "July" }, { value: 8, label: "August" },
+  { value: 9, label: "September" }, { value: 10, label: "October" },
+  { value: 11, label: "November" }, { value: 12, label: "December" }
 ];
-
-const DEFAULT_PERFUME_FORECASTS = [
-  { id: "01", name: "Apricot Premium", trend: "up",   currentStock: 123, predictedDemand: 250, change:  127, confidence: 77 },
-  { id: "02", name: "Rose Classic",    trend: "down", currentStock: 200, predictedDemand: 150, change: -100, confidence: 77 },
-  { id: "03", name: "Midnight Wood",   trend: "up",   currentStock:  80, predictedDemand: 180, change:  100, confidence: 65 },
-  { id: "04", name: "Ocean Breeze",    trend: "up",   currentStock: 150, predictedDemand: 200, change:   50, confidence: 82 },
-  { id: "05", name: "Velvet Rose",     trend: "down", currentStock: 300, predictedDemand: 100, change: -200, confidence: 71 },
-];
-
-const DEFAULT_METRIC_CARDS = [
-  { title: "Forecast Accuracy",       mainValue: "69.67%", secondValue: "+12%",            subText: " from last period", Icon: TrendingUp,  color: "text-emerald-500"  },
-  { title: "Predicted Growth",        mainValue: "+18.42%",                                subText: "Expected over 6 months", Icon: BarChart2,   color: "text-purple-500" },
-  { title: "High Confidence Items",   mainValue: 12,        secondValue: "87%",            subText: " prediction accuracy",   Icon: ChevronsUp,  color: "text-blue-500"   },
-  { title: "Restock Alerts",          mainValue: 3,         secondValue: "Requires attention",                            Icon: AlertTriangle, color: "text-amber-500" },
-];
+const currentYear = new Date().getFullYear();
+const YEARS = [currentYear, currentYear + 1, currentYear + 2];
 
 const aiInsights = [
-  { title: "High Demand Expected",       description: "Apricot Perfume expected to increase by 12% in 2 months", Icon: TrendingUp,   bg: "bg-emerald-100 dark:bg-emerald-500/10",  border: "border-emerald-200 dark:border-emerald-500/20",  iconColor: "text-emerald-600 dark:text-emerald-400"  },
-  { title: "Stock Level Shortage Warning", description: "Apricot Perfume may run out of stock by May",          Icon: AlertTriangle, bg: "bg-amber-100 dark:bg-amber-500/10", border: "border-amber-200 dark:border-amber-500/20", iconColor: "text-amber-600 dark:text-amber-400" },
-  { title: "Pattern Detected",            description: "Rose Classic shows 15% increase during spring months",   Icon: Eye,          bg: "bg-blue-100 dark:bg-blue-500/10", border: "border-blue-200 dark:border-blue-500/20", iconColor: "text-blue-600 dark:text-blue-400"   },
-  { title: "Declining Interest",          description: "Rose Classic showing downward trend",                    Icon: TrendingDown, bg: "bg-red-100 dark:bg-red-500/10",    border: "border-red-200 dark:border-red-500/20",    iconColor: "text-red-600 dark:text-red-400"    },
+  { title: "High Demand Expected",       description: "AI detects potential stockout risks based on historical patterns", Icon: TrendingUp,   bg: "bg-emerald-100 dark:bg-emerald-500/10",  border: "border-emerald-200 dark:border-emerald-500/20",  iconColor: "text-emerald-600 dark:text-emerald-400"  },
+  { title: "Seasonal Pattern Detected",  description: "Revenue fluctuations align with standard retail holiday cycles",   Icon: Eye,          bg: "bg-blue-100 dark:bg-blue-500/10", border: "border-blue-200 dark:border-blue-500/20", iconColor: "text-blue-600 dark:text-blue-400"   },
 ];
-
-const parseCSV = (text) => {
-  const lines   = text.trim().split("\n");
-  const headers = lines[0].split(",").map((h) => h.trim());
-  return lines.slice(1).map((line) => {
-    const values = line.split(",").map((v) => v.trim());
-    return Object.fromEntries(headers.map((h, i) => [h, values[i] ?? ""]));
-  });
-};
-
-const aggregateByMonth = (rows) => {
-  const monthMap = new Map();
-  rows.forEach((row) => {
-    const month   = row.month       || "Unknown";
-    const revenue = parseFloat(row.revenue) || 0;
-    monthMap.set(month, (monthMap.get(month) || 0) + revenue);
-  });
-
-  const months = Array.from(monthMap.entries());
-
-  return months.map(([month, total], index) => ({
-    month,
-    value: total,
-    upper: Math.round(total * 1.25),
-    lower: Math.round(total * 0.80),
-    isActual: index < months.length - 1, 
-  }));
-};
-
-const extractPerProduct = (rows) => {
-  const productMap = new Map();
-  rows.forEach((row) => {
-    const name  = row.product_name || "Unknown";
-    const units = parseInt(row.units_sold, 10) || 0;
-    productMap.set(name, (productMap.get(name) || 0) + units);
-  });
-
-  return Array.from(productMap.entries()).map(([name, totalUnits], i) => ({
-    id:              String(i + 1).padStart(2, "0"),
-    name,
-    trend:           totalUnits > 100 ? "up" : "down",
-    currentStock:    0,
-    predictedDemand: totalUnits,
-    change:          totalUnits,
-    confidence:      70,
-  }));
-};
 
 const ForecastChart = ({ data }) => {
   const W  = 900; const H  = 300;
@@ -104,11 +42,19 @@ const ForecastChart = ({ data }) => {
   const cW = W - PL - PR;
   const cH = H - PT - PB;
 
-  const maxVal  = Math.max(...data.map((d) => d.upper));
+  if (!data || data.length === 0) {
+      return (
+          <div className="w-full h-[300px] flex items-center justify-center text-muted-foreground border-2 border-dashed border-border rounded-lg">
+              No chart data available. Generate a forecast.
+          </div>
+      );
+  }
+
+  const maxVal  = Math.max(...data.map((d) => d.upper || 0), 1000);
   const MAX_Y   = Math.ceil(maxVal / 10000) * 10000 || 60000;
   const Y_TICKS = Array.from({ length: 5 }, (_, i) => Math.round((MAX_Y / 4) * i));
 
-  const n    = data.length;
+  const n    = Math.max(data.length, 2);
   const toY  = (val) => PT + (1 - val / MAX_Y) * cH;
   const toX  = (i)   => PL + (i / (n - 1)) * cW;
   const pts  = (acc) => data.map((d, i) => ({ x: toX(i), y: toY(acc(d)) }));
@@ -130,76 +76,72 @@ const ForecastChart = ({ data }) => {
     return d;
   };
 
-  const upperPts = pts((d) => d.upper);
-  const lowerPts = pts((d) => d.lower);
+  const upperPts = pts((d) => d.upper || 0);
+  const lowerPts = pts((d) => d.lower || 0);
   const bandPath =
-    catmullRomPath(upperPts) +
-    " L " + lowerPts[lowerPts.length - 1].x + "," + lowerPts[lowerPts.length - 1].y +
-    " " + catmullRomPath([...lowerPts].reverse()).replace(/^M [^ ]+ /, "L ") +
-    " Z";
+    upperPts.length > 1 && lowerPts.length > 1
+      ? catmullRomPath(upperPts) +
+        " L " + lowerPts[lowerPts.length - 1].x + "," + lowerPts[lowerPts.length - 1].y +
+        " " + catmullRomPath([...lowerPts].reverse()).replace(/^M [^ ]+ /, "L ") +
+        " Z"
+      : "";
 
-  const linePath       = catmullRomPath(pts((d) => d.value));
+  const linePath       = catmullRomPath(pts((d) => d.value || 0));
   const lastActualIdx  = data.reduce((acc, d, i) => (d.isActual ? i : acc), -1);
 
   const fmtY = (v) => v >= 1000 ? `₱${(v / 1000).toFixed(0)}k` : `₱${v}`;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Sales Forecast Chart">
-      {Y_TICKS.map((tick) => (
-        <g key={tick}>
-          <line x1={PL} y1={toY(tick)} x2={W - PR} y2={toY(tick)} stroke="currentColor" className="text-border" strokeWidth="1" />
-          <text x={PL - 8} y={toY(tick)} textAnchor="end" dominantBaseline="middle" fontSize="11" fill="currentColor" className="text-muted-foreground">
-            {fmtY(tick)}
+    <div className="w-full overflow-x-auto">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[650px] h-auto" role="img">
+        {Y_TICKS.map((tick) => (
+          <g key={tick}>
+            <line x1={PL} y1={toY(tick)} x2={W - PR} y2={toY(tick)} stroke="currentColor" className="text-border" strokeWidth="1" />
+            <text x={PL - 8} y={toY(tick)} textAnchor="end" dominantBaseline="middle" fontSize="11" fill="currentColor" className="text-muted-foreground">
+              {fmtY(tick)}
+            </text>
+          </g>
+        ))}
+
+        {data.map((d, i) => (
+          <text key={d.month || i} x={toX(i)} y={H - 8} textAnchor="middle" fontSize="11" fill="currentColor" className="text-muted-foreground">
+            {d.month}
           </text>
-        </g>
-      ))}
+        ))}
 
-      {data.map((d, i) => (
-        <text key={d.month} x={toX(i)} y={H - 8} textAnchor="middle" fontSize="11" fill="currentColor" className="text-muted-foreground">
-          {d.month}
-        </text>
-      ))}
+        {bandPath && <path d={bandPath} className="fill-primary/20" />}
+        {linePath && <path d={linePath} fill="none" stroke="currentColor" className="text-primary" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />}
 
-      <path d={bandPath} className="fill-primary/20" />
-
-      <path d={linePath} fill="none" stroke="currentColor" className="text-primary" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-
-      {data.filter((d) => !d.isActual).map((d) => {
-        const idx = data.indexOf(d);
-        const cx = toX(idx); const cy = toY(d.value); const s = 5;
-        return <polygon key={d.month} points={`${cx},${cy-s} ${cx+s},${cy} ${cx},${cy+s} ${cx-s},${cy}`} fill="currentColor" stroke="currentColor" strokeWidth="1.5" className="text-primary stroke-background" />;
-      })}
-
-      {lastActualIdx >= 0 && (() => {
-        const cx = toX(lastActualIdx); const cy = toY(data[lastActualIdx].value); const s = 5;
-        return <polygon points={`${cx},${cy-s} ${cx+s},${cy} ${cx},${cy+s} ${cx-s},${cy}`} fill="currentColor" stroke="currentColor" strokeWidth="1.5" className="text-primary stroke-background" />;
-      })()}
-    </svg>
+        {data.map((d, idx) => {
+          const arrIdx = data.indexOf(d);
+          const cx = toX(arrIdx); const cy = toY(d.value || 0); const s = 5;
+          return <polygon key={idx} points={`${cx},${cy-s} ${cx+s},${cy} ${cx},${cy+s} ${cx-s},${cy}`} fill="currentColor" stroke="currentColor" strokeWidth="1.5" className="text-primary stroke-background" />;
+        })}
+      </svg>
+    </div>
   );
 };
 
 const ForecastPage = () => {
-  const { forecastData, asyncState, fetchForecast } = useForecast();
+  const { forecastData, asyncState, fetchForecast, branchOptions, productOptions } = useForecast();
 
-  const [chartData, setChartData]               = useState(DEFAULT_CHART_DATA);
-  const [perfumeForecasts, setPerfumeForecasts] = useState(DEFAULT_PERFUME_FORECASTS);
-  const [showAll, setShowAll]                   = useState(false);
-
-  const [importedFile, setImportedFile]   = useState(null);
-  const [parseError, setParseError]       = useState(null);
-  const [isUsingDemo, setIsUsingDemo]     = useState(true);
-  const [csvSummary, setCsvSummary]       = useState(null);
-
-  const fileInputRef = useRef(null);
-
-  const visiblePerfumes = showAll ? perfumeForecasts : perfumeForecasts.slice(0, 2);
+  const [chartData, setChartData]               = useState([]);
+  const [perfumeForecasts, setPerfumeForecasts] = useState([]);
+  
+  const [formData, setFormData] = useState({
+    branchId: "",
+    productId: "",
+    month: new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2,
+    year: new Date().getMonth() + 2 > 12 ? new Date().getFullYear() + 1 : new Date().getFullYear(),
+  });
 
   const handleRefreshForecast = () => {
-    const now = new Date();
+    if (!formData.branchId || !formData.productId) return;
     fetchForecast({
-      year: now.getFullYear(),
-      month: now.getMonth() + 1, 
-      productId: 0,
+      year: Number(formData.year),
+      month: Number(formData.month), 
+      productId: Number(formData.productId),
+      branchId: Number(formData.branchId),
       discountPercent: 0,
       discountAmount: 0,
       hasDiscount: false,
@@ -207,175 +149,205 @@ const ForecastPage = () => {
     });
   };
 
+  // Wire raw API DTO data directly to the UI components with zero frontend calculations
   useEffect(() => {
-    const revenue = forecastData?.revenue;
-    if (!revenue) return;
-    const incoming = Array.isArray(revenue) ? revenue : revenue.data;
-    if (Array.isArray(incoming) && incoming.length > 0) {
-      setChartData(incoming);
-    }
-  }, [forecastData]);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setParseError(null);
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      try {
-        const text = event.target.result;
-        const rows = parseCSV(text);
-
-        if (rows.length === 0) throw new Error("CSV file is empty");
-
-        const requiredCols = ["month", "product_name", "units_sold", "revenue"];
-        const missingCols  = requiredCols.filter((col) => !(col in rows[0]));
-        if (missingCols.length > 0)
-          throw new Error(`Missing columns: ${missingCols.join(", ")}`);
-
-        const newChartData      = aggregateByMonth(rows);
-        const newPerfumes       = extractPerProduct(rows);
-        const uniqueMonths      = new Set(rows.map((r) => r.month)).size;
-        const uniqueProducts    = new Set(rows.map((r) => r.product_name)).size;
-
-        setChartData(newChartData);
-        setPerfumeForecasts(newPerfumes);
-        setImportedFile(file);
-        setIsUsingDemo(false);
-        setCsvSummary({ months: uniqueMonths, rows: rows.length, products: uniqueProducts });
-
-      } catch (err) {
-        setParseError(err.message);
-        if (fileInputRef.current) fileInputRef.current.value = "";
+    if (forecastData) {
+      
+      // 1. Pass raw revenue DTO to chart
+      if (forecastData.revenue) {
+        const rev = forecastData.revenue;
+        const monthLabel = MONTHS.find(m => m.value === Number(formData.month))?.label.substring(0, 3);
+        const yearLabel = String(formData.year).substring(2);
+        
+        setChartData([
+          {
+            month: `${monthLabel} '${yearLabel}`,
+            value: rev.expectedRevenue,
+            upper: rev.highestRevenue,
+            lower: rev.lowestRevenue,
+            isActual: false
+          }
+        ]);
       }
-    };
 
-    reader.readAsText(file); 
-  };
+      // 2. Pass raw StockForecast DTO properties directly to the list
+      if (forecastData.stocks) {
+        const st = forecastData.stocks;
+        
+        setPerfumeForecasts([{
+          id: st.productId?.toString() || "1",
+          name: st.productName,
+          trend: st.recommendedOrderQuantity > 0 ? "up" : "down",
+          currentStock: st.currentStock,
+          predictedDemand: st.predictedUnitsSold,
+          change: st.recommendedOrderQuantity, // Direct mapping from C# model
+          confidence: null // No confidence score provided by backend
+        }]);
+      }
+    }
+  }, [forecastData, formData.month, formData.year]);
 
-  const handleClearImport = () => {
-    setChartData(DEFAULT_CHART_DATA);
-    setPerfumeForecasts(DEFAULT_PERFUME_FORECASTS);
-    setImportedFile(null);
-    setIsUsingDemo(true);
-    setCsvSummary(null);
-    setParseError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+  // Display raw values in metric cards
+  const dynamicMetrics = [
+    { 
+      title: "Expected Revenue", 
+      mainValue: forecastData?.revenue ? `₱${forecastData.revenue.expectedRevenue.toLocaleString()}` : "---", 
+      subText: "For selected month", 
+      Icon: TrendingUp,  
+      color: "text-emerald-500"  
+    },
+    { 
+      title: "Predicted Demand", 
+      mainValue: forecastData?.stocks ? forecastData.stocks.predictedUnitsSold : "---", 
+      subText: "Units expected to sell", 
+      Icon: BarChart2,   
+      color: "text-blue-500" 
+    },
+    { 
+      title: "Current Inventory", 
+      mainValue: forecastData?.stocks ? forecastData.stocks.currentStock : "---", 
+      subText: "Units currently on hand", 
+      Icon: Package,  
+      color: "text-purple-500"   
+    },
+    { 
+      title: "Restock Recommendation", 
+      mainValue: forecastData?.stocks ? forecastData.stocks.recommendedOrderQuantity : "---", 
+      subText: forecastData?.stocks?.recommendedOrderQuantity > 0 ? "Order required" : "Stock sufficient", 
+      Icon: AlertTriangle, 
+      color: forecastData?.stocks?.recommendedOrderQuantity > 0 ? "text-amber-500" : "text-emerald-500" 
+    },
+  ];
 
   return (
-    <div className="flex flex-col h-full animate-fade-in">
-      <h1 className="text-[32px] font-bold text-foreground mb-2 leading-none tracking-tight">
-        Sales Forecast
-      </h1>
-      <p className="text-muted-foreground text-sm mb-4">
-        Predictive analytics and trend analysis for inventory planning
-      </p>
+    <div className="flex flex-col h-full w-full overflow-y-auto pr-1 pb-16 font-montserrat animate-fade-in">
+      <div className="mb-6 shrink-0">
+        <h1 className="text-3xl font-bold text-foreground mb-1 leading-none tracking-tight">
+          Sales Forecast
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Predictive analytics and trend analysis for inventory planning
+        </p>
+      </div>
 
       {asyncState.isLoading && (
-        <div className="mb-6 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg text-xs text-primary">
-          Loading forecast from /api/Forecasting...
+        <div className="mb-6 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg text-xs text-primary shrink-0">
+          Loading forecast data...
         </div>
       )}
       {asyncState.error && (
-        <div className="mb-6 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg text-xs text-destructive flex items-center gap-2">
+        <div className="mb-6 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg text-xs text-destructive flex items-center gap-2 shrink-0">
           <AlertTriangle size={13} />
           <span>
-            <strong>Forecast API error:</strong> {asyncState.error?.message || "Unknown error"}.
-            Showing sample data below.
+            <strong>Forecast API message:</strong> {asyncState.error?.message || "Check network/parameters."}
           </span>
         </div>
       )}
 
-      <Card className="mb-6 border-border bg-card text-card-foreground">
-        <CardContent className="pt-5 pb-5">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <FileUp size={18} className={isUsingDemo ? "text-muted-foreground" : "text-primary"} />
-              <div>
-                <p className="text-sm font-semibold text-foreground leading-none mb-0.5">
-                  {isUsingDemo ? "Using sample data" : `Loaded: ${importedFile?.name}`}
-                </p>
-                {isUsingDemo ? (
-                  <p className="text-xs text-muted-foreground">
-                    Import a CSV file to visualize your real sales data
-                  </p>
-                ) : (
-                  <p className="text-xs text-primary">
-                    {csvSummary?.rows} rows · {csvSummary?.months} months · {csvSummary?.products} products
-                  </p>
-                )}
-              </div>
+      {/* Forecasting Parameter Card */}
+      <Card className="mb-6 border-border bg-card text-card-foreground shadow-sm shrink-0">
+        <CardHeader className="pb-3 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Sparkles className="text-emerald-500" size={20} />
+            <CardTitle className="text-base text-foreground">AI Forecasting Engine</CardTitle>
+          </div>
+          <CardDescription>Select parameters to query ML.NET and Gemini AI predictions</CardDescription>
+        </CardHeader>
+        
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 items-end mb-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-muted-foreground">Branch</label>
+              <select 
+                className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary"
+                value={formData.branchId}
+                onChange={(e) => setFormData(prev => ({ ...prev, branchId: e.target.value }))}
+              >
+                <option value="">Select Branch</option>
+                {branchOptions?.map(b => (
+                  <option key={b.value} value={b.value}>{b.label}</option>
+                ))}
+              </select>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="hidden lg:block text-xs text-muted-foreground border border-border rounded-lg px-3 py-2 font-mono">
-                month, product_name, units_sold, revenue
-              </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                className="border-border text-muted-foreground hover:text-foreground gap-2"
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-muted-foreground">Product</label>
+              <select 
+                className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary"
+                value={formData.productId}
+                onChange={(e) => setFormData(prev => ({ ...prev, productId: e.target.value }))}
               >
-                <FileUp size={14} />
-                Import CSV
-              </Button>
-
-              {!isUsingDemo && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClearImport}
-                  className="text-destructive hover:text-destructive/80 gap-1"
-                >
-                  <X size={14} />
-                  Clear
-                </Button>
-              )}
-
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleRefreshForecast}
-                disabled={asyncState.isFetching}
-                className="gap-2"
-              >
-                Refresh Forecast
-              </Button>
+                <option value="">Select Product</option>
+                {productOptions?.map(p => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
             </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-muted-foreground">Month</label>
+              <select 
+                className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary"
+                value={formData.month}
+                onChange={(e) => setFormData(prev => ({ ...prev, month: e.target.value }))}
+              >
+                {MONTHS.map(m => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-muted-foreground">Year</label>
+              <select 
+                className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary"
+                value={formData.year}
+                onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
+              >
+                {YEARS.map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+
+            <Button
+              variant="default"
+              onClick={handleRefreshForecast}
+              disabled={asyncState.isFetching || !formData.branchId || !formData.productId}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+            >
+              {asyncState.isFetching ? "Analyzing..." : "Generate Forecast"}
+            </Button>
           </div>
 
-          {parseError && (
-            <div className="mt-3 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg text-xs text-destructive flex items-center gap-2">
-              <AlertTriangle size={13} />
-              <span>
-                <strong>CSV error:</strong> {parseError}. Check that your file has the columns:{" "}
-                <code className="font-mono">month, product_name, units_sold, revenue</code>
-              </span>
+          {/* Gemini AI Panel */}
+          {forecastData?.ai && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 mt-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-fade-in">
+              <div className="col-span-3 text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-[-10px]">GEMINI AI PREDICTION</div>
+              <div className="bg-background/80 border border-border rounded-lg p-3 text-center backdrop-blur-sm">
+                <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Current Stock</p>
+                <p className="text-2xl font-bold text-foreground">{forecastData.ai.currentStock}</p>
+              </div>
+              <div className="bg-background/80 border border-border rounded-lg p-3 text-center backdrop-blur-sm">
+                <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Predicted Demand</p>
+                <p className="text-2xl font-bold text-blue-500">{forecastData.ai.predictedUnitsSold}</p>
+              </div>
+              <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-lg p-3 text-center backdrop-blur-sm">
+                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-1 uppercase tracking-wider">Recommended Order</p>
+                <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{forecastData.ai.recommendedOrderQuantity}</p>
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-6 mb-6">
-        {DEFAULT_METRIC_CARDS.map((card, i) => (
+      {/* Dynamic Summary Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 shrink-0">
+        {dynamicMetrics.map((card, i) => (
           <StatusCard
             key={i}
             title={card.title}
             mainValue={card.mainValue}
-            secondValue={card.secondValue}
             subText={card.subText}
             Icon={card.Icon}
             color={card.color}
@@ -383,36 +355,31 @@ const ForecastPage = () => {
         ))}
       </div>
 
-      <Card className="mb-6 border-border bg-card">
+      {/* Revenue Forecast Chart */}
+      <Card className="mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base text-foreground">
-                Sales Forecast with Confidence Interval
+                Revenue Forecast with Confidence Interval
               </CardTitle>
               <CardDescription>
-                {isUsingDemo
-                  ? "Oct 2024 – Mar 2025 actual · Apr – May 2025 forecast (sample data)"
-                  : `${importedFile?.name} — ${csvSummary?.months} months, last period is forecast`}
+                Live API prediction from ML.NET
               </CardDescription>
             </div>
-
-            {isUsingDemo && (
-              <Badge variant="outline" className="text-amber-500 border-amber-500 text-xs">
-                Sample Data
-              </Badge>
-            )}
+            <Badge variant="outline" className="text-emerald-500 border-emerald-500 text-xs">
+              Live API Data
+            </Badge>
           </div>
         </CardHeader>
 
         <CardContent>
           <ForecastChart data={chartData} />
 
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-3 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-4 text-xs text-muted-foreground">
             {[
               { color: "text-muted-foreground", dashed: true,  label: "Upper Bound"     },
               { color: "text-muted-foreground", dashed: true,  label: "Lower Bound"     },
-              { color: "text-primary",          dashed: false, label: "Actual Sales"    },
               { color: "text-primary",          dashed: true,  label: "Predicted Sales" },
             ].map(({ color, dashed, label }) => (
               <div key={label} className="flex items-center gap-1.5">
@@ -426,31 +393,24 @@ const ForecastPage = () => {
         </CardContent>
       </Card>
 
-      <Card className="mb-6 border-border bg-card">
+      {/* ML.NET Perfume Level Breakdown */}
+      <Card className="mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div className="flex flex-col gap-1.5">
-              <CardTitle className="text-base text-foreground">Perfume-Level Forecast</CardTitle>
-              <CardDescription>Individual perfume predictions with confidence levels</CardDescription>
+              <CardTitle className="text-base text-foreground">ML.NET Target Product Forecast</CardTitle>
+              <CardDescription>FastTree Regression output for the selected product</CardDescription>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAll((prev) => !prev)}
-              className="text-foreground hover:text-muted-foreground gap-1.5 shrink-0"
-            >
-              {showAll ? "Show Less" : "View All"}
-              <ChevronDown size={14} className={`transition-transform duration-200 ${showAll ? "rotate-180" : ""}`} />
-            </Button>
           </div>
         </CardHeader>
 
         <CardContent className="pt-2">
+          {perfumeForecasts.length === 0 && (
+              <div className="text-muted-foreground text-sm py-4">No prediction generated yet.</div>
+          )}
           <div className="flex flex-col">
-            {visiblePerfumes.map((perfume, i) => (
+            {perfumeForecasts.map((perfume) => (
               <div key={perfume.id}>
-                {i > 0 && <Separator className="my-4 bg-border" />}
-
                 <div className="flex items-center gap-2 mb-3">
                   <span className="font-bold text-foreground">{perfume.name}</span>
                   {perfume.trend === "up"
@@ -458,7 +418,7 @@ const ForecastPage = () => {
                     : <TrendingDown size={15} className="text-destructive"  />}
                 </div>
 
-                <div className="flex items-center gap-10 text-sm pl-4">
+                <div className="flex flex-wrap items-center gap-6 sm:gap-10 text-sm pl-4">
                   <div>
                     <p className="text-muted-foreground text-xs mb-0.5">Current stock</p>
                     <p className="font-semibold text-foreground text-xl leading-none">{perfume.currentStock}</p>
@@ -468,15 +428,10 @@ const ForecastPage = () => {
                     <p className="font-semibold text-foreground text-xl leading-none">{perfume.predictedDemand}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs mb-0.5">Change</p>
-                    <p className={`font-semibold text-xl leading-none ${perfume.change >= 0 ? "text-emerald-500" : "text-destructive"}`}>
-                      {perfume.change >= 0 ? `+${perfume.change}` : perfume.change}
+                    <p className="text-muted-foreground text-xs mb-0.5">Restock Recommendation</p>
+                    <p className={`font-semibold text-xl leading-none ${perfume.change > 0 ? "text-emerald-500" : "text-muted-foreground"}`}>
+                      {perfume.change > 0 ? `+${perfume.change}` : perfume.change}
                     </p>
-                  </div>
-                  <div className="ml-auto">
-                    <Badge variant="outline" className="text-muted-foreground font-normal border-border rounded-md">
-                      {perfume.confidence}% confidence
-                    </Badge>
                   </div>
                 </div>
               </div>
@@ -485,13 +440,14 @@ const ForecastPage = () => {
         </CardContent>
       </Card>
 
-      <Card className="mb-6 border-border bg-card">
+      {/* AI Insights Card */}
+      <Card className="mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
           <CardTitle className="text-base text-foreground">AI-Powered Insights</CardTitle>
           <CardDescription>Automated recommendations based on predictive analysis</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {aiInsights.map((insight) => (
               <div key={insight.title} className={`${insight.bg} ${insight.border} border rounded-xl p-4`}>
                 <div className="flex items-center gap-2 mb-1">
@@ -504,7 +460,6 @@ const ForecastPage = () => {
           </div>
         </CardContent>
       </Card>
-
     </div>
   );
 };
