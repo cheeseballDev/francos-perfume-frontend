@@ -10,6 +10,7 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
     const [config, setConfig] = useState(null);
     const [data, setData] = useState({});
     const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!isOpen) return null;
 
@@ -37,7 +38,7 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
         setData((prev) => ({ ...prev, [field]: value }));
     
         if (errors[field]) {
-            setErrors((prev) => ({ ...prev, [field]: null }));
+            setErrors((prev) => ({...prev, [field]: null }));
         }
     };
 
@@ -75,7 +76,9 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
             description: "This will immediately be available to use under the Point-Of-Sale system",
             confirmText: "Create Discount",
             onConfirm: async () => {
+                setIsSubmitting(true);
                 await createDiscount(payload);
+                setIsSubmitting(false);
                 setData({});
                 onClose();
             } 
@@ -136,8 +139,11 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
                             Cancel
                         </Button>
 
-                        <Button onClick={handleSave}>
-                            Save Changes
+                        <Button 
+                            onClick={handleSave} 
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Saving..." : "Save Changes"}
                         </Button>
                     </div>
                 </DialogContent>

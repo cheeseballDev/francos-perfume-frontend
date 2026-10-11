@@ -1,3 +1,5 @@
+import CreateProductModal from '@/components/features/product_components/CreateProductModal';
+import EditProductModal from '@/components/features/product_components/EditProductModal';
 import ProductGrid from '@/components/features/product_components/ProductGrid';
 import ProductGridSkeleton from '@/components/loaders/ProductGridSkeleton';
 import { FilterDropDown, SearchBar } from '@/components/shared';
@@ -17,36 +19,29 @@ export default function ProductsPage() {
         filter,
         updateFilter,
         filterOptions,
-        // THESE FUNCTIONS BELOW ARE ALREADY CONNECTED WITH THE BACKEND SERVICE. PLEASE CHECK THE useProducts HOOK FOR MORE DETAILED INFORMATION.
-        getProduct,
-        updateDetails,
+        fetchProducts,
+        updateProduct,
         createProduct
     } = useProduct();
 
     const isOwner = user?.trueRole === 'OWNER';
     const [searchQuery, setSearchQuery] = useState('');
-    
-    // PLEASE CREATE SEPARATE COMPONENTS FOR THESE. PUT IT UNDER THE product_components FOLDER UNDER components/features
-    // CHECK THE MANAGEACCOUNTSPAGE AND ITS PATTERN. FOLLOW HOW THE MANAGEACCOUNTSPAGE WAS MADE. 
 
-    const openCreateModal = () => {
-        
-    };
+    const [isCreateProductModalOpen, setIsCreateProductModalOpen] = useState(false);
+    const [isEditProductModalOpen, setIsEditProductModalOpen] = useState(false);
 
-    const openEditModal = () => {
-        
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-    };
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const handleSearchChange = (value) => {
         const query = value?.target ? value.target.value : value;
         setSearchQuery(query);
         updateFilter('search', query);
     }
+
+    const handleOpenEditModal = (product) => {
+        setSelectedProduct(product);
+        setIsEditProductModalOpen(true);
+    };
 
     return (
         <div className="bg-background min-h-screen font-montserrat relative flex flex-col">
@@ -69,7 +64,7 @@ export default function ProductsPage() {
 
                     {isOwner && (
                         <Button
-                            //onClick={() => setIsCreateAccountModalOpen(true)}
+                            onClick={() => setIsCreateProductModalOpen(true)}
                             className="w-full sm:w-auto shrink-0"
                         >
                             <Plus className="h-5 w-5 mr-2" />
@@ -93,7 +88,7 @@ export default function ProductsPage() {
                 <ProductGrid 
                     products={products}
                     isOwner={isOwner}
-                    //openEditModal={openEditModal}
+                    openEditModal={handleOpenEditModal}
                 />
             )}
             
@@ -104,6 +99,22 @@ export default function ProductsPage() {
                 totalEntries={pagination.totalEntries}
                 updateFilter={updateFilter}
             />
+
+            <CreateProductModal
+                isOpen={isCreateProductModalOpen}
+                onClose={() => setIsCreateProductModalOpen(false)}
+                filterOptions={filterOptions}
+                createProduct={createProduct}
+            />
+
+            <EditProductModal
+                isOpen={isEditProductModalOpen}
+                onClose={() => setIsEditProductModalOpen(false)}
+                selectedProduct={selectedProduct}
+                filterOptions={filterOptions}
+                updateProduct={updateProduct}
+                onSuccess={fetchProducts}
+            /> 
 
         </div>
     );

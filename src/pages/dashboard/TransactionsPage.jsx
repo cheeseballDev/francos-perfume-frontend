@@ -1,10 +1,11 @@
 import { transactionColumns } from '@/components/features/transactions_components/TransactionColumns';
+import TransactionDetailsModal from '@/components/features/transactions_components/TransactionDetailsModal';
 import TransactionTableSkeleton from '@/components/loaders/TransactionTableSkeleton';
 import { SearchBar } from '@/components/shared';
 import DataTable from '@/components/shared/DataTable';
 import { Button } from '@/components/ui/button';
 import { useTransaction } from '@/hooks/transaction_hooks/useTransaction';
-import { FileDown, RefreshCcw } from 'lucide-react';
+import { Eye, FileDown, RefreshCcw } from 'lucide-react';
 import { useState } from 'react';
 import ExportTransactionModal from "../../components/features/transactions_components/ExportTransactionModal";
 
@@ -16,16 +17,34 @@ export default function TransactionsPage() {
         filter, 
         fetchTransactions, 
         updateFilter,
+        fetchTransactionDetails
     } = useTransaction();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
 
     const handleSearchChange = (value) => {
         const query = value?.target ? value.target.value : value;
         setSearchQuery(query);
         updateFilter('search', query);
     }
+
+    const handleRowClick = async (row) => {
+        if (selectedTransaction?.salesOrderId === row.salesOrderId) {
+            setSelectedTransaction(null);
+            return;
+        }
+
+        setSelectedTransaction(row);
+        //console.log(selectedTransaction);    
+        const transaction = await fetchTransactionDetails(row.salesOrderId);
+        if (transaction) {
+            setSelectedTransaction(prev => prev ? { ...prev, ...transaction }: transaction);
+        }
+    }
+
 
     return (
         <div className="bg-background min-h-screen font-montserrat flex flex-col animate-fade-in relative">
@@ -37,12 +56,22 @@ export default function TransactionsPage() {
                 </div>
             </div>
 
-            <div className="relative w-full md:w-96 shrink-0 mb-6">
+            <div className="relative flex justify-between gap-6 mt-4 shrink-0 mb-6">
                 <SearchBar
                     value={searchQuery}
                     onChange={handleSearchChange}
                 />
+
+                <Button
+                    onClick={fetchTransactions}
+                    className='justify-end'
+                >
+                    <RefreshCcw className='w-4 h-4'/>
+                    Refresh Status
+                </Button>
+
             </div>
+
 
             {asyncState?.isLoading ? (
                 <TransactionTableSkeleton rowCount={10} />
@@ -55,6 +84,9 @@ export default function TransactionsPage() {
                     pagination={pagination}
                     filter={filter}
                     updateFilter={updateFilter}
+                    selectedItem={selectedTransaction}
+                    onRowClick={handleRowClick}
+                    onRowDoubleClick={() => setIsTransactionModalOpen(true)}
                 />
             )}
 
@@ -67,17 +99,22 @@ export default function TransactionsPage() {
                 </Button>
 
                 <Button
-                    onClick={fetchTransactions}
-                    className='justify-end'
+                    onClick={() => setIsTransactionModalOpen(true)}
                 >
-                    <RefreshCcw className='w-4 h-4'/>
-                    Refresh Status
+                    <Eye className='h-8 w-8'/>
+                    View Transaction
                 </Button>
             </div>
             
             <ExportTransactionModal 
                 isOpen={isExportModalOpen} 
                 onClose={() => setIsExportModalOpen(false)}
+            />
+
+            <TransactionDetailsModal 
+                isOpen={isTransactionModalOpen}
+                onClose={() => setIsTransactionModalOpen(false)}
+                selectedTransaction={selectedTransaction}
             />
 
         </div>

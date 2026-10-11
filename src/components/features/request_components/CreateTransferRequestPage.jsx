@@ -74,33 +74,34 @@ const CreateTransferRequestPage = () => {
     }, [data.fromBranch, fetchRequestFilters]);
 
     const handleAddProduct = () => {
-        if (!selectedProduct) return;
+    if (!selectedProduct) return;
 
-        const productOption = productOptions.find(p => p.value === selectedProduct);
-        if (!productOption) return;
+    const productOption = productOptions.find(p => p.value === selectedProduct);
+    if (!productOption) return;
 
-        const fromBranchName = branchOptions.find(
-            b => b.value === data.fromBranch
-        )?.label?.toUpperCase();
-        const isWarehouse = fromBranchName === 'WAREHOUSE';
+    const fromBranchName = branchOptions.find(
+        b => b.value === data.fromBranch
+    )?.label?.toUpperCase();
+    
+    const isWarehouse = fromBranchName === 'WAREHOUSE';
 
-        // FIXED: Calculate total intended quantity by checking what is already in the list
-        const existingItem = data.items.find(p => p.productId === productOption.value);
-        const currentQtyInList = existingItem ? existingItem.quantity : 0;
-        const totalIntendedQty = currentQtyInList + quantity;
+    const existingItem = data.items?.find(p => p.productId === productOption.value);
+    const alreadyAddedQty = existingItem ? existingItem.quantity : 0;
 
-        // FIXED: Validate combined total against available stock and show an alert if it exceeds
-        if (!isWarehouse && totalIntendedQty > (productOption.availableQty ?? 0)) {
-            setConfig({
-                isAlert: true,
-                title: "Not Enough Stock",
-                description: `You are trying to request ${totalIntendedQty} units total, but only ${productOption.availableQty} are available in the source branch.`,
-                confirmVariant: "default",
-                confirmText: "Okay",
-                onConfirm: () => setConfig(null)
-            });
-            return;
-        }
+    const maxAvailable = productOption.availableQty ?? 0;
+    const remainingAllowed = isWarehouse ? Infinity : (maxAvailable - alreadyAddedQty);
+
+    if (!isWarehouse && quantity > remainingAllowed) {
+        setConfig({
+            isAlert: true,
+            title: "Exceeds Available Stock",
+            description: `You can only add up to ${remainingAllowed} more unit(s) of this product.`,
+            confirmVariant: "destructive",
+            confirmText: "Acknowledge",
+            onConfirm: () => setConfig(null)
+        });
+        return;
+    }
 
         setData(prev => {
             const existingIndex = prev.items.findIndex(p => p.productId === productOption.value);
@@ -122,10 +123,11 @@ const CreateTransferRequestPage = () => {
 
             return { ...prev, items: updatedItems };
         });
+        
         setSelectedProduct('');
         setQuantity(1);
     };
-
+    
     const handleRemoveProduct = (productId) => {
         setData(prev => ({
             ...prev,
