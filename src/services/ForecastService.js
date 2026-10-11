@@ -5,8 +5,8 @@ const PATH = "/Forecasting";
 /**
  * Stock forecast for a product over a given horizon.
  *
- * @param {StockForecastRequestDTO} dto - request payload sent to the backend
- *   (e.g. { productId, branchId, days/horizon, historyDays })
+ * @param {StockForecastRequestDTO} dto payload sent to the backend
+ *   (e.g. { year, month, productId, branchId })
  */
 export const forecastStocks = async (dto) => {
     const response = await apiClient.post(`${PATH}/stocks`, dto);
@@ -16,8 +16,8 @@ export const forecastStocks = async (dto) => {
 /**
  * Revenue forecast for a branch / product over a given horizon.
  *
- * @param {RevenueForecastRequestDTO} dto - request payload sent to the backend
- *   (e.g. { branchId, productId, months })
+ * @param {RevenueForecastRequestDTO} dto payload sent to the backend
+ *   (e.g. { year, month, branchId, ... })
  */
 export const forecastRevenue = async (dto) => {
     const response = await apiClient.post(`${PATH}/revenue`, dto);
@@ -27,7 +27,7 @@ export const forecastRevenue = async (dto) => {
 /**
  * AI-powered stock forecast.
  *
- * @param {StockForecastRequestDTO} dto - same shape as forecastStocks
+ * @param {StockForecastRequestDTO} dto same shape as forecastStocks
  */
 export const forecastStocksAI = async (dto) => {
     const response = await apiClient.post(`${PATH}/ai`, dto);

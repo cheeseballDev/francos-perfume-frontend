@@ -9,7 +9,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const ConfirmDialog = ({ isOpen, onClose, config }) => {
+const ConfirmDialog = ({ isOpen, onClose, config, isLoading }) => {
     if (!config) return null;
 
     const handleConfirm = async (e) => {
@@ -34,7 +34,6 @@ const ConfirmDialog = ({ isOpen, onClose, config }) => {
     const confirmVariant = config.confirmVariant || "destructive";
     const isAlertOnly = config.isAlert === true;
 
-    // Force Tailwind color classes based on the requested variant
     const getButtonColor = (variant) => {
         switch (variant) {
             case "success":
@@ -77,8 +76,9 @@ const ConfirmDialog = ({ isOpen, onClose, config }) => {
                         <AlertDialogAction
                             onClick={handleConfirm}
                             className={`w-full font-bold ${getButtonColor(confirmVariant)}`}
+                            disabled={isLoading}
                         >
-                            {config.confirmText || (isAlertOnly ? "OK" : "Confirm")}
+                            {isLoading ? "Saving..." : (config.confirmText || (isAlertOnly ? "OK" : "Confirm"))}
                         </AlertDialogAction>
                     </div>
                 </AlertDialogFooter>

@@ -1,29 +1,22 @@
 import { forecastRevenue, forecastStocks, forecastStocksAI } from "@/services/ForecastService";
+import { getRequestFilters } from "@/services/RequestService";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-/**
- * useForecast
- * ─────────────────
- * Wraps the three /api/Forecasting endpoints:
- *   - POST /stocks  → stock forecast  (StockForecastRequestDTO)
- *   - POST /revenue → revenue forecast (RevenueForecastRequestDTO)
- *   - POST /ai      → AI stock forecast (StockForecastRequestDTO)
- *
- * Both request DTOs only need Year + Month, so the caller passes a single
- * `{ year, month }` (and optionally discount params for revenue, and a
- * productId for the stock endpoints) and the hook fans it out.
- */
+const buildStockRequest = ({ year, month, productId, branchId }) => ({ 
+    year, 
+    month, 
+    productId: Number(productId), 
+    branchId: Number(branchId) 
+});
 
-/** @typedef {{ year: number, month: number, productId?: number, discountPercent?: number, discountAmount?: number, hasDiscount?: boolean, isPercentageDiscount?: boolean }} ForecastRequestDTO */
-
-const buildStockRequest = ({ year, month, productId }) => ({ year, month, productId });
-const buildRevenueRequest = ({ year, month, discountPercent, discountAmount, hasDiscount, isPercentageDiscount }) => ({
+const buildRevenueRequest = ({ year, month, discountPercent, discountAmount, hasDiscount, isPercentageDiscount, branchId }) => ({
     year,
     month,
     discountPercent,
     discountAmount,
     hasDiscount,
     isPercentageDiscount,
+    branchId: Number(branchId)
 });
 
 export const useForecast = () => {
@@ -35,16 +28,31 @@ export const useForecast = () => {
         error: null,
     });
 
-    // Combined forecast result from the backend
     const [forecastData, setForecastData] = useState({
         stocks: null,
         revenue: null,
         ai: null,
     });
 
-    /**
-     * @param {ForecastRequestDTO} dto
-     */
+    const [branchOptions, setBranchOptions] = useState([]);
+    const [productOptions, setProductOptions] = useState([]);
+
+    // Fetch filters for dropdowns
+    useEffect(() => {
+        getRequestFilters().then(data => {
+            if (data) {
+                setBranchOptions((data.branches || []).map(b => ({
+                    value: b.branchId,
+                    label: b.branchLocation
+                })));
+                setProductOptions((data.products || []).map(p => ({
+                    value: p.productId,
+                    label: p.productName
+                })));
+            }
+        }).catch(err => console.error("Failed to load options", err));
+    }, []);
+
     const fetchForecast = useCallback(async (dto) => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -53,10 +61,11 @@ export const useForecast = () => {
         }
 
         try {
+            // Prevent AI API crash by only calling endpoints if required parameters exist
             const [stocks, revenue, ai] = await Promise.all([
-                forecastStocks(buildStockRequest(dto)),
-                forecastRevenue(buildRevenueRequest(dto)),
-                forecastStocksAI(buildStockRequest(dto)),
+                dto.productId && dto.branchId ? forecastStocks(buildStockRequest(dto)) : Promise.resolve(null),
+                dto.branchId ? forecastRevenue(buildRevenueRequest(dto)) : Promise.resolve(null),
+                dto.productId && dto.branchId ? forecastStocksAI(buildStockRequest(dto)) : Promise.resolve(null),
             ]);
 
             isFirstLoad.current = false;
@@ -74,8 +83,9 @@ export const useForecast = () => {
         const now = new Date();
         fetchForecast({
             year: now.getFullYear(),
-            month: now.getMonth() + 1, // 1-indexed to match the backend
-            productId: 0,
+            month: now.getMonth() + 1,
+            productId: 0, 
+            branchId: 0,
             discountPercent: 0,
             discountAmount: 0,
             hasDiscount: false,
@@ -87,5 +97,7 @@ export const useForecast = () => {
         forecastData,
         asyncState,
         fetchForecast,
+        branchOptions,
+        productOptions
     };
 };

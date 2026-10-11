@@ -7,7 +7,7 @@ export const transactionColumns = [
     },
     {
         header: "Sales Order ID",
-        accessorKey: "salesOrderId"
+        accessorKey: "salesOrderDisplayId"
     },
     {
         header: "Perfume Sold",

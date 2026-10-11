@@ -24,66 +24,69 @@ const ROLE_RANKS = {
 };
 
 const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount }) => {
-  const [config, setConfig] = useState(null);
+    const [config, setConfig] = useState(null);
 
-  const [data, setData] = useState({});
-  // use async state instead of setErrors
-  const [errors,setErrors] = useState({});
-
-  if (!isOpen) return null;
-
-  const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
-  const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
-  const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
-
-  const branchOptions = branchOptionData.filter(
-    (option) => option.value !== "" && option.value !== "__all__"
-  );
-
-  const roleOptions = roleOptionData.filter(
-    (option) => {
-      if (!option.value || option.value === "__all__") {
-        return false;
-      }
-
-    const targetRoleRank = ROLE_RANKS[option.value.toUpperCase()] || 0;
-    const currentUserRank = ROLE_RANKS[sessionStorage.getItem("trueRole")] || 0;
-
-    return targetRoleRank < currentUserRank;
-  });
-
-  const employeeShiftOptions = employeeShiftOptionData.filter(
-    (option) => option.value !== "" && option.value !== "__all__"
-  );
-
-
-  const handleChange = (field, value) => {
-    setData((prev) => ({ ...prev, [field]: value }));
+    const [data, setData] = useState({});
     
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: null }));
+    const [errors,setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    if (!isOpen) return null;
+
+    const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
+    const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
+    const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
+
+    const branchOptions = branchOptionData.filter(
+        (option) => option.value !== "" && option.value !== "__all__"
+    );
+
+    const roleOptions = roleOptionData.filter(
+        (option) => {
+        if (!option.value || option.value === "__all__") {
+            return false;
+        }
+
+        const targetRoleRank = ROLE_RANKS[option.value.toUpperCase()] || 0;
+        const currentUserRank = ROLE_RANKS[sessionStorage.getItem("trueRole")] || 0;
+
+        return targetRoleRank < currentUserRank;
+    });
+
+    const employeeShiftOptions = employeeShiftOptionData.filter(
+        (option) => option.value !== "" && option.value !== "__all__"
+    );
+
+
+    const handleChange = (field, value) => {
+        setData((prev) => ({ ...prev, [field]: value }));
+        
+        if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: null }));
+        }
+    };
+
+    const handleSave = () => {
+        const validationErrors = validateForm(data, accountValidationSchema);
+
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+        
+        setConfig({
+        title: "Are you sure you want to create this account?",
+        description: "This will make a new account for the employee.",
+        confirmText: "Create Account",
+        onConfirm: async () => {
+            setIsSubmitting(true);
+            await createAccount(data);
+            setIsSubmitting(false);
+            setData({});
+            onClose();
+        } 
+        })
     }
-  };
-
-  const handleSave = () => {
-      const validationErrors = validateForm(data, accountValidationSchema);
-
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
-      }
-      
-      setConfig({
-      title: "Are you sure you want to create this account?",
-      description: "This will make a new account for the employee.",
-      confirmText: "Create Account",
-      onConfirm: async () => {
-        await createAccount(data);
-        setData({});
-        onClose();
-      } 
-    })
-  }
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -174,8 +177,9 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
 
             <Button
               onClick={handleSave}
+              disabled={isSubmitting}
             >
-              Save Changes
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </DialogContent>

@@ -1,5 +1,5 @@
 import { useAuth } from '@/auth/UseAuth';
-import { ArrowRightLeft, LogOut, Settings, User } from 'lucide-react';
+import { ArrowRightLeft, HelpCircle, LogOut, Settings, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from './LogoutModal';
@@ -45,7 +45,6 @@ const ProfileDropdown = () => {
           <div 
             onClick={() => {
               setIsOpen(false);
-              // FIXED: Only route cashiers to /pos/settings. Everyone else goes to /home/settings.
               navigate(user?.activeRole === 'CASHIER' ? '/pos/settings' : '/home/settings');
             }}
             className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
@@ -66,6 +65,18 @@ const ProfileDropdown = () => {
               <span className="text-sm font-medium">Switch Module</span>
             </div>
           )}
+
+          {/* ADDED: FAQ / Help Link */}
+          <div 
+            onClick={() => {
+              setIsOpen(false);
+              navigate(user?.activeRole === 'CASHIER' ? '/pos/faq' : '/home/faq');
+            }}
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors border-t border-border"
+          >
+            <HelpCircle size={18} className="text-muted-foreground" />
+            <span className="text-sm font-medium">Help / FAQ</span>
+          </div>
 
           <div
             onClick={() => {

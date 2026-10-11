@@ -56,7 +56,7 @@ export const ProductCard = ({ product, isOwner, onEdit }) => {
 
       {isOwner && (
         <Button
-          //onClick={() => onEdit(product)}
+          onClick={() => onEdit(product)}
         >
           Edit Details
         </Button>

@@ -4,6 +4,9 @@ import { useLogin } from '@/hooks/useLogin';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import logo from '../assets/FrancoPerfumeLogo.png';
 
+// FIXED: Import the modal based on your folder structure
+import ForcePasswordChangeModal from '@/auth/ForcePasswordChangeModal';
+
 const LoginPage = () => {
   const {
     //error,
@@ -17,6 +20,10 @@ const LoginPage = () => {
     setPassword,
     email, 
     setEmail, 
+    // ADDED: Extract the new modal states and submission handler from your hook
+    showPasswordModal,
+    setShowPasswordModal,
+    handlePasswordUpdate
   } = useLogin();
   
   if (view === 'module') {
@@ -55,7 +62,6 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background font-montserrat p-4">
       <div className="w-full max-w-sm flex flex-col items-center text-center">
-        {/* Added max-w to prevent the logo from blowing up */}
         <img src={logo} alt="Franco Perfume" className="h-24 w-auto max-w-[200px] object-contain mb-6"/>
         <h1 className="text-3xl font-bold text-foreground mb-1 tracking-tight">OneFrancoScentHub</h1>
         <p className="text-muted-foreground mb-8 text-sm">Welcome back!</p>
@@ -82,7 +88,6 @@ const LoginPage = () => {
             <Button type="submit" disabled={isLoading} className="mt-2 w-full bg-primary text-primary-foreground hover:opacity-90">
                 {isLoading ? (
                   <>
-                    {/* ADDED: Standardized spinner animation */}
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Logging in...
                   </>
@@ -96,6 +101,14 @@ const LoginPage = () => {
           Forgot password? <a href="/forgot-password" className="text-destructive font-medium hover:underline">Reset it here</a>.
         </p>
       </div>
+
+      {/* ADDED: The modal is rendered here, controlled by the hook */}
+      <ForcePasswordChangeModal 
+          isOpen={showPasswordModal}
+          isLoading={isLoading}
+          onClose={() => setShowPasswordModal(false)}
+          onSubmit={handlePasswordUpdate}
+      />
     </div>
   )
 };

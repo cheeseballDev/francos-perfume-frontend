@@ -11,6 +11,9 @@ import { ArchivesPage, AuditLogPage, BarcodePage, DeliveriesPage, DiscountPage, 
 import AccountsPage from './pages/dashboard/ManageAccountsPage';
 import UserSettingsPage from './pages/dashboard/UserSettingsPage'; 
 
+// ADDED: Direct import for the FAQ page
+import FaqPage from './pages/dashboard/FaqPage';
+
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import LoginPage from './pages/LoginPage';
 import PointOfSalePage from './pages/PointOfSalePage';
@@ -34,7 +37,6 @@ const NavigationManager = ({ user }) => {
     if (user) {
       const role = user.activeRole;
       
-      // FIXED: Use startsWith to allow sub-routes like /pos/settings
       if (role === 'CASHIER' && !path.startsWith('/pos')) {
         navigate('/pos', { replace: true });
       } 
@@ -127,6 +129,9 @@ const App = () => {
             >
               <Route index element={<HomePage role={user?.trueRole} />} />
               <Route path="settings" element={<UserSettingsPage />} />
+              
+              {/* ADDED: FAQ Page available for all Dashboard users */}
+              <Route path="faq" element={<FaqPage />} />
 
               <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'OWNER', 'STAFF']} />}>
                 <Route path="inventory" element={<InventoryPage role={user?.trueRole} />} />
@@ -158,8 +163,10 @@ const App = () => {
             
             <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'CASHIER']} />}>
               <Route path="/pos" element={<PointOfSalePage />} />
-              {/* FIXED: Added the missing setting route for cashiers */}
               <Route path="/pos/settings" element={<UserSettingsPage />} />
+              
+              {/* ADDED: FAQ Page available specifically for Cashiers */}
+              <Route path="/pos/faq" element={<FaqPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/login" replace />} />

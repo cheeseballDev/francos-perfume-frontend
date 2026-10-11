@@ -1,4 +1,4 @@
-export const requestedProductsColumns = ( itemApprovals, handleApproveToggle, handleQtyChange ) => 
+export const requestedProductsColumns = ( itemApprovals, handleApproveToggle, handleQtyChange, isEditable ) => 
 [
     {
         accessorKey: "productDisplayId",
@@ -18,14 +18,20 @@ export const requestedProductsColumns = ( itemApprovals, handleApproveToggle, ha
     {
         accessorKey: "isApproved",
         header: "Approve?",
-        render: (row) => (
-            <input  
-                type="checkbox"
-                checked={itemApprovals[row.requestItemId]?.isApproved ?? true}
-                onChange={(e) => handleApproveToggle(row.requestItemId, e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 accent-black cursor-pointer"
-            />
-        ),
+        render: (row) => {
+            const itemId = row.requestItemId;
+            const approvalState = itemApprovals[itemId];
+
+            return (
+                <input
+                    type="checkbox"
+                    checked={approvalState?.isApproved ?? false}
+                    onChange={(e) => handleApproveToggle(itemId, e.target.checked)}
+                    disabled={!isEditable}
+                    className="w-5 h-5 border border-gray-300 rounded text-center disabled:bg-gray-100"
+                />
+            );
+        },
     },
     {
         accessorKey: "approvedQty",

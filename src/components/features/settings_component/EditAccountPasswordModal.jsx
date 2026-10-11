@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { X, ChevronLeft } from 'lucide-react';
-import { Button } from "@/components/ui/button"; 
 import ConfirmDialog from "@/components/shared/ConfirmDialog"; // ADDED: Import ConfirmDialog
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, X } from 'lucide-react';
+import { useState } from 'react';
 
 const EditAccountPasswordModal = ({ isOpen, onClose, user }) => {
   const [password, setPassword] = useState('');
@@ -11,17 +11,14 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user }) => {
 
   if (!isOpen) return null;
 
-  // --- ROBUST ID EXTRACTION ---
   const targetId = user?.employee_id || user?.id || user?.employeeId || user?.nameid;
 
-  // --- REAL-TIME VALIDATION ENGINE ---
   const checkNameCondition = () => {
     if (password.length === 0) return false;
     const passLower = password.toLowerCase();
     const first = user?.first_name?.toLowerCase();
     const last = user?.last_name?.toLowerCase();
     
-    // Fails if the password includes the user's first or last name (if they exist)
     if (first && passLower.includes(first)) return false;
     if (last && passLower.includes(last)) return false;
     return true;
@@ -38,11 +35,9 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user }) => {
 
   const passwordsMatch = password === confirmPassword && password.length > 0;
   
-  // All conditions must be true AND the passwords must match to submit
   const canSubmit = Object.values(conditions).every(Boolean) && passwordsMatch;
 
   const handleClose = () => {
-    // Reset state when closing
     setPassword('');
     setConfirmPassword('');
     onClose();
@@ -52,7 +47,6 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user }) => {
     e.preventDefault();
     if (!canSubmit) return;
 
-    // Safety check to prevent 404 errors before they happen
     if (!targetId) {
         setConfig({
             isAlert: true,
@@ -105,8 +99,7 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user }) => {
       setIsSubmitting(false);
     }
   };
-
-  // Helper for text colors based on validation
+  
   const getConditionClass = (isMet) => {
     return isMet ? "text-green-500 font-medium transition-colors" : "text-destructive transition-colors";
   };

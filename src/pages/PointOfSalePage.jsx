@@ -11,7 +11,8 @@ import { usePointOfSale } from '@/hooks/point_of_sale_hooks/usePointOfSale';
 import { useClock } from '@/hooks/useClock';
 
 const PointOfSalePage = () => {
-  const { products, isLoading, filter, updateFilter } = usePointOfSale();
+  // FIXED: Destructure fetchProducts from the hook
+  const { products, isLoading, filter, updateFilter, fetchProducts } = usePointOfSale();
 
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -52,13 +53,18 @@ const PointOfSalePage = () => {
 
   const onConfirmPayment = async (paymentDetails) => {
     try {
-      await handleFinalCheckout(paymentDetails, (receiptData) => {
+      await handleFinalCheckout(paymentDetails, async (receiptData) => {
         handleClearCart();
         setAppliedDiscountRate(0);
         setAppliedDiscountId(0);
         setShowCashModal(false);
         setShowGCashModal(false);
         setShowCheckoutModal(false);
+        
+        // FIXED: Force a network request to pull the newly deducted stock levels
+        if (typeof fetchProducts === 'function') {
+            await fetchProducts();
+        }
         
         setConfig({
           isAlert: true,
