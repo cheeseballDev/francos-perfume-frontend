@@ -4,7 +4,7 @@ import { SearchBar } from '@/components/shared';
 import DataTable from '@/components/shared/DataTable';
 import { Button } from '@/components/ui/button';
 import { useTransaction } from '@/hooks/transaction_hooks/useTransaction';
-import { FileDown, RefreshCcw } from 'lucide-react';
+import { Eye, FileDown, RefreshCcw } from 'lucide-react';
 import { useState } from 'react';
 import ExportTransactionModal from "../../components/features/transactions_components/ExportTransactionModal";
 
@@ -20,12 +20,29 @@ export default function TransactionsPage() {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [selectedTransaction, setSelectedTransaction] = useState(null);
 
     const handleSearchChange = (value) => {
         const query = value?.target ? value.target.value : value;
         setSearchQuery(query);
         updateFilter('search', query);
     }
+
+    const handleRowClick = async (row) => {
+        if (selectedTransation?.transactionId === row.employeeId) {
+        setSelectedTransaction(null);
+        return;
+        }
+
+        setSelectedAccount(row);    
+
+        const profile = await fetchAccount(row.employeeId);
+        if (profile) {
+        setSelectedAccount(prev => prev ? { ...prev, ...profile }: profile);
+        }
+    }
+
+    
 
     return (
         <div className="bg-background min-h-screen font-montserrat flex flex-col animate-fade-in relative">
@@ -37,12 +54,22 @@ export default function TransactionsPage() {
                 </div>
             </div>
 
-            <div className="relative w-full md:w-96 shrink-0 mb-6">
+            <div className="relative flex justify-between gap-6 mt-4 shrink-0 mb-6">
                 <SearchBar
                     value={searchQuery}
                     onChange={handleSearchChange}
                 />
+
+                <Button
+                    onClick={fetchTransactions}
+                    className='justify-end'
+                >
+                    <RefreshCcw className='w-4 h-4'/>
+                    Refresh Status
+                </Button>
+
             </div>
+
 
             {asyncState?.isLoading ? (
                 <TransactionTableSkeleton rowCount={10} />
@@ -66,12 +93,9 @@ export default function TransactionsPage() {
                     Export
                 </Button>
 
-                <Button
-                    onClick={fetchTransactions}
-                    className='justify-end'
-                >
-                    <RefreshCcw className='w-4 h-4'/>
-                    Refresh Status
+                <Button>
+                    <Eye className='h-8 w-8'/>
+                    View Transaction
                 </Button>
             </div>
             

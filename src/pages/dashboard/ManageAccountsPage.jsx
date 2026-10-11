@@ -23,7 +23,7 @@ const ManageAccountsPage = () => {
     toggleStatus,
     resetPassword,
     filterOptions,
-    updateDetails,
+    updateAccount,
     createAccount,
   } = useAccount();
 
@@ -138,7 +138,7 @@ const ManageAccountsPage = () => {
       onClose={() => setIsEditAccountModalOpen(false)}
       selectedAccount={selectedAccount}
       filterOptions={filterOptions}
-      updateDetails={updateDetails}
+      updateAccount={updateAccount}
     />
 
     <div className="flex justify-end mt-4">

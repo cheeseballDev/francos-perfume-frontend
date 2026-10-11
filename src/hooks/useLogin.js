@@ -15,7 +15,6 @@ export const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  // ADDED: State to control the password modal
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const displayName = email ? email.split('@')[0] : 'User';
@@ -26,26 +25,24 @@ export const useLogin = () => {
     else navigate('/home');
   };
 
-  // ADDED: Helper function to process the user data once a token is successfully acquired
   const processSuccessfulLogin = (result) => {
-    const normalizedRole = result.role;
     const userData = {
       email: result.email,
       accessToken: result.accessToken,
-      trueRole: normalizedRole,
-      activeRole: normalizedRole,
+      trueRole: result.role,
+      activeRole: result.role,
       branchId: result.branchId,
       branchLocation: result.branchLocation
     };
 
-    setTrueRole(normalizedRole);
+    setTrueRole(result.role);
 
-    if (normalizedRole === 'MANAGER') {
+    if (result.role === 'MANAGER') {
       setPendingAuthData(userData);
       setView('module');
     } else {
       setAuthUser(userData);
-      navigateByRole(normalizedRole);
+      navigateByRole(result.role);
     }
   };
 
@@ -57,10 +54,9 @@ export const useLogin = () => {
     try {
       const result = await loginApi(email, password);
 
-      // FIXED: Intercept Leo's flag before processing the login
       if (result.requiresPasswordChange) {
         setShowPasswordModal(true);
-        return; // Halt execution here
+        return;
       }
 
       processSuccessfulLogin(result);
@@ -71,12 +67,11 @@ export const useLogin = () => {
     }
   };
 
-  // ADDED: Submission handler for the modal
+
   const handlePasswordUpdate = async (newPassword) => {
     setIsLoading(true);
     setError(null);
     try {
-      // Send the login request again, but this time with the new password attached
       const result = await loginApi(email, password, newPassword);
       
       setShowPasswordModal(false);
@@ -112,7 +107,6 @@ export const useLogin = () => {
     setPassword,
     email,
     setEmail,
-    // ADDED: Export the new states and functions so LoginPage.jsx can use them
     showPasswordModal,
     setShowPasswordModal,
     handlePasswordUpdate

@@ -36,7 +36,7 @@ const ROLE_RANKS = {
   OWNER: 4,
 };
 
-const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = [], updateDetails }) => {
+const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = [], updateAccount }) => {
   
   const { user } = useAuth();
   const [config, setConfig] = useState(null);
@@ -100,7 +100,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
       description: "The user of this account will be notified of the changes made to their account.",
       confirmText: "Save Changes",
       onConfirm: async () => {
-        await updateDetails(selectedAccount.employeeId, data);
+        await updateAccount(selectedAccount.employeeId, data);
         setData(null);
         onClose();
       } 
@@ -112,8 +112,10 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent
-          className="sm:max-w-3xl"
-        >
+            className="sm:max-w-3xl"
+            onInteractOutside={(e) => e.preventDefault()}
+            onPointerDownOutside={(e) => e.preventDefault()}
+         >
           <DialogHeader>
             <DialogTitle>Edit Account</DialogTitle>
           </DialogHeader>

@@ -74,17 +74,34 @@ const CreateTransferRequestPage = () => {
     }, [data.fromBranch]);
 
     const handleAddProduct = () => {
-        if (!selectedProduct) return;
+    if (!selectedProduct) return;
 
-        const productOption = productOptions.find(p => p.value === selectedProduct);
-        if (!productOption) return;
+    const productOption = productOptions.find(p => p.value === selectedProduct);
+    if (!productOption) return;
 
-        const fromBranchName = branchOptions.find(
-            b => b.value === data.fromBranch
-        )?.label?.toUpperCase();
-        const isWarehouse = fromBranchName === 'WAREHOUSE';
+    const fromBranchName = branchOptions.find(
+        b => b.value === data.fromBranch
+    )?.label?.toUpperCase();
+    
+    const isWarehouse = fromBranchName === 'WAREHOUSE';
 
-        if (!isWarehouse && quantity > (productOption.availableQty ?? 0)) return;
+    const existingItem = data.items?.find(p => p.productId === productOption.value);
+    const alreadyAddedQty = existingItem ? existingItem.quantity : 0;
+
+    const maxAvailable = productOption.availableQty ?? 0;
+    const remainingAllowed = isWarehouse ? Infinity : (maxAvailable - alreadyAddedQty);
+
+    if (!isWarehouse && quantity > remainingAllowed) {
+        setConfig({
+            isAlert: true,
+            title: "Exceeds Available Stock",
+            description: `You can only add up to ${remainingAllowed} more unit(s) of this product.`,
+            confirmVariant: "destructive",
+            confirmText: "Acknowledge",
+            onConfirm: () => setConfig(null)
+        });
+        return;
+    }
 
         setData(prev => {
             const existingIndex = prev.items.findIndex(p => p.productId === productOption.value);
@@ -106,10 +123,11 @@ const CreateTransferRequestPage = () => {
 
             return { ...prev, items: updatedItems };
         });
+        
         setSelectedProduct('');
         setQuantity(1);
     };
-
+    
     const handleRemoveProduct = (productId) => {
         setData(prev => ({
             ...prev,
@@ -120,11 +138,9 @@ const CreateTransferRequestPage = () => {
     const executeSubmission = async () => {
         setIsSubmitting(true);
         try {
-            // Find the literal text strings (e.g., "RIVERBANKS") from the state options
-            const fromBranchStr = branchOptions.find(b => b.value === data.fromBranch)?.label || "";
-            const toBranchStr = branchOptions.find(b => b.value === data.toBranch)?.label || "";
+            const fromBranchStr = branchOptions.find(b => b.value === data.fromBranch)?.label;
+            const toBranchStr = branchOptions.find(b => b.value === data.toBranch)?.label;
 
-            // Mapped exactly to Leo's updated DTO (expecting strings)
             const payload = {
                 fromBranch: fromBranchStr,
                 toBranch: toBranchStr,
@@ -154,7 +170,6 @@ const CreateTransferRequestPage = () => {
     };
 
     const handleSubmitClick = () => {
-        // Validate required fields
         if (!data.fromBranch || !data.toBranch) {
             setConfig({
                 isAlert: true,
@@ -180,7 +195,6 @@ const CreateTransferRequestPage = () => {
             return;
         }
 
-        // Show confirmation modal before executing API call
         setConfig({
             isAlert: false,
             title: "Submit Transfer Request?",
