@@ -71,7 +71,7 @@ const CreateTransferRequestPage = () => {
                 availableQty: p.productQty || 0,
             })));
         });
-    }, [data.fromBranch]);
+    }, [data.fromBranch, fetchRequestFilters]);
 
     const handleAddProduct = () => {
         if (!selectedProduct) return;
@@ -84,7 +84,23 @@ const CreateTransferRequestPage = () => {
         )?.label?.toUpperCase();
         const isWarehouse = fromBranchName === 'WAREHOUSE';
 
-        if (!isWarehouse && quantity > (productOption.availableQty ?? 0)) return;
+        // FIXED: Calculate total intended quantity by checking what is already in the list
+        const existingItem = data.items.find(p => p.productId === productOption.value);
+        const currentQtyInList = existingItem ? existingItem.quantity : 0;
+        const totalIntendedQty = currentQtyInList + quantity;
+
+        // FIXED: Validate combined total against available stock and show an alert if it exceeds
+        if (!isWarehouse && totalIntendedQty > (productOption.availableQty ?? 0)) {
+            setConfig({
+                isAlert: true,
+                title: "Not Enough Stock",
+                description: `You are trying to request ${totalIntendedQty} units total, but only ${productOption.availableQty} are available in the source branch.`,
+                confirmVariant: "default",
+                confirmText: "Okay",
+                onConfirm: () => setConfig(null)
+            });
+            return;
+        }
 
         setData(prev => {
             const existingIndex = prev.items.findIndex(p => p.productId === productOption.value);
@@ -120,11 +136,9 @@ const CreateTransferRequestPage = () => {
     const executeSubmission = async () => {
         setIsSubmitting(true);
         try {
-            // Find the literal text strings (e.g., "RIVERBANKS") from the state options
             const fromBranchStr = branchOptions.find(b => b.value === data.fromBranch)?.label || "";
             const toBranchStr = branchOptions.find(b => b.value === data.toBranch)?.label || "";
 
-            // Mapped exactly to Leo's updated DTO (expecting strings)
             const payload = {
                 fromBranch: fromBranchStr,
                 toBranch: toBranchStr,
@@ -154,7 +168,6 @@ const CreateTransferRequestPage = () => {
     };
 
     const handleSubmitClick = () => {
-        // Validate required fields
         if (!data.fromBranch || !data.toBranch) {
             setConfig({
                 isAlert: true,
@@ -180,7 +193,6 @@ const CreateTransferRequestPage = () => {
             return;
         }
 
-        // Show confirmation modal before executing API call
         setConfig({
             isAlert: false,
             title: "Submit Transfer Request?",
