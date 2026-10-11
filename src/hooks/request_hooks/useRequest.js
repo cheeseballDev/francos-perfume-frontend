@@ -77,10 +77,11 @@ export const useRequest = () => {
       return () => clearTimeout(timer);
     }, [fetchRequests]);
 
-    const fetchRequestFilters = useCallback(async () => {
+    // FIXED: Added branchId parameter to pass down to the API call
+    const fetchRequestFilters = useCallback(async (branchId = null) => {
         setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
-            const data = await getRequestFilters();
+            const data = await getRequestFilters(branchId);
             setFilterOptions(buildFilterOptions(data, REQUEST_FILTER_SCHEMA));
             return data;
         } catch (err) {

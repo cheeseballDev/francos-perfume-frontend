@@ -19,45 +19,45 @@ export default function RequestInformation({ request }) {
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
-            <h2 className="text-xl font-bold text-gray-900">Request Information</h2>
+        <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-6">
+            <h2 className="text-xl font-bold text-foreground">Request Information</h2>
 
             {/* Metadata Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                    <span className="text-xs text-gray-400 block font-medium">From Branch</span>
-                    <span className="font-semibold text-gray-800">
+                    <span className="text-xs text-muted-foreground block font-medium">From Branch</span>
+                    <span className="font-semibold text-foreground">
                         {request.requestedFrom || "N/A"}
                     </span>
                 </div>
                 <div>
-                    <span className="text-xs text-gray-400 block font-medium">To Branch</span>
-                    <span className="font-semibold text-gray-800">
+                    <span className="text-xs text-muted-foreground block font-medium">To Branch</span>
+                    <span className="font-semibold text-foreground">
                         {request.deliveredTo || "N/A"}
                     </span>
                 </div>
                 <div>
-                    <span className="text-xs text-gray-400 block font-medium">Created By</span>
-                    <span className="font-semibold text-gray-800">
+                    <span className="text-xs text-muted-foreground block font-medium">Created By</span>
+                    <span className="font-semibold text-foreground">
                         {request.employeeDisplayId || "N/A"}
                     </span>
                 </div>
                 <div>
-                    <span className="text-xs text-gray-400 block font-medium">Date Created</span>
-                    <span className="font-semibold text-gray-800">
+                    <span className="text-xs text-muted-foreground block font-medium">Date Created</span>
+                    <span className="font-semibold text-foreground">
                         {formatDate(request.requestDateSubmitted)}
                     </span>
                 </div>
             </div>
 
             {/* Request Message Box */}
-            <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 flex gap-3 items-start">
-                <div className="p-2 bg-indigo-500 rounded-lg text-white mt-0.5">
+            <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 flex gap-3 items-start">
+                <div className="p-2 bg-primary rounded-lg text-primary-foreground mt-0.5">
                     <MessageSquare className="w-4 h-4" />
                 </div>
                 <div>
-                    <h3 className="font-bold text-indigo-950 text-sm">Request Message</h3>
-                    <p className="text-xs text-indigo-600/80 mt-1 whitespace-pre-line leading-relaxed">
+                    <h3 className="font-bold text-primary text-sm">Request Message</h3>
+                    <p className="text-xs text-muted-foreground mt-1 whitespace-pre-line leading-relaxed">
                         {request.requestMessage && request.requestMessage !== "string"
                             ? request.requestMessage
                             : "No request message provided."}

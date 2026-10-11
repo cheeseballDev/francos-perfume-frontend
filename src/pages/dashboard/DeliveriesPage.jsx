@@ -11,7 +11,7 @@ import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { cancelDelivery, dispatchDelivery, receiveDelivery } from "@/services/DeliveryService";
 import { ArrowDownLeft, ArrowUpRight, Clock, ListFilter } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom"; // <-- Added useNavigate
 
 const DeliveriesPage = () => {
     const {
@@ -26,6 +26,7 @@ const DeliveriesPage = () => {
 
     const { user } = useAuth();
 
+    const navigate = useNavigate(); // <-- Initialized navigate
     const [searchParams, setSearchParams] = useSearchParams();
     const [config, setConfig] = useState(null);
 
@@ -89,6 +90,7 @@ const DeliveriesPage = () => {
             title: "Cancel this request?",
             description: "This cannot be undone. The request will be terminated.",
             confirmText: "Cancel Request",
+            confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
                     await cancelDelivery(deliveryId);
@@ -141,6 +143,7 @@ const DeliveriesPage = () => {
             title: "Reject this delivery request?",
             description: "This will notify the source branch that the request has been rejected.",
             confirmText: "Reject Request",
+            confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
                     await receiveDelivery(deliveryId, { accepted: false });
@@ -162,30 +165,9 @@ const DeliveriesPage = () => {
         });
     };
 
+    // FIXED: Replaced the dialog with navigation to the stock-checking page
     const handleConfirmDelivery = (deliveryId) => {
-        setConfig({
-            title: "Confirm delivery received?",
-            description: "This will mark the delivery as completed and update your inventory.",
-            confirmText: "Confirm Delivery",
-            onConfirm: async () => {
-                try {
-                    await receiveDelivery(deliveryId, { received: true });
-                    fetchDeliveries();
-                    setConfig(null);
-                } catch (err) {
-                    console.error("Failed to confirm delivery:", err);
-                    setConfig({
-                        isAlert: true,
-                        title: "Action Failed",
-                        description: err.message || "Failed to confirm the delivery.",
-                        confirmVariant: "destructive",
-                        confirmText: "Acknowledge",
-                        onConfirm: () => setConfig(null) 
-                    });
-                }
-            },
-            onCancel: () => setConfig(null),
-        });
+        navigate(`/home/deliveries/${deliveryId}/confirm`);
     };
 
     return (
@@ -201,25 +183,19 @@ const DeliveriesPage = () => {
                 <StatusCard
                     title="Pending Dispatches"
                     Icon={Clock}
-                    //secondValue={forDispatchInbound}
                     subText=" inbound, "
-                    //thirdValue={forDispatchOutbound}
                     secondSubText=" outbound"
                 />
                 <StatusCard
                     title="Outbound Deliveries"
                     Icon={Clock}
-                    //secondValue={outboundInTransit}
                     subText=" in-transit "
-                    //thirdValue={outboundCompleted}
                     secondSubText=" completed"
                 />
                 <StatusCard
                     title="Inbound Deliveries"
                     Icon={Clock}
-                    //secondValue={inboundInTransit}
                     subText=" in-transit "
-                    //thirdValue={inboundCompleted}
                     secondSubText=" completed"
                 />
             </div>

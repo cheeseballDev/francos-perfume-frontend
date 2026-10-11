@@ -29,12 +29,14 @@ export const rejectRequest = async (requestId, remarks) => {
   return response.data;
 };
 
-export const getRequestFilters = async () => {
-  const response = await apiClient.get(`${PATH}/filters`);
+// FIXED: Now accepts branchId and sends it to the C# backend
+export const getRequestFilters = async (branchId = null) => {
+  const url = branchId ? `${PATH}/filters?branchId=${branchId}` : `${PATH}/filters`;
+  const response = await apiClient.get(url);
   return response.data;
 };
 
 export const cancelRequest = async (requestId) => {
   const response = await apiClient.patch(`${PATH}/${requestId}/cancel`);
   return response.data;
-}
+};
