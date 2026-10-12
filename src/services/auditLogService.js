@@ -10,3 +10,22 @@ export const getAllAuditLogs = async (filter) => {
   });
   return response.data;
 };
+
+// ADDED: Export endpoints with date filters
+export const getExcel = async (dateFrom, dateTo) => {
+    const params = cleanFilters({ dateFrom, dateTo }); 
+    const response = await apiClient.get(`${PATH}/excel`, {
+        params,
+        responseType: "blob",
+    });
+    return response;
+}
+
+export const getPdf = async (dateFrom, dateTo) => {
+    const params = cleanFilters({ dateFrom, dateTo });
+    const response = await apiClient.get(`${PATH}/pdf`, {
+        params,
+        responseType: "blob",
+    });
+    return response;
+}

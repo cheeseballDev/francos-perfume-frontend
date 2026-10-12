@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { getExcel, getPdf } from "../../services/TransactionService";
+// FIXED: Using absolute alias to avoid strict casing crashes in relative paths
+import { getExcel, getPdf } from "@/services/transactionService";
 
 export const useExportReport = () => {
     const [isExporting, setIsExporting] = useState(false);
@@ -27,12 +28,11 @@ export const useExportReport = () => {
         window.URL.revokeObjectURL(url);
     };
 
-
-    const exportExcel = useCallback(async () => {
+    const exportExcel = useCallback(async (dateFrom, dateTo) => {
         setIsExporting(true);
         setIsError(null);
         try {
-            const response = await getExcel();
+            const response = await getExcel(dateFrom, dateTo);
             const filename = getFilename(response, "Transaction_List.xlsx");
             triggerDownload(response.data, filename);
         } catch (err) {
@@ -42,17 +42,17 @@ export const useExportReport = () => {
         }
     }, []);
 
-    const exportPdf = useCallback(async () => {
+    const exportPdf = useCallback(async (dateFrom, dateTo) => {
         setIsExporting(true);
         setIsError(null);
         try {
-            const response = await getPdf();
+            const response = await getPdf(dateFrom, dateTo);
             const filename = getFilename(response, "Transaction_List.pdf");
-        triggerDownload(response.data, filename);
+            triggerDownload(response.data, filename);
         } catch (err) {
             setIsError(err);
         } finally {
-        setIsExporting(false);
+            setIsExporting(false);
         }
     }, []);
 
