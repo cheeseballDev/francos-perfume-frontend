@@ -1,4 +1,4 @@
-import { getAllProductsPOS } from "@/services/pointOfSaleService"; // FIXED: lowercase 'p' to match disk
+import { getAllProductsPOS } from "@/services/PointOfSaleService"; // FIXED: lowercase 'p' to match disk
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../auth/UseAuth";
 

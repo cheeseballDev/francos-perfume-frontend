@@ -1,5 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
-import { addNewProduct, getAllProducts, getProductDetails, getProductFilters, updateProductDetails } from "@/services/ProductService";
+import { addNewProduct, getAllProductBarcodeDownload, getAllProducts, getOneProductBarcode, getOneProductBarcodeDownload, getProductDetails, getProductFilters, updateProductDetails } from "@/services/ProductService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
@@ -119,7 +119,53 @@ export const useProduct = () => {
         fetchProductFilters();
     }, [fetchProductFilters]);
 
-        
+    const fetchOneProductBarcode = useCallback(async (productId) => {
+        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const data = await getOneProductBarcode(productId);
+            return data;
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, error: err }));
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+        }
+    }, [])
+
+    const downloadOneProductBarcode = async (productId) => {
+        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const blob = await getOneProductBarcodeDownload(productId);
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `barcode-${productId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, error: err }));
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+        }
+    };
+
+    const downloadAllProductBarcodes = async () => {
+        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const blob = await getAllProductBarcodeDownload();
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `barcode-list.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, error: err }));
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+        }
+    };
     return { 
       products, 
       asyncState,
@@ -129,6 +175,9 @@ export const useProduct = () => {
       filterOptions,
       getProduct,
       updateProduct,
-      createProduct
+      createProduct,
+      fetchOneProductBarcode,
+      downloadOneProductBarcode,
+      downloadAllProductBarcodes
     };
 }

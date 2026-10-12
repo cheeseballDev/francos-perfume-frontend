@@ -1,6 +1,6 @@
 import { cleanFilters } from "@/utils/formattingUtils.jsx";
 
-import apiClient from "./ApiClient";
+import apiClient from "./APIClient";
 
 const PATH = "/Discount";
 

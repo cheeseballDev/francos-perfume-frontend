@@ -1,24 +1,19 @@
 import {
-  AlertTriangle,
-  BarChart2,
-  ChevronDown,
-  ChevronsUp,
-  Eye,
-  FileUp,
-  TrendingDown,
-  TrendingUp,
-  Sparkles,
-  X,
-  Package,
+    AlertTriangle,
+    BarChart2,
+    Eye,
+    Package,
+    Sparkles,
+    TrendingDown,
+    TrendingUp
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import StatusCard from "../../components/shared/StatusCard";
 import { useForecast } from "@/hooks/forecast_hooks/useForecast";
+import StatusCard from "../../components/shared/StatusCard";
 
 const MONTHS = [
   { value: 1, label: "January" }, { value: 2, label: "February" },
@@ -125,7 +120,7 @@ const ForecastChart = ({ data }) => {
 const ForecastPage = () => {
   const { forecastData, asyncState, fetchForecast, branchOptions, productOptions } = useForecast();
 
-  const [chartData, setChartData]               = useState([]);
+  const [chartData, setChartData] = useState([]);
   const [perfumeForecasts, setPerfumeForecasts] = useState([]);
   
   const [formData, setFormData] = useState({
