@@ -19,10 +19,10 @@ export const RequestApprovalActions = ({ user, allProductsApproved, remarks, set
 
     if (requestStage === "DISPATCH" || requestStage === "TRANSIT") {
         return (
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4 text-center">
-                <h2 className="text-base font-bold text-gray-900">No Action Required</h2>
-                <p className="text-sm text-gray-500">
-                    This request is currently in the <span className="font-bold text-gray-700">{requestStage}</span> stage. No approval or rejection actions are required at this time.
+            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
+                <h2 className="text-base font-bold text-foreground">No Action Required</h2>
+                <p className="text-sm text-muted-foreground">
+                    This request is currently in the <span className="font-bold text-foreground">{requestStage}</span> stage. No approval or rejection actions are required at this time.
                 </p>
             </div>
         );
@@ -30,10 +30,10 @@ export const RequestApprovalActions = ({ user, allProductsApproved, remarks, set
 
     if (requestStatus === "RECEIVED" || requestStatus === "APPROVED") {
         return (
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4 text-center">
-                <h2 className="text-base font-bold text-gray-900">No Action Required</h2>
-                <p className="text-sm text-gray-500">
-                    This request has already been <span className="font-bold text-gray-700">{requestStatus}</span>. No further approval or rejection actions are required.
+            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
+                <h2 className="text-base font-bold text-foreground">No Action Required</h2>
+                <p className="text-sm text-muted-foreground">
+                    This request has already been <span className="font-bold text-foreground">{requestStatus}</span>. No further approval or rejection actions are required.
                 </p>
             </div>
         );
@@ -41,11 +41,11 @@ export const RequestApprovalActions = ({ user, allProductsApproved, remarks, set
     
     if (!isAuthorized) {
         return (
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4 text-center">
-                <h2 className="text-base font-bold text-gray-900">Waiting for Approval</h2>
-                <p className="text-sm text-gray-500">
+            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
+                <h2 className="text-base font-bold text-foreground">Waiting for Approval</h2>
+                <p className="text-sm text-muted-foreground">
                     This request is currently pending review for{" "}
-                    <span className="font-bold text-gray-700">
+                    <span className="font-bold text-foreground">
                         {requestStage || "the next stage"}
                     </span>
                     . You are not authorized to approve or reject at this time.
@@ -55,14 +55,14 @@ export const RequestApprovalActions = ({ user, allProductsApproved, remarks, set
     }
 
     return (
-        <div className="bg-white p-6 rounded-xl border border-amber-200 shadow-sm space-y-4">
+        <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4">
             <div>
-                <h2 className="text-base font-bold text-gray-900">Required Action</h2>
+                <h2 className="text-base font-bold text-foreground">Required Action</h2>
             </div>
 
             <Textarea
                 placeholder="Add remarks (required for rejection)..."
-                className="resize-none h-20 text-sm border-gray-200 focus:border-gray-400"
+                className="resize-none h-20 text-sm border-input bg-background text-foreground focus:ring-2 focus:ring-ring"
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
             />

@@ -42,28 +42,26 @@ const CreateTransferRequestPage = () => {
     const [branchOptions, setBranchOptions] = useState([]);
     const [productOptions, setProductOptions] = useState([]);
 
+    // Fetch branches once on mount
     useEffect(() => {
-        fetchRequestFilters().then(data => {
-            if (!data) return;
-            setBranchOptions((data.branches).map(branch => ({
+        fetchRequestFilters().then(raw => {
+            if (!raw) return;
+            setBranchOptions((raw.branches).map(branch => ({
                 value: branch.branchId,
                 label: branch.branchLocation,
-            })));
-            setProductOptions((data.products).map(product => ({
-                value: product.productId,
-                label: product.productName,
-                availableQty: product.productQty || 0,
             })));
         });
     }, [fetchRequestFilters]);
 
+    // Fetch products and correct remote stock when Source Branch changes
     useEffect(() => {
         if (!data.fromBranch) {
             setProductOptions([]);
             return;
         }
 
-        fetchRequestFilters().then(raw => {
+        // FIXED: Passing data.fromBranch fetches the actual inventory of the remote branch!
+        fetchRequestFilters(data.fromBranch).then(raw => {
             if (!raw) return;
             setProductOptions((raw.products || []).map(p => ({
                 value: p.productId,
@@ -74,34 +72,34 @@ const CreateTransferRequestPage = () => {
     }, [data.fromBranch, fetchRequestFilters]);
 
     const handleAddProduct = () => {
-    if (!selectedProduct) return;
+        if (!selectedProduct) return;
 
-    const productOption = productOptions.find(p => p.value === selectedProduct);
-    if (!productOption) return;
+        const productOption = productOptions.find(p => p.value === selectedProduct);
+        if (!productOption) return;
 
-    const fromBranchName = branchOptions.find(
-        b => b.value === data.fromBranch
-    )?.label?.toUpperCase();
-    
-    const isWarehouse = fromBranchName === 'WAREHOUSE';
+        const fromBranchName = branchOptions.find(
+            b => b.value === data.fromBranch
+        )?.label?.toUpperCase();
+        
+        const isWarehouse = fromBranchName === 'WAREHOUSE';
 
-    const existingItem = data.items?.find(p => p.productId === productOption.value);
-    const alreadyAddedQty = existingItem ? existingItem.quantity : 0;
+        const existingItem = data.items?.find(p => p.productId === productOption.value);
+        const alreadyAddedQty = existingItem ? existingItem.quantity : 0;
 
-    const maxAvailable = productOption.availableQty ?? 0;
-    const remainingAllowed = isWarehouse ? Infinity : (maxAvailable - alreadyAddedQty);
+        const maxAvailable = productOption.availableQty ?? 0;
+        const remainingAllowed = isWarehouse ? Infinity : (maxAvailable - alreadyAddedQty);
 
-    if (!isWarehouse && quantity > remainingAllowed) {
-        setConfig({
-            isAlert: true,
-            title: "Exceeds Available Stock",
-            description: `You can only add up to ${remainingAllowed} more unit(s) of this product.`,
-            confirmVariant: "destructive",
-            confirmText: "Acknowledge",
-            onConfirm: () => setConfig(null)
-        });
-        return;
-    }
+        if (!isWarehouse && quantity > remainingAllowed) {
+            setConfig({
+                isAlert: true,
+                title: "Exceeds Available Stock",
+                description: `You can only add up to ${remainingAllowed} more unit(s) of this product.`,
+                confirmVariant: "destructive",
+                confirmText: "Acknowledge",
+                onConfirm: () => setConfig(null)
+            });
+            return;
+        }
 
         setData(prev => {
             const existingIndex = prev.items.findIndex(p => p.productId === productOption.value);

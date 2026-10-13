@@ -1,5 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
-import ConfirmDialog from "@/components/shared/ConfirmDialog"; // ADDED: Import ConfirmDialog
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useRequestDetails } from "@/hooks/request_hooks/useRequestDetails";
@@ -181,8 +181,9 @@ export default function RequestDetailsPage() {
                 )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
+            {/* FIXED: Changed breakpoints from lg to xl to force stacking on smaller screens */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="xl:col-span-2 space-y-6">
 
                     <RequestInformation 
                         request={data} 
@@ -205,7 +206,7 @@ export default function RequestDetailsPage() {
                     </div>
                 </div>
 
-                <div className="lg:col-span-1 space-y-6">
+                <div className="xl:col-span-1 space-y-6">
                     <RequestTimeline
                         selectedRequest={data}
                     />
