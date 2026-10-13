@@ -46,7 +46,8 @@ export const useProductArchive = () => {
                 })
             })
             .catch((err) => {
-            setAsyncState((prev) => ({ ...prev, error: err }));
+                setAsyncState((prev) => ({ ...prev, error: err }));
+                throw err;
             })
             .finally(() => {
                 setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));

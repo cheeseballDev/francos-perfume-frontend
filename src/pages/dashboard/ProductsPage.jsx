@@ -19,7 +19,6 @@ export default function ProductsPage() {
         filter,
         updateFilter,
         filterOptions,
-        fetchProducts,
         updateProduct,
         createProduct
     } = useProduct();
@@ -113,7 +112,6 @@ export default function ProductsPage() {
                 selectedProduct={selectedProduct}
                 filterOptions={filterOptions}
                 updateProduct={updateProduct}
-                onSuccess={fetchProducts}
             /> 
 
         </div>

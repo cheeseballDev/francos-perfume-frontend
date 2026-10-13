@@ -1,8 +1,20 @@
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
+import { useState } from 'react';
 import Barcode from 'react-barcode';
 
 const BarcodePreview = ({ selectedProduct, downloadOneProductBarcode }) => {
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const handleSingleDownload = async () => {
+        try {
+            setIsDownloading(true);
+            await downloadOneProductBarcode(selectedProduct.productId);
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     if (!selectedProduct) {
         return (
             <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
@@ -27,8 +39,9 @@ const BarcodePreview = ({ selectedProduct, downloadOneProductBarcode }) => {
                 />
             </div>
 
-            <Button className="w-full" onClick={() => downloadOneProductBarcode(selectedProduct.productId)}>
-                <Download size={16} /> Download PDF
+            <Button className="w-full" onClick={handleSingleDownload}>
+                <Download size={16} /> 
+                {isDownloading ? "Downloading..." : "Download PDF"}
             </Button>
         </div>
     );

@@ -37,6 +37,7 @@ export const useExportReport = () => {
             triggerDownload(response.data, filename);
         } catch (err) {
             setIsError(err)
+            throw err;
         } finally {
             setIsExporting(false);
         }
@@ -51,6 +52,7 @@ export const useExportReport = () => {
         triggerDownload(response.data, filename);
         } catch (err) {
             setIsError(err);
+            throw err;
         } finally {
         setIsExporting(false);
         }

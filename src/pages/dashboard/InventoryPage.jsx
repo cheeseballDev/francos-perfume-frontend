@@ -1,9 +1,6 @@
-import { useAuth } from "@/auth/UseAuth";
 import InventoryTable from "@/components/features/inventory_components/InventoryTable";
 import TableSkeleton from "@/components/loaders/TableSkeleton";
-import { Button } from "@/components/ui/button";
-import { formatDateForInput } from "@/utils/formattingUtils";
-import { Plus } from "lucide-react";
+import { formatDateForInput, formatDateForTable } from "@/utils/formattingUtils";
 import { useState } from "react";
 import EditBatchModal from "../../components/features/inventory_components/EditBatchModal";
 import FilterDropDown from "../../components/shared/FilterDropDown";
@@ -11,36 +8,70 @@ import SearchBar from "../../components/shared/SearchBar";
 import { useInventory } from "../../hooks/inventory_hooks/useInventory";
 
 const InventoryPage = () => {
-  const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState(""); 
-  
-  const { inventory, asyncState, pagination, filter, updateFilter, fetchBatchesForProduct, saveBatchEdit, filterOptions } = useInventory();
+    const { 
+        inventory, 
+        asyncState, 
+        pagination, 
+        filter, 
+        updateFilter, 
+        fetchBatchesForProduct, 
+        saveBatchEdit, 
+        filterOptions 
+    } = useInventory();
+    
+    const [searchQuery, setSearchQuery] = useState(""); 
+    const [isEditBatchModalOpen, setIsEditBatchModalOpen] = useState(false);
+    const [selectedBatch, setSelectedBatch] = useState(null);
+    const [batchMap, setBatchMap] = useState({});
 
-  const [isCreateNewProductModalOpen, setIsCreateNewProductModalOpen] = useState(false);
-  const [isEditBatchModalOpen, setIsEditBatchModalOpen] = useState(false);
-  const [editingBatch, setEditingBatch] = useState(null);
-
-  const [batchMap, setBatchMap] = useState([]);
-
-  const handleOpenEditBatchModal = (batch, product) => {
-    const date = batch.targetDate || batch.dateReceived;
-    const formattedTargetDate = date ? formatDateForInput(date) : null;
-        setEditingBatch({ 
-          ...batch,
-          branchId: batch.branchId,
-          batchDisplayId: batch.batchDisplayId,
-          productName: product.productName,
-          quantity: batch.quantity,
-          targetDate: formattedTargetDate
+    const handleOpenEditBatchModal = (batch, product) => {
+        const formattedReceivedDate = formatDateForTable(batch.dateReceived);
+        const formattedExpiryDate = formatDateForInput(batch.expiryDate);
+        setSelectedBatch({ 
+            ...batch,
+            branchId: product.branchId,
+            branchName: product.branchName,
+            batchDisplayId: batch.batchDisplayId,
+            productDisplayId: product.productDisplayId,
+            productId: product.productId,
+            productName: product.productName,
+            quantity: batch.quantity,
+            expiryDate: formattedExpiryDate,
+            dateReceived: formattedReceivedDate
         });
         setIsEditBatchModalOpen(true);
     };
-  
-  const handleSearchChange = (value) => {
-    const query = value?.target ? value.target.value : value;
-    setSearchQuery(query);
-    updateFilter('search', query);
-  }
+
+    const handleSaveBatchWrapper = async (batchId, dto) => {
+        await saveBatchEdit(batchId, dto);
+    
+        if (selectedBatch) {
+            const freshBatches = await fetchBatchesForProduct(selectedBatch.productId, selectedBatch.branchId);
+            const mapped = (freshBatches || []).map(b => ({
+                batchDisplayId: b.batchDisplayId,
+                batchId: b.batchId,
+                dateReceived: b.createdAt,
+                expiryDate: b.expiryDate ? formatDateForInput(b.expiryDate) : 'N/A',
+                quantity: b.quantity
+            }));
+
+            const rowKey = `${selectedBatch.productDisplayId}-${selectedBatch.branchName}`;
+
+            setBatchMap(prev => ({
+                ...prev,
+                [rowKey]: mapped
+            }));
+        }
+        
+        setIsEditBatchModalOpen(false);
+    };
+
+    const handleSearchChange = (value) => {
+        const query = value?.target ? value.target.value : value;
+        setSearchQuery(query);
+        updateFilter('search', query);
+        updateFilter('pageCount', 1)
+    }
   
   return (
     <div className="flex flex-col h-screen overflow-auto-y animate-fade-in relative font-montserrat">
@@ -55,33 +86,20 @@ const InventoryPage = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 mb-8">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="w-full sm:max-w-xl">
+      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+        <div className="w-full sm:max-w-md">
             <SearchBar
-              value={searchQuery}
-              onChange={handleSearchChange}
+                value={searchQuery}
+                onChange={handleSearchChange}
             />
-          </div>
-
-        {user.trueRole === 'OWNER' && (
-          <Button
-            onClick={() => setIsCreateNewProductModalOpen(true)}
-            className="w-full sm:w-auto shrink-0"
-          >
-            <Plus className="h-5 w-5" />
-            Add Stock
-          </Button>
-        )}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <FilterDropDown 
-          filter={filter}
-          updateFilter={updateFilter}
-          filterOptions={filterOptions}
-        />
-      </div>
+        </div>
+        <div className="w-full sm:w-auto">
+            <FilterDropDown 
+                filter={filter}
+                updateFilter={updateFilter}
+                filterOptions={filterOptions}
+            />
+        </div>
     </div>
 
       <div className="flex flex-col gap-4 pb-4 flex-1">
@@ -95,7 +113,7 @@ const InventoryPage = () => {
             batchMap={batchMap}
             setBatchMap={setBatchMap}
             fetchBatchesForProduct={fetchBatchesForProduct}
-            handleSaveBatchEdit={saveBatchEdit}
+            handleSaveBatchEdit={handleSaveBatchWrapper}
             filter={filter}
             updateFilter={updateFilter}
             handleOpenEditBatchModal={handleOpenEditBatchModal}
@@ -104,19 +122,11 @@ const InventoryPage = () => {
       </div>
 
       <EditBatchModal
-        key={editingBatch?.batchId || "empty"}
+        key={selectedBatch?.batchId}
         isOpen={isEditBatchModalOpen}
         onClose={() => setIsEditBatchModalOpen(false)}
-        batch={editingBatch}
-        onSave={async (submittedBatchData) => {
-          await saveBatchEdit(submittedBatchData);
-          setIsEditBatchModalOpen(false)
-          setBatchMap(prev => {
-            const next = {...prev};
-            delete next[`${submittedBatchData.productId}-${submittedBatchData.branchId}`]
-            return next;
-          })
-        }}
+        selectedBatch={selectedBatch}
+        handleSaveBatchWrapper={handleSaveBatchWrapper}
       />  
     </div>
   );

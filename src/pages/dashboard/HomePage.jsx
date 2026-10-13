@@ -1,19 +1,16 @@
 import { useAuth } from "@/auth/UseAuth";
 import DashboardSkeleton from "@/components/loaders/DashboardSkeleton";
-import StatusCard from "../../components/shared/StatusCard";
-import { AlertCircle, Archive, Banknote, BarChart3, Boxes, Clock, Package, ShieldAlert, Receipt } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-// API Services - Adjust uppercase/lowercase here if VS Code still highlights them
-import { getAllAuditLogs } from "@/services/AuditLogService"; 
+import { getAllAuditLogs } from "@/services/AuditLogService";
 import { getAllDeliveries } from "@/services/DeliveryService";
 import { getAllInventory } from "@/services/inventoryService";
 import { getLowStockKPI } from "@/services/KPIService";
 import { getAllRequests } from "@/services/RequestService";
-import { getAllTransactions } from "@/services/TransactionService"; 
+import { getAllTransactions } from "@/services/TransactionService";
+import { AlertCircle, Archive, Banknote, BarChart3, Boxes, Clock, Package, Receipt, ShieldAlert } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import StatusCard from "../../components/shared/StatusCard";
 
-// Safe array extractor for varying backend response structures
 const getArray = (res) => {
     if (!res) return [];
     if (Array.isArray(res)) return res;
@@ -28,8 +25,6 @@ const formatDate = (dateString) => {
         hour: '2-digit', minute: '2-digit'
     });
 };
-
-// ---------------- UI COMPONENTS ----------------
 
 const DashboardPanel = ({ title, actionText, onAction, children, className = "" }) => (
     <div className={`bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col h-full ${className}`}>
@@ -127,8 +122,6 @@ const TransactionItem = ({ tx }) => (
         <span className="text-sm font-bold text-emerald-500">+ ₱{Number(tx?.totalAmount || tx?.grandTotal || 0).toLocaleString()}</span>
     </div>
 );
-
-// ---------------- MAIN DASHBOARD ----------------
 
 const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) => {
     const { user } = useAuth();

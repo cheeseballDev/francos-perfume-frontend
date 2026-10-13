@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-// Helper component for label-value pairs if you don't already have one
 const DetailItem = ({ label, value }) => (
     <div className="flex flex-col gap-1">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
@@ -23,15 +22,19 @@ const TransactionDetailsModal = ({ isOpen, onClose, selectedTransaction }) => {
                     <div className="grid grid-cols-3 gap-6">
                         <DetailItem label="Sales Order ID" value={selectedTransaction.salesOrderDisplayId || "N/A"}/>
                         <DetailItem label="Amount" value={selectedTransaction.amount ? `₱${selectedTransaction.amount}` : "N/A"}/>
-                        <DetailItem label="Processed By" value={selectedTransaction.processedBy || "N/A"} />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-6">
                         <DetailItem 
                             label="Date and Time" 
                             value={selectedTransaction.transactionDate ? new Date(selectedTransaction.transactionDate).toLocaleString() : "N/A"}
                         />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-6">
+                        <DetailItem label="Processed By" value={selectedTransaction.processedBy || "N/A"} />
+                        <DetailItem label="Branch Location" value={selectedTransaction.branchLocation || "N/A"} />
                         <DetailItem label="Payment Method" value={selectedTransaction.paymentMethod || "N/A"}/>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-6">
                         <DetailItem label="Discount Applied" value={selectedTransaction.discountName || "N/A"}/>
                     </div>
 

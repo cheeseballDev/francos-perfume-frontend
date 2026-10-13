@@ -3,6 +3,7 @@ import FormField from '@/components/shared/FormField';
 import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { toast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useState } from 'react';
 
@@ -76,11 +77,27 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
             description: "This will immediately be available to use under the Point-Of-Sale system",
             confirmText: "Create Discount",
             onConfirm: async () => {
-                setIsSubmitting(true);
-                await createDiscount(payload);
-                setIsSubmitting(false);
-                setData({});
-                onClose();
+                try {
+                    setIsSubmitting(true);
+                    await createDiscount(payload);
+
+                    toast({
+                        title: "Success",
+                        description: "Discount created successfully.",
+                    });
+
+                    onClose();
+                } catch (error) {
+                    toast({
+                        title: "Creation Failed",
+                        description: error?.message || "An error occurred while creating the discount.",
+                        variant: "destructive",
+                    });
+                } finally {
+                    setIsSubmitting(false);
+                    setConfig(null);
+                    setData(null);
+                }
             } 
         });
     };
@@ -96,13 +113,15 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
                     <div className="grid grid-cols-2 gap-4 py-4">
                         <FormField 
                             label="Discount Prefix"
+                            maxLength={3}
                             onChange={e => handleChange('discountPrefix', e.target.value)}
-                            placeholder="ABC..."
+                            placeholder="ABC... (MUST BE 3 LETTERS ONLY)"
                             error={errors.discountPrefix}
                         />
 
                         <FormField 
                             label="Discount Name"
+                            maxLength={25}
                             onChange={e => handleChange('discountName', e.target.value)}
                             placeholder="Enter discount name here..."
                             error={errors.discountName}
@@ -121,11 +140,21 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
 
                         <FormField 
                             label={isPercent ? "Discount Percentage (%)" : "Discount Amount (₱)"}
+                            type="number"
+                            step={isPercent ? "1" : "0.01"}
                             value={isPercent ? (data.discountPercent || '') : (data.discountAmount || '')}
-                            onChange={e => handleChange(
-                                isPercent ? 'discountPercent' : 'discountAmount',
-                                e.target.value
-                            )}
+                            onChange={e => {
+                                const val = e.target.value;
+                                const field = isPercent ? 'discountPercent' : 'discountAmount';
+                                const maxLimit = isPercent ? 100 : 9999;
+                                if (val === "") {
+                                    handleChange(field, "");
+                                    return;
+                                }
+
+                                const clampedValue = Math.min(maxLimit, Math.max(0, Number(val)));
+                                handleChange(field, clampedValue);
+                            }}
                             placeholder={isPercent ? "e.g. 10 (for 10%)" : "e.g. 50.00"}
                             error={isPercent ? errors.discountPercent : errors.discountAmount}
                         />
@@ -153,6 +182,7 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </>
     );

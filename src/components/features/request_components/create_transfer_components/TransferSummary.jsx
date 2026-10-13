@@ -1,6 +1,7 @@
 import { useAuth } from '@/auth/UseAuth';
 import { Button } from '@/components/ui/button';
-import { Send, Loader2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2, Send } from 'lucide-react';
 
 const TransferSummary = ({ 
     fromBranch,
@@ -58,9 +59,10 @@ const TransferSummary = ({
 
             <div>
                 <p className="text-sm font-semibold text-foreground mb-2">Request Message</p>
-                <textarea
+                <Textarea
                     value={message || ''}
                     onChange={(e) => onMessageChange(e.target.value)}
+                    maxLength={255}
                     placeholder="Add your comments or message for this request...."
                     className="w-full border border-input bg-transparent text-foreground rounded-lg p-3 text-sm resize-none h-24 outline-none focus:ring-2 focus:ring-ring transition-colors"
                 />
