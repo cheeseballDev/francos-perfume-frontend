@@ -1,4 +1,4 @@
-import { addNewProduct, getAllProductBarcodeDownload, getAllProducts, getOneProductBarcode, getOneProductBarcodeDownload, getProductDetails, getProductFilters, updateProductDetails } from "@/services/ProductService";
+import { getAllProductBarcodeDownload, getAllProducts, getOneProductBarcode, getOneProductBarcodeDownload, getProductDetails, getProductFilters, patchUpdateProductDetails, postAddNewProduct } from "@/services/ProductService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
@@ -84,7 +84,7 @@ export const useProduct = () => {
 
     const updateProduct = async (id, dto) => {
         try {
-            await updateProductDetails(id, dto);
+            await patchUpdateProductDetails(id, dto);
             await new Promise((resolve) => setTimeout(resolve, 200));
             await fetchAllProducts();
         } catch (err) {
@@ -95,7 +95,7 @@ export const useProduct = () => {
 
     const createProduct = async (dto) => {
         try {
-            await addNewProduct(dto);
+            await postAddNewProduct(dto);
             await new Promise((resolve) => setTimeout(resolve, 200));
             await fetchAllProducts();
         } catch (err) {

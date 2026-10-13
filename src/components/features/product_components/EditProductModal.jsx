@@ -82,7 +82,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
         } catch (error) {
             toast({
                 title: "Update Failed",
-                description: error?.message || "An error occurred while updating the product.",
+                description: `An error occurred while updating the product.\n${error}`,
                 variant: "destructive",
             });
         } finally {

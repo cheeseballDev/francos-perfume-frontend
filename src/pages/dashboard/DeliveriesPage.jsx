@@ -8,7 +8,7 @@ import SearchBar from "@/components/shared/SearchBar";
 import StatusCard from "@/components/shared/StatusCard";
 import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
-import { cancelDelivery, dispatchDelivery, receiveDelivery } from "@/services/DeliveryService";
+import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
 import { ArrowDownLeft, ArrowUpRight, Clock, ListFilter } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom"; // <-- Added useNavigate
@@ -66,7 +66,7 @@ const DeliveriesPage = () => {
             confirmText: "Mark In Transit",
             onConfirm: async () => {
                 try {
-                    await dispatchDelivery(deliveryId);
+                    await postDispatchDelivery(deliveryId);
                     fetchDeliveries();
                     setConfig(null);
                 } catch (err) {
@@ -93,7 +93,7 @@ const DeliveriesPage = () => {
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
-                    await cancelDelivery(deliveryId);
+                    await postCancelDelivery(deliveryId);
                     fetchDeliveries();
                     setConfig(null);
                 } catch (err) {
@@ -119,7 +119,7 @@ const DeliveriesPage = () => {
             confirmText: "Accept Request",
             onConfirm: async () => {
                 try {
-                    await receiveDelivery(deliveryId, { accepted: true });
+                    await postReceiveDelivery(deliveryId, { accepted: true });
                     fetchDeliveries();
                     setConfig(null);
                 } catch (err) {
@@ -146,7 +146,7 @@ const DeliveriesPage = () => {
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
-                    await receiveDelivery(deliveryId, { accepted: false });
+                    await postReceiveDelivery(deliveryId, { accepted: false });
                     fetchDeliveries();
                     setConfig(null);
                 } catch (err) {

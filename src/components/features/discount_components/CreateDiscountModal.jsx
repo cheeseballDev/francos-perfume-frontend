@@ -90,7 +90,7 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
                 } catch (error) {
                     toast({
                         title: "Creation Failed",
-                        description: error?.message || "An error occurred while creating the discount.",
+                        description: `An error occurred while creating the discount.\n${error}`,
                         variant: "destructive",
                     });
                 } finally {

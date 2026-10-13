@@ -25,7 +25,7 @@ export const getInventoryBatches = async (productId, branchId) => {
     return response.data;
 };
 
-export const updateBatch = async (batchId, dto) => {
+export const patchUpdateBatch = async (batchId, dto) => {
     const response = await apiClient.patch(`${PATH}/batch/${batchId}`, dto);
     return response.data;
 };
@@ -35,7 +35,8 @@ export const getInventoryFilters = async () => {
     return response.data;
 };
 
-
+/*
 export const addInventoryItem = async () => {
     
 };
+*/

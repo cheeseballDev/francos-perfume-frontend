@@ -4,6 +4,7 @@ import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { Check } from 'lucide-react';
 import { useState } from 'react';
@@ -17,8 +18,9 @@ const productValidationSchema = {
 };
 
 const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) => {
-    const [config, setConfig] = useState(null);
+    const { toast } = useToast();
 
+    const [config, setConfig] = useState(null);
     const [data, setData] = useState({});
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,9 +58,21 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
         try {
             setIsSubmitting(true);
             await createProduct(data);
+
+            toast({
+                title: "Success",
+                description: "Product created successfully.",
+            });
+
             onClose();
+
         } catch (error) {
-            console.error("Failed to save:", error);
+            toast({
+                title: "Creation Failed",
+                description: `An error occurred while creating the product.\n${error}`,
+                variant: "destructive",
+            });
+
         } finally {
             setIsSubmitting(false);
         }

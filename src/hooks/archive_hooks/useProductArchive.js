@@ -1,10 +1,8 @@
-import { useAuth } from "@/auth/UseAuth";
-import { getAllArchivedProducts } from "@/services/ArchiveService";
+import { getAllArchivedProducts, getOneArchivedProduct, patchRestoreArchivedProduct } from "@/services/ArchiveService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
 export const useProductArchive = () => {
-    const { user } = useAuth();
     const [archivedProducts, setArchivedProducts] = useState([]);
     const isFirstLoad = useRef(true);
 
@@ -28,14 +26,14 @@ export const useProductArchive = () => {
         pageSize: 10,
     })
 
-    const fetchArchivedProducts = useCallback(() => {
+    const fetchAllArchivedProducts = useCallback(() => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {
             setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         }
 
-        getAllArchivedProducts(filter, user?.accessToken)
+        getAllArchivedProducts(filter)
             .then(data => {
                 isFirstLoad.current = false;
                 setArchivedProducts(data.data);
@@ -52,17 +50,39 @@ export const useProductArchive = () => {
             .finally(() => {
                 setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
             });
-    }, [filter, user?.accessToken]);
+    }, [filter]);
 
     useEffect(() => {
-        if (!user?.accessToken) {
-            return;
-        }
         const timer = setTimeout(() => {
-            fetchArchivedProducts();
+            fetchAllArchivedProducts();
         }, 0);
         return () => clearTimeout(timer); 
-    }, [fetchArchivedProducts, user?.accessToken])
+    }, [fetchAllArchivedProducts])
+
+    const fetchArchivedProduct = useCallback(async (archiveId) => {
+        try {
+            const data = await getOneArchivedProduct(archiveId);
+            return data;
+        } catch (err) {
+            setAsyncState({ error: err });
+            throw err;
+        }
+    }, [])
+
+    const restoreArchivedProduct = useCallback(async (archiveId) => {
+        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        try {
+            await patchRestoreArchivedProduct(archiveId);
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            await fetchAllArchivedProducts();
+            setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
+            throw err;
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+        }
+    }, [fetchAllArchivedProducts])
 
 
     return { 
@@ -71,6 +91,7 @@ export const useProductArchive = () => {
         pagination, 
         filter,
         updateFilter,
-        fetchArchivedProducts, 
+        fetchArchivedProduct,
+        restoreArchivedProduct
     };
 }

@@ -34,27 +34,26 @@ const ManageAccountsPage = () => {
     const [isAccountInfoModalOpen, setIsAccountInfoModalOpen] = useState(false);
     const [isEditAccountModalOpen, setIsEditAccountModalOpen] = useState(false);
 
-  const role = sessionStorage.getItem("trueRole");
+    const role = sessionStorage.getItem("trueRole");
 
-  const handleRowClick = async (row) => {
-    if (selectedAccount?.employeeId === row.employeeId) {
-      setSelectedAccount(null);
-      return;
+    const handleRowClick = async (row) => {
+        if (selectedAccount?.employeeId === row.employeeId) {
+            setSelectedAccount(null);
+            return;
+        }
+        setSelectedAccount(row);    
+
+        const profile = await fetchAccount(row.employeeId);
+            if (profile) {
+            setSelectedAccount(prev => prev ? { ...prev, ...profile }: profile);
+        }
     }
 
-    setSelectedAccount(row);    
-
-    const profile = await fetchAccount(row.employeeId);
-    if (profile) {
-      setSelectedAccount(prev => prev ? { ...prev, ...profile }: profile);
+    const handleSearchChange = (value) => {
+        const query = value?.target ? value.target.value : value;
+        setSearchQuery(query);
+        updateFilter('search', query);
     }
-  }
-
-  const handleSearchChange = (value) => {
-    const query = value?.target ? value.target.value : value;
-    setSearchQuery(query);
-    updateFilter('search', query);
-  }
 
   return (
     <div className="flex flex-col animate-fade-in font-montserrat h-screen overflow-y-auto">
@@ -72,6 +71,7 @@ const ManageAccountsPage = () => {
               value={searchQuery}
               onChange={handleSearchChange}
             />
+            
           </div>
 
         {role !== 'MANAGER' && (
@@ -123,7 +123,6 @@ const ManageAccountsPage = () => {
       isOpen={isAccountInfoModalOpen}
       onClose={() => setIsAccountInfoModalOpen(false)}
       selectedAccount={selectedAccount}
-      setSelectedAccount={setSelectedAccount}
       archive={archive}
       toggleStatus={toggleStatus}
       resetPassword={resetPassword}

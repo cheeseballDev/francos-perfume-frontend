@@ -1,5 +1,5 @@
-import { addNewAccount, getAccountDetails, getAccountFilters, getAllAccounts, resetAccountPassword, updateAccountDetails } from "@/services/AccountService";
-import { archiveAccount } from "@/services/ArchiveService";
+import { getAccountFilters, getAllAccounts, getOneAccountDetails, patchResetAccountPassword, patchToggleAccountStatus, patchUpdateAccountDetails, postAddNewAccount } from "@/services/AccountService";
+import { patchArchiveAccount } from "@/services/ArchiveService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
@@ -80,46 +80,56 @@ export const useAccount = () => {
 
     const fetchAccountDetails = useCallback(async (employeeId) => {
         try {
-            const data = await getAccountDetails(employeeId);
+            const data = await getOneAccountDetails(employeeId);
             return data;
         } catch (err) {
-            setAsyncState({ error: err });
+            setAsyncState((prev) => ({ ...prev, error: err }));
             throw err;
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
     }, [])
 
     const updateAccount = async (accountId, dto) => {
         try {
-            await updateAccountDetails(accountId, dto);
+            await patchUpdateAccountDetails(accountId, dto);
             await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
         } catch (err) {
-            setAsyncState({ error: err });
+            setAsyncState((prev) => ({ ...prev, error: err }));
             throw err;
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
     };
 
     const createAccount = async (dto) => {
         try {
-            const data = await addNewAccount(dto);
+            const data = await postAddNewAccount(dto);
             await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
             return data;
         } catch (err) {
-            setAsyncState({ error: err });
+            setAsyncState((prev) => ({ ...prev, error: err }));
             throw err;
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
     };
 
-    const updatePassword = async (id) => {
+    const updatePassword = async (accountId) => {
         // TO BE ADDED
     };
 
-    const resetPassword = useCallback(async (id) => {
+    const updateAuth = (accountId) => {
+        // TO BE ADDED
+    };
+
+
+    const resetPassword = useCallback(async (accountId) => {
         try {
-            await resetAccountPassword(id);
+            await patchResetAccountPassword(accountId);
             await fetchAllAccounts();
-            setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
             throw err;
@@ -128,15 +138,9 @@ export const useAccount = () => {
         }
     }, [fetchAllAccounts]);
 
-
-
-    const updateAuth = (id) => {
-        // TO BE ADDED
-    };
-
-    const toggleAccountStatus = useCallback(async (id) => {
+    const toggleAccountStatus = useCallback(async (accountId) => {
         try {
-            await toggleAccountStatus(id);
+            await patchToggleAccountStatus(accountId);
             await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
@@ -148,10 +152,10 @@ export const useAccount = () => {
         }
     }, [fetchAllAccounts]);
 
-    const archive = useCallback(async (id) => {
+    const archiveAccount = useCallback(async (accountId) => {
         setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
-            await archiveAccount(id);
+            await patchArchiveAccount(accountId);
             await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
@@ -187,7 +191,7 @@ export const useAccount = () => {
         filter,
         updateFilter,
         fetchAccount: fetchAccountDetails,
-        archive,
+        archive: archiveAccount,
         toggleStatus: toggleAccountStatus,
         resetPassword,
         filterOptions,

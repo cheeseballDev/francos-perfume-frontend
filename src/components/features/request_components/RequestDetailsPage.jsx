@@ -3,7 +3,7 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useRequestDetails } from "@/hooks/request_hooks/useRequestDetails";
-import { approveRequest, cancelRequest, rejectRequest } from "@/services/RequestService";
+import { patchApproveRequest, patchCancelRequest, patchRejectRequest } from "@/services/RequestService";
 import { canUserApproveRequest } from "@/utils/requestAuthorizationUtils";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -70,7 +70,7 @@ export default function RequestDetailsPage() {
         if (!remarks.trim()) return;
         setIsSubmitting(true);
         try {
-            await rejectRequest(requestId, remarks);
+            await patchRejectRequest(requestId, remarks);
             navigate(0);
         } catch (err) {
             console.error("Failed to reject request:", err);
@@ -104,7 +104,7 @@ export default function RequestDetailsPage() {
                 };
             });
             console.log(payload);
-            await approveRequest(requestId, payload);
+            await patchApproveRequest(requestId, payload);
             navigate(0);
         } catch (err) {
             console.error("Failed to approve request:", err);
@@ -124,7 +124,7 @@ export default function RequestDetailsPage() {
     const handleCancelRequest = async () => {
         setIsSubmitting(true);
         try {
-            await cancelRequest(requestId);
+            await patchCancelRequest(requestId);
             navigate("/home/requests");
         } catch (err) {
             console.error("Failed to cancel request:", err);

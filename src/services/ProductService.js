@@ -15,12 +15,12 @@ export const getProductDetails = async (id) => {
     return response.data;
 };
 
-export const addNewProduct = async (dto) => {
+export const postAddNewProduct = async (dto) => {
     const response = await apiClient.post(`${PATH}`, dto);
     return response.data;
 };
 
-export const updateProductDetails = async (id, dto) => {
+export const patchUpdateProductDetails = async (id, dto) => {
     const response = await apiClient.patch(`${PATH}/${id}`, dto);
     return response.data;
 };

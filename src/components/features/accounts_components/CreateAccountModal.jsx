@@ -3,6 +3,7 @@ import FormField from '@/components/shared/FormField';
 import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useState } from 'react';
 
@@ -24,10 +25,9 @@ const ROLE_RANKS = {
 };
 
 const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount }) => {
+    const { toast } = useToast();
     const [config, setConfig] = useState(null);
-
     const [data, setData] = useState({});
-    
     const [errors,setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,11 +79,29 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
         description: "This will make a new account for the employee.",
         confirmText: "Create Account",
         onConfirm: async () => {
-            setIsSubmitting(true);
-            await createAccount(data);
-            setIsSubmitting(false);
-            setData({});
-            onClose();
+            try {
+                setIsSubmitting(true);
+                await createAccount(data);
+
+                toast({
+                    title: "Success",
+                    description: "Account created successfully.",
+                });
+
+                setData({});
+                onClose();
+
+            } catch (error) {
+                toast({
+                    title: "Creation Failed",
+                    description:`An error occurred while creating the account.\n${error}`,
+                    variant: "destructive",
+                });
+
+            } finally {
+                setIsSubmitting(false);
+                setConfig(null);
+            }
         } 
         })
     }
@@ -99,97 +117,108 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
 
           <div className='grid grid-cols-3 gap-4 py-4'>
             <FormField 
-              label="First Name"
-              onChange={e => handleChange('firstName', e.target.value)}
-              placeholder="Enter first name here..."
-              error={errors.firstName}
+                label="First Name"
+                maxLength={25}
+                onChange={e => handleChange('firstName', e.target.value)}
+                placeholder="Enter first name here..."
+                error={errors.firstName}
             />
 
             <FormField 
-              label="Middle Name"
-              onChange={e => handleChange('middleName', e.target.value)}
-              placeholder="Enter middle name here..."
-              error={errors.middleName}
+                label="Middle Name"
+                maxLength={25}
+                onChange={e => handleChange('middleName', e.target.value)}
+                placeholder="Enter middle name here..."
+                error={errors.middleName}
             />
 
             <FormField 
-              label="Last Name"
-              onChange={e => handleChange('lastName', e.target.value)}
-              placeholder="Enter last name here..."
-              error={errors.lastName}
+                label="Last Name"
+                maxLength={25}
+                onChange={e => handleChange('lastName', e.target.value)}
+                placeholder="Enter last name here..."
+                error={errors.lastName}
             />
           </div>
 
           <div className='mb-6'>
             <FormField 
-              label="Address"
-              onChange={e => handleChange('address', e.target.value)}
-              placeholder="Enter address here..."
-              error={errors.address}
+                label="Address"
+                maxLength={50}
+                onChange={e => handleChange('address', e.target.value)}
+                placeholder="Enter address here..."
+                error={errors.address}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-6 mb-6">
             <FormField 
-              label="Email"
-              onChange={e => handleChange('email', e.target.value)}
-              placeholder="Enter email here..."
-              error={errors.email}
+                label="Email"
+                maxLength={30}
+                onChange={e => handleChange('email', e.target.value)}
+                placeholder="Enter email here..."
+                error={errors.email}
             />
             <FormField 
-              label="Contact Number"
-              onChange={e => handleChange('contactNumber', e.target.value)}
-              placeholder="Enter contact number here..."
-              error={errors.contactNumber}
+                label="Contact Number"
+                maxLength={11}
+                value={data.contactNumber || ''}
+                onChange={e => {
+                        const numericString = e.target.value.replace(/[^\d+]/g, '');
+                        handleChange('contactNumber', numericString);
+                    }}
+                placeholder="E.g 09123456789"
+                error={errors.contactNumber}
             />
           </div>
 
           <div className="grid grid-cols-3 gap-6 mb-8">
             <FormSelect
-              label="Branch"
-              onChange={(value) => setData(prev => ({...prev, branchLocation: value }))}
-              options={branchOptions}
-              placeholder="Select branch..."
+                label="Branch"
+                onChange={(value) => setData(prev => ({...prev, branchLocation: value }))}
+                options={branchOptions}
+                placeholder="Select branch..."
             />
             
             <FormSelect
-              label="Role"
-              onChange={(value) => setData(prev => ({...prev, employeeRole: value }))}
-              options={roleOptions}
-              placeholder="Select role..."
+                label="Role"
+                onChange={(value) => setData(prev => ({...prev, employeeRole: value }))}
+                options={roleOptions}
+                placeholder="Select role..."
             />
 
             <FormSelect
-              label="Shift"
-              onChange={(value) => setData(prev => ({...prev, employeeShift: value }))}
-              options={employeeShiftOptions}
-              placeholder="Select shift..."
+                label="Shift"
+                onChange={(value) => setData(prev => ({...prev, employeeShift: value }))}
+                options={employeeShiftOptions}
+                placeholder="Select shift..."
             />
           </div>
 
           <div className="grid grid-cols-2 gap-6 mb-8">
             <Button 
-              variant="outline"
-              onClick={onClose}
+                variant="outline"
+                onClick={onClose}
             >
               Cancel
             </Button>
 
             <Button
-              onClick={handleSave}
-              disabled={isSubmitting}
+                onClick={handleSave}
+                disabled={isSubmitting}
             >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+                {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog 
-        isOpen={!!config}
-        onClose={() => setConfig(null)}
-        config={config}
-      />
+        <ConfirmDialog 
+            isOpen={!!config}
+            onClose={() => setConfig(null)}
+            config={config}
+            isLoading={isSubmitting}
+        />
     </>
   );
 };

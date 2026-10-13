@@ -10,8 +10,19 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
+
+    if (config.data instanceof FormData) {
+        if (config.headers && typeof config.headers.delete === 'function') {
+            config.headers.delete('Content-Type');
+        } else {
+            delete config.headers['Content-Type'];
+        }
+    } else {
+        config.headers['Content-Type'] = 'application/json';
+    }
+
     if (config.url.includes("/auth/login")) {
-      return config;
+        return config;
     }
 
     const userData = sessionStorage.getItem("user");

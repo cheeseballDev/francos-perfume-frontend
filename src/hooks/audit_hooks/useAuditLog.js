@@ -1,5 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
-import { getAllAuditLogs } from "@/services/AuditLogService";
+import { getAllAuditLogs, getOneAuditLogDetails } from "@/services/AuditLogService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
@@ -36,7 +36,7 @@ export const useAuditLog = () => {
         }
 
 
-        getAllAuditLogs(filter, user?.accessToken)
+        getAllAuditLogs(filter)
             .then(data => {
                 isFirstLoad.current = false;
                 setAuditLogs(data.data);
@@ -53,18 +53,24 @@ export const useAuditLog = () => {
                 setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
             });
 
-    }, [filter, user?.accessToken]);
+    }, [filter]);
 
     useEffect(() => {
-        if (!user?.accessToken) {
-            return;
-        }
         const timer = setTimeout(() => {
             fetchAuditLogs();
         }, 0);
         return () => clearTimeout(timer); 
-    }, [fetchAuditLogs, user?.accessToken])
+    }, [fetchAuditLogs]);
 
+    const fetchAuditLogDetails = useCallback(async (logId) => {
+        try {
+            const data = await getOneAuditLogDetails(logId);
+            return data;
+        } catch (err) {
+            setAsyncState({ error: err });
+            throw err;
+        }
+    }, []);
 
     return { 
         auditLogs, 
@@ -72,7 +78,8 @@ export const useAuditLog = () => {
         pagination, 
         filter, 
         fetchAuditLogs, 
-        updateFilter 
+        updateFilter,
+        fetchAuditLogDetails
     };
 
 }

@@ -2,7 +2,7 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
-import { receiveDelivery } from "@/services/DeliveryService";
+import { postReceiveDelivery } from "@/services/DeliveryService";
 import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -118,7 +118,7 @@ const DeliveryConfirmationPage = () => {
                         })
                     };
                     
-                    await receiveDelivery(deliveryId, payload);
+                    await postReceiveDelivery(deliveryId, payload);
                     navigate("/home/deliveries");
                 } catch (err) {
                     console.error("Failed to confirm delivery:", err);

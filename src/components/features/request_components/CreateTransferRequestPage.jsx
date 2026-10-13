@@ -1,7 +1,7 @@
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from '@/components/ui/button';
 import { useRequest } from '@/hooks/request_hooks/useRequest';
-import { createRequest } from '@/services/RequestService';
+import { postCreateRequest } from '@/services/RequestService';
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -149,7 +149,7 @@ const CreateTransferRequestPage = () => {
                 }))
             };
 
-            await createRequest(payload);
+            await postCreateRequest(payload);
             setConfig(null);
             navigate('/home/requests');
         } catch (error) {

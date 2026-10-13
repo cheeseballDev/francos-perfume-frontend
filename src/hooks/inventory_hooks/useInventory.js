@@ -1,4 +1,4 @@
-import { getAllInventory, getInventoryBatches, getInventoryFilters, updateBatch } from "@/services/InventoryService";
+import { getAllInventory, getInventoryBatches, getInventoryFilters, patchUpdateBatch } from "@/services/InventoryService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
@@ -78,7 +78,7 @@ export const useInventory = () => {
 
     const saveBatchEdit = async (batchId, dto) => {
         try {
-            await updateBatch(batchId, dto);
+            await patchUpdateBatch(batchId, dto);
             await new Promise((resolve) => setTimeout(resolve, 200));
             await fetchInventory();
         } catch (err) {

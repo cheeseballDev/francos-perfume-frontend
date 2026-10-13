@@ -17,13 +17,17 @@ export const getTransactionDetails = async (salesOrderId) => {
 }
 
 export const getExcel = async (dateFrom, dateTo) => {
-    // cleanFilters removes undefined/empty strings so it only sends dates if they exist
     const params = cleanFilters({ dateFrom, dateTo }); 
     const response = await apiClient.get(`${PATH}/excel`, {
         params,
         responseType: "blob",
     });
     return response;
+}
+
+export const getTransactionFilters = async () => {
+    const response = await apiClient.get(`${PATH}/filters`)
+    return response.data;
 }
 
 export const getPdf = async (dateFrom, dateTo) => {
@@ -34,3 +38,10 @@ export const getPdf = async (dateFrom, dateTo) => {
     });
     return response;
 }
+
+export const postUploadExcel = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file); 
+    const response = await apiClient.post(`${PATH}/excel`, formData);
+    return response.data;
+};

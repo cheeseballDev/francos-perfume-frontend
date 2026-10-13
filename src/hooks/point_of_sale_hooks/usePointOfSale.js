@@ -1,9 +1,7 @@
 import { getAllProductsPOS } from "@/services/PointOfSaleService"; // FIXED: lowercase 'p' to match disk
 import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "../../auth/UseAuth";
 
 export const usePointOfSale = () => {
-    const { user } = useAuth();
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,19 +12,17 @@ export const usePointOfSale = () => {
         product_gender: '',
     });
 
-    // FIXED: Extracted to a callable function that returns a Promise
     const fetchProducts = useCallback(async () => {
-        if (!user?.accessToken) return;
         setIsLoading(true);
         try {
-            const response = await getAllProductsPOS(filter, user.accessToken);
+            const response = await getAllProductsPOS(filter);
             setProducts(response.data);
         } catch (err) {
             setError(err);
         } finally {
             setIsLoading(false);
         }
-    }, [filter, user?.accessToken]);
+    }, [filter]);
 
     useEffect(() => {
         fetchProducts();

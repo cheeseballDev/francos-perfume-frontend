@@ -1,7 +1,7 @@
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
-import { cancelDelivery, dispatchDelivery, receiveDelivery } from "@/services/DeliveryService";
+import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
 import { ArrowLeft, CheckCircle, Loader2, Truck, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -56,7 +56,7 @@ export default function DeliveryDetailsPage() {
             confirmText: "Mark In Transit",
             onConfirm: async () => {
                 try {
-                    await dispatchDelivery(deliveryId);
+                    await postDispatchDelivery(deliveryId);
                     await loadDeliveryData(); // Refresh UI
                 } catch (err) {
                     console.error("Failed to mark as in transit:", err);
@@ -76,7 +76,7 @@ export default function DeliveryDetailsPage() {
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
-                    await cancelDelivery(deliveryId);
+                    await postCancelDelivery(deliveryId);
                     navigate("/home/deliveries"); // Go back since it's cancelled
                 } catch (err) {
                     console.error("Failed to cancel delivery:", err);
@@ -95,7 +95,7 @@ export default function DeliveryDetailsPage() {
             confirmText: "Accept Request",
             onConfirm: async () => {
                 try {
-                    await receiveDelivery(deliveryId, { accepted: true });
+                    await postReceiveDelivery(deliveryId, { accepted: true });
                     await loadDeliveryData(); // Refresh UI
                 } catch (err) {
                     console.error("Failed to accept delivery:", err);
@@ -115,7 +115,7 @@ export default function DeliveryDetailsPage() {
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
-                    await receiveDelivery(deliveryId, { accepted: false });
+                    await postReceiveDelivery(deliveryId, { accepted: false });
                     navigate("/home/deliveries"); // Go back since it's rejected
                 } catch (err) {
                     console.error("Failed to reject delivery:", err);

@@ -1,4 +1,4 @@
-import { forecastRevenue, forecastStocks, forecastStocksAI } from "@/services/ForecastService";
+import { postForecastRevenue, postForecastStocks, postForecastStocksAI } from "@/services/ForecastService";
 import { getRequestFilters } from "@/services/RequestService";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -63,9 +63,9 @@ export const useForecast = () => {
         try {
             // Prevent AI API crash by only calling endpoints if required parameters exist
             const [stocks, revenue, ai] = await Promise.all([
-                dto.productId && dto.branchId ? forecastStocks(buildStockRequest(dto)) : Promise.resolve(null),
-                dto.branchId ? forecastRevenue(buildRevenueRequest(dto)) : Promise.resolve(null),
-                dto.productId && dto.branchId ? forecastStocksAI(buildStockRequest(dto)) : Promise.resolve(null),
+                dto.productId && dto.branchId ? postForecastStocks(buildStockRequest(dto)) : Promise.resolve(null),
+                dto.branchId ? postForecastRevenue(buildRevenueRequest(dto)) : Promise.resolve(null),
+                dto.productId && dto.branchId ? postForecastStocksAI(buildStockRequest(dto)) : Promise.resolve(null),
             ]);
 
             isFirstLoad.current = false;
