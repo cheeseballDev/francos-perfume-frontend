@@ -55,6 +55,7 @@ export const useRequest = () => {
             })
         .catch((err) => {
             setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
         })
         .finally(() => {
             setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
@@ -67,6 +68,7 @@ export const useRequest = () => {
             return data;
         } catch (err) {
             setAsyncState({ error: err });
+            throw err;
         }
     }, [])
 
@@ -85,6 +87,7 @@ export const useRequest = () => {
             return data;
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }

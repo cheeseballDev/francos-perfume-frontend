@@ -48,6 +48,7 @@ export const useTransaction = () => {
             })
         .catch((err) => {
             setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
         })
         .finally(() => {
             setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
@@ -67,6 +68,7 @@ export const useTransaction = () => {
             return data;
         } catch (err) {
             setAsyncState({ error: err });
+            throw err;
         }
     }, []) 
 

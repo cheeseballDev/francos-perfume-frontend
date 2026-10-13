@@ -1,9 +1,16 @@
-import { formatLabel } from "@/utils/formattingUtils";
+import { formatDateTimeForTable, formatLabel } from "@/utils/formattingUtils";
 
 export const transactionColumns = [
     {
         header: "Date Received",
-        accessorKey: "transactionDate"
+        accessorKey: "transactionDate",
+        render: (row) => {
+            return (
+                <span>
+                    {formatDateTimeForTable(row.transactionDate)}
+                </span>
+            )
+        }
     },
     {
         header: "Sales Order ID",
@@ -22,7 +29,6 @@ export const transactionColumns = [
         header: "Amount",
         render: (row) => {
             return (
-                // FIXED: Replaced text-custom-green with text-emerald-500
                 <span className="text-emerald-500">
                     ₱ {Math.abs(row.amount ?? 0).toLocaleString()}
                 </span>
@@ -34,9 +40,9 @@ export const transactionColumns = [
         accessorKey: "processedBy"
     },
     {
-        header: "Payment Method",
-        accessorKey: "paymentMethod",
-         render: (row) => formatLabel(row.paymentMethod) || "N/A"
+        header: "Location",
+        accessorKey: "branchLocation",
+         render: (row) => formatLabel(row.branchLocation) || "N/A"
     },
     
 ]

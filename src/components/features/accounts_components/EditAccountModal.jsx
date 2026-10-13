@@ -9,15 +9,15 @@ import { useEffect, useState } from 'react';
 import { useAuth } from "../../../auth/UseAuth";
 
 const getAccountFormData = (account) => ({
-  firstName: account?.firstName || "",
-  lastName: account?.lastName || "",
-  middleName: account?.middleName || "",
-  contactNumber: account?.contactNumber || "",
-  address: account?.address || "",
-  email: account?.email || "",
-  branchLocation: account?.branchLocation || "",
-  employeeRole: account?.employeeRole || "",
-  employeeShift: account?.employeeShift || "",
+    firstName: account?.firstName || "",
+    lastName: account?.lastName || "",
+    middleName: account?.middleName || "",
+    contactNumber: account?.contactNumber || "",
+    address: account?.address || "",
+    email: account?.email || "",
+    branchLocation: account?.branchLocation || "",
+    employeeRole: account?.employeeRole || "",
+    employeeShift: account?.employeeShift || "",
 });
 
 const accountValidationSchema = {

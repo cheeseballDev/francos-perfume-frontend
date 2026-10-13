@@ -63,6 +63,7 @@ export const useAccount = () => {
             })
             .catch((err) => {
                 setAsyncState((prev) => ({ ...prev, error: err }));
+                throw err;
             })
             .finally(() => {
                 setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
@@ -83,27 +84,30 @@ export const useAccount = () => {
             return data;
         } catch (err) {
             setAsyncState({ error: err });
+            throw err;
         }
     }, [])
 
-    const updateAccount = async (id, dto) => {
+    const updateAccount = async (accountId, dto) => {
         try {
-            const data = updateAccountDetails(id, dto);
+            await updateAccountDetails(accountId, dto);
             await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
-            return data;
         } catch (err) {
             setAsyncState({ error: err });
+            throw err;
         }
     };
 
     const createAccount = async (dto) => {
         try {
             const data = await addNewAccount(dto);
+            await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
             return data;
         } catch (err) {
             setAsyncState({ error: err });
+            throw err;
         }
     };
 
@@ -118,6 +122,7 @@ export const useAccount = () => {
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
+            throw err;
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
@@ -132,10 +137,12 @@ export const useAccount = () => {
     const toggleAccountStatus = useCallback(async (id) => {
         try {
             await toggleAccountStatus(id);
-            fetchAllAccounts();
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            await fetchAllAccounts();
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
+            throw err;
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
@@ -145,10 +152,12 @@ export const useAccount = () => {
         setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             await archiveAccount(id);
+            await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
+            throw err;
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
@@ -161,6 +170,7 @@ export const useAccount = () => {
             setFilterOptions(buildFilterOptions(data, ACCOUNT_FILTER_SCHEMA));
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }

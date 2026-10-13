@@ -32,6 +32,7 @@ export default function BarcodePage() {
                         updateFilter={updateFilter}
                         fetchOneProductBarcode={fetchOneProductBarcode}
                         downloadAllProductBarcodes={downloadAllProductBarcodes}
+                        downloadOneProductBarcode={downloadOneProductBarcode}
                     />
                 </div>
 

@@ -31,7 +31,7 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
             batchDisplayId: b.batchDisplayId,
             batchId: b.batchId,
             dateReceived: b.createdAt,
-            targetDate: b.expiryDate
+            expiryDate: b.expiryDate
               ? formatDateForInput(b.expiryDate)  
               : 'N/A',
             quantity: b.quantity
@@ -116,7 +116,7 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
                               <TableRow key={batch.batchId}>
                                 <TableCell className="font-medium text-foreground">{batch.batchId || 0}</TableCell>
                                 <TableCell className="text-foreground">{formatDateForTable(batch.dateReceived) || 0}</TableCell>
-                                <TableCell className="text-foreground">{batch.targetDate || 0}</TableCell>
+                                <TableCell className="text-foreground">{batch.expiryDate || 0}</TableCell>
                                 <TableCell className="text-center text-foreground">{batch.quantity || 0}</TableCell>
                                 <TableCell className="text-right pr-4">
                                   <Button 

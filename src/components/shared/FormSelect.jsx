@@ -11,13 +11,18 @@ const FormSelect = ({ label, value, onChange, options = [], placeholder, disable
         </SelectTrigger>
         <SelectContent
           position="popper"
+          className="w-[--radix-select-trigger-width] max-h-60 hover:cursor-pointer"
           onCloseAutoFocus={(e) => e.preventDefault()}
         > 
           {options.map((option) => {
             const optValue = typeof option === "object" ? option.value : option;
             const optLabel = typeof option === "object" ? option.label : option;
             return (
-              <SelectItem key={optValue} value={optValue}>
+              <SelectItem 
+                className="hover:cursor-pointer"
+                key={optValue} 
+                value={optValue}
+              >
                 {optLabel}
               </SelectItem>
             );

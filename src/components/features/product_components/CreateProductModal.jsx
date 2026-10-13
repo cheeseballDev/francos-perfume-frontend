@@ -87,6 +87,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                             label="Perfume Name:"
                             onChange={e => handleChange('productName', e.target.value)}
                             placeholder="Enter New Perfume Name"
+                            maxLength={25}
                             error={errors.productName}
                         />
 
@@ -109,10 +110,21 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                         <FormField 
                             label="Price (₱):"
                             type="number"
-                            onChange={e => handleChange('productPrice', e.target.value)}
+                            max={9999}
+                            value={data.productPrice}
+                            onChange={e => {
+                                const val = e.target.value;
+                                if (val === "") {
+                                    handleChange('productPrice', "");
+                                    return;
+                                }
+                                const clampedValue = Math.min(9999, Math.max(0, Number(val)));
+                                handleChange('productPrice', clampedValue);
+                            }}
                             placeholder="Enter Price"
                             error={errors.productPrice}
                         />
+
                     </div>
 
                    <div className="mt-4 flex flex-col gap-1.5">

@@ -30,7 +30,6 @@ const ProductSelector = ({
             <div className="flex items-end gap-4 mb-4">
                 <div className="flex-1">
                     <FormSelect
-                        value={selectedProduct}
                         onChange={setSelectedProduct}
                         options={productOptions}
                         placeholder="Select product..."

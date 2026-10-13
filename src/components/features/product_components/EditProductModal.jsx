@@ -25,7 +25,7 @@ const productValidationSchema = {
     productDescription: [isValid.required],
 };
 
-const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = [], updateProduct, onSuccess }) => {
+const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = [], updateProduct }) => {
     const { toast } = useToast();
 
     const [config, setConfig] = useState(null);
@@ -73,9 +73,10 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
             setIsSubmitting(true);
             await updateProduct(selectedProduct.productId, data);
             
-            if (onSuccess) {
-                onSuccess();
-            }
+            toast({
+                title: "Success",
+                description: "Product updated successfully.",
+            });
 
             onClose();
         } catch (error) {
@@ -87,7 +88,6 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
         } finally {
             setIsSubmitting(false);
             setConfig(null);
-            setData(null);
         }
     }
 
@@ -103,6 +103,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
                         <FormField 
                             label="Perfume Name:"
                             value={data.productName}
+                            maxLength={25}
                             onChange={e => handleChange('productName', e.target.value)}
                             placeholder="Enter New Perfume Name"
                             error={errors.productName}
@@ -128,13 +129,22 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
 
                         <FormField 
                             label="Price (₱):"
-                            value={data.productPrice}
                             type="number"
-                            step="0.01"
-                            onChange={e => handleChange('productPrice', e.target.value)}
+                            max={9999}
+                            value={data.productPrice}
+                            onChange={e => {
+                                const val = e.target.value;
+                                if (val === "") {
+                                    handleChange('productPrice', "");
+                                    return;
+                                }
+                                const clampedValue = Math.min(9999, Math.max(0, Number(val)));
+                                handleChange('productPrice', clampedValue);
+                            }}
                             placeholder="Enter Price"
                             error={errors.productPrice}
                         />
+                        
                     </div>
 
                    <div className="mt-4 flex flex-col gap-1.5">

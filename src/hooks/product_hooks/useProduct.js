@@ -1,15 +1,12 @@
-import { useAuth } from "@/auth/UseAuth";
 import { addNewProduct, getAllProductBarcodeDownload, getAllProducts, getOneProductBarcode, getOneProductBarcodeDownload, getProductDetails, getProductFilters, updateProductDetails } from "@/services/ProductService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
 export const useProduct = () => {
-    const { user } = useAuth();
     const [products, setProducts] = useState([]);
     const isFirstLoad = useRef(true);
     
-    // can add the page and page size here
     const [asyncState, setAsyncState] = useState({
         isLoading: true,
         isFetching: false,
@@ -60,6 +57,7 @@ export const useProduct = () => {
         })
         .catch((err) => {
             setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
         })
         .finally(() => {
             setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
@@ -80,26 +78,29 @@ export const useProduct = () => {
             return data;
         } catch (err) {
             setAsyncState({ error: err })
+            throw err;
         }
     }
 
     const updateProduct = async (id, dto) => {
         try {
-            const data = updateProductDetails(id, dto);
-            fetchAllProducts();
-            return data;
+            await updateProductDetails(id, dto);
+            await new Promise((resolve) => setTimeout(resolve, 200));
+            await fetchAllProducts();
         } catch (err) {
             setAsyncState({ error: err })
+            throw err;
         }
     }
 
     const createProduct = async (dto) => {
         try {
-            const data = await addNewProduct(dto);
+            await addNewProduct(dto);
+            await new Promise((resolve) => setTimeout(resolve, 200));
             await fetchAllProducts();
-            return data;
         } catch (err) {
             setAsyncState({ error: err })
+            throw err;
         }
     }
 
@@ -110,6 +111,7 @@ export const useProduct = () => {
             setFilterOptions(buildFilterOptions(data, PRODUCT_FILTER_SCHEMA));
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
@@ -126,6 +128,7 @@ export const useProduct = () => {
             return data;
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
@@ -144,6 +147,7 @@ export const useProduct = () => {
             link.remove();
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
@@ -162,10 +166,12 @@ export const useProduct = () => {
             link.remove();
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
     };
+    
     return { 
       products, 
       asyncState,

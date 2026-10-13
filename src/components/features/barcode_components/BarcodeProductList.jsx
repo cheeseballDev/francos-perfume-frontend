@@ -7,6 +7,8 @@ import { getBarcodeColumns } from "./BarcodeColumns";
 
 const BarcodeProductList = ({ setSelectedProduct, selectedProduct, products, isLoading,  updateFilter, fetchOneProductBarcode, downloadAllProductBarcodes, downloadOneProductBarcode}) => {
     const [searchQuery, setSearchQuery] = useState("");
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadId, setDownloadId] = useState(null);
 
     const handleSearchChange = (value) => {
         const query = value?.target ? value.target.value : value;
@@ -19,16 +21,32 @@ const BarcodeProductList = ({ setSelectedProduct, selectedProduct, products, isL
             setSelectedProduct(null);
             return;
         }
-
         setSelectedProduct(row);
-        //console.log(selectedTransaction);    
         const barcode = await fetchOneProductBarcode(row.productId);
         if (barcode) {
             setSelectedProduct(prev => prev ? { ...prev, ...barcode }: barcode);
         }
     }
 
-    const barcodeColumns = getBarcodeColumns(downloadOneProductBarcode);
+    const handleDownloadAll = async () => {
+        try {
+            setIsDownloading(true);
+            await downloadAllProductBarcodes();
+        } finally {
+            setIsDownloading(false);
+        }
+    } 
+
+    const handleSingleDownload = async (productId) => {
+        try {
+            setDownloadId(productId);
+            await downloadOneProductBarcode(productId);
+        } finally {
+            setDownloadId(null); 
+        }
+    };
+
+    const barcodeColumns = getBarcodeColumns(handleSingleDownload, downloadId);
 
     return (
         <div className="flex flex-col h-full gap-4">
@@ -36,9 +54,11 @@ const BarcodeProductList = ({ setSelectedProduct, selectedProduct, products, isL
                 <SearchBar value={searchQuery} onChange={handleSearchChange} />
                 <Button 
                     variant="outline" 
-                    onClick={() => downloadAllProductBarcodes()}
+                    onClick={handleDownloadAll}
+                    disabled={isDownloading}
                 >
-                    <Printer size={16} /> Download All
+                    <Printer size={16} /> 
+                    {isDownloading ? "Downloading..." : "Download All"}
                 </Button>
             </div>
 
