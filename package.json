@@ -21,6 +21,7 @@
     "lucide-react": "^1.46.0",
     "radix-ui": "^1.6.0",
     "react": "^19.3.0",
+    "react-barcode": "^1.6.1",
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.11.0",

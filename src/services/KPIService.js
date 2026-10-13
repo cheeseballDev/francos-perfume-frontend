@@ -1,4 +1,4 @@
-import apiClient from "./ApiClient";
+import apiClient from "./APIClient";
 
 const PATH = "/KPI";
 export const getLowStockKPI = async () => {

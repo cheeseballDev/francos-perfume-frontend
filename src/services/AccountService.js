@@ -1,7 +1,7 @@
 
 import { cleanFilters } from "@/utils/formattingUtils.jsx";
 
-import apiClient from "./ApiClient";
+import apiClient from "./APIClient";
 
 const PATH = "/Account";
 
@@ -20,6 +20,7 @@ export const addNewAccount = async (dto) => {
     const response = await apiClient.post(`${PATH}`, dto);
     return response.data;
 };
+
 
 export const updateAccountDetails = async (id, dto) => {
     const response = await apiClient.patch(`${PATH}/update/${id}`, dto);

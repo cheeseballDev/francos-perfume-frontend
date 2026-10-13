@@ -1,12 +1,6 @@
 import { getLowStockKPI } from "@/services/KPIService";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-/**
- * useKPI
- * ──────
- * Wraps the /api/KPI endpoints. Currently exposes a single
- * "low stock" KPI for the current user/branch.
- */
 export const useKPI = () => {
     const isFirstLoad = useRef(true);
 
