@@ -16,18 +16,19 @@ const AuditLogDetails = ({ isOpen, onClose, selectedAuditLog }) => {
 
                     <div className="grid grid-cols-3 gap-6">
                         <DetailItem label="Audit Log ID" value={selectedAuditLog.logDisplayId || "N/A"}/>
-                        <DetailItem label="Employee Display ID" value={selectedAuditLog.employeeDisplayId || "N/A"}/>
                         <DetailItem 
                             label="Date and Time" 
                             value={selectedAuditLog.logTimestamp ? formatDateTimeForTable(selectedAuditLog.logTimestamp) : "N/A"}
                         />
                     </div>
-                    <div className="grid grid-cols-2 gap-6">
-                        <DetailItem label="Module" value={selectedAuditLog.logModule || "N/A"} />
+                    <div className="grid grid-cols-3 gap-6">
+                        <DetailItem label="Employee Display ID" value={selectedAuditLog.employeeDisplayId || "N/A"}/>
+                        <DetailItem label="Employee Name" value={selectedAuditLog.employeeName || "N/A"}/>
                         <DetailItem label="Branch Location" value={selectedAuditLog.branchLocation || "N/A"}/>
                     </div>
 
-                    <div className="gap-6">
+                    <div className="grid grid-cols-2 gap-6">
+                        <DetailItem label="Module" value={selectedAuditLog.logModule || "N/A"} />
                         <DetailItem label="Action" value={selectedAuditLog.logAction || "N/A"} />
                     </div>
                 </div>

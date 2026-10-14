@@ -38,7 +38,7 @@ export const useProduct = () => {
         pageSize: 10,
     });
 
-    const fetchAllProducts = useCallback(() => {
+    const fetchAllProducts = useCallback(async () => {
       if (isFirstLoad.current) {
         setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
       } else {

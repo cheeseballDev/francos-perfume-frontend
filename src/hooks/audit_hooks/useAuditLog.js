@@ -28,13 +28,12 @@ export const useAuditLog = () => {
         pageSize: 10,
     })
 
-    const fetchAuditLogs = useCallback(() => {
+    const fetchAuditLogs = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {
             setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         }
-
 
         getAllAuditLogs(filter)
             .then(data => {

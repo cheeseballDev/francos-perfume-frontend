@@ -26,7 +26,7 @@ export const useProductArchive = () => {
         pageSize: 10,
     })
 
-    const fetchAllArchivedProducts = useCallback(() => {
+    const fetchAllArchivedProducts = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {

@@ -45,7 +45,7 @@ export const useAccount = () => {
         { key: "employeeShift", label: "Filter: Shift", allLabel: "All Shifts" },
     ]
 
-    const fetchAllAccounts = useCallback(() => {
+    const fetchAllAccounts = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {
@@ -93,7 +93,6 @@ export const useAccount = () => {
     const updateAccount = async (accountId, dto) => {
         try {
             await patchUpdateAccountDetails(accountId, dto);
-            await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, error: err }));
@@ -106,7 +105,6 @@ export const useAccount = () => {
     const createAccount = async (dto) => {
         try {
             const data = await postAddNewAccount(dto);
-            await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
             return data;
         } catch (err) {
@@ -141,9 +139,7 @@ export const useAccount = () => {
     const toggleAccountStatus = useCallback(async (accountId) => {
         try {
             await patchToggleAccountStatus(accountId);
-            await new Promise((resolve) => setTimeout(resolve, 500));
             await fetchAllAccounts();
-            setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
             throw err;

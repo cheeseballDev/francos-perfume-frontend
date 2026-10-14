@@ -3,7 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { canUserApproveRequest } from "@/utils/requestAuthorizationUtils";
 import { Check, X } from "lucide-react";
 
-export const RequestApprovalActions = ({ user, allProductsApproved, remarks, setRemarks, handleApproveRequest, handleRejectRequest, selectedRequest }) => {
+export const RequestApprovalActions = ({ user, allProductsApproved, remarks, setRemarks, handleApproveRequest, handleRejectRequest, selectedRequest, isSubmitting }) => {
 
     const isAuthorized = canUserApproveRequest(user, selectedRequest);
 
@@ -80,7 +80,7 @@ export const RequestApprovalActions = ({ user, allProductsApproved, remarks, set
                     onClick={() => handleRejectRequest(requestId)}
                     variant="destructive"
                     className="w-full font-bold"
-                    disabled={!remarks.trim()}
+                    disabled={!remarks.trim() || isSubmitting}
                 >
                     <X className="w-4 h-4 mr-2" /> Reject Request
                 </Button>

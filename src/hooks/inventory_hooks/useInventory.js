@@ -41,7 +41,7 @@ export const useInventory = () => {
       { key: "branch", label: "Filter: Branch", allLabel: "All Branches" },
     ]
 
-    const fetchInventory = useCallback(() => {
+    const fetchInventory = useCallback(async () => {
       if (isFirstLoad.current) {
         setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
       } else {

@@ -28,7 +28,13 @@ const requestValidationSchema = {
 const CreateTransferRequestPage = () => {
     const navigate = useNavigate();
 
-    const { fetchRequestFilters } = useRequest();
+    const { 
+        fetchRequestFilters,
+        branchOptions,
+        productOptions,
+        fetchBranches,
+        fetchProductsByBranch
+    } = useRequest();
     
     const [data, setData] = useState(INITIAL_DATA_STATE);
     const [selectedProduct, setSelectedProduct] = useState('');
@@ -38,38 +44,14 @@ const CreateTransferRequestPage = () => {
     const [config, setConfig] = useState(null);
 
     const totalUnits = (data.items || []).reduce((sum, item) => sum + item.quantity, 0);
-    
-    const [branchOptions, setBranchOptions] = useState([]);
-    const [productOptions, setProductOptions] = useState([]);
 
-    // Fetch branches once on mount
     useEffect(() => {
-        fetchRequestFilters().then(raw => {
-            if (!raw) return;
-            setBranchOptions((raw.branches).map(branch => ({
-                value: branch.branchId,
-                label: branch.branchLocation,
-            })));
-        });
-    }, [fetchRequestFilters]);
+        fetchBranches();
+    }, [fetchBranches]);
 
-    // Fetch products and correct remote stock when Source Branch changes
     useEffect(() => {
-        if (!data.fromBranch) {
-            setProductOptions([]);
-            return;
-        }
-
-        // FIXED: Passing data.fromBranch fetches the actual inventory of the remote branch!
-        fetchRequestFilters(data.fromBranch).then(raw => {
-            if (!raw) return;
-            setProductOptions((raw.products || []).map(p => ({
-                value: p.productId,
-                label: p.productName,
-                availableQty: p.productQty || 0,
-            })));
-        });
-    }, [data.fromBranch, fetchRequestFilters]);
+        fetchProductsByBranch(data.fromBranch);
+    }, [data.fromBranch, fetchProductsByBranch]);
 
     const handleAddProduct = () => {
         if (!selectedProduct) return;
@@ -152,15 +134,17 @@ const CreateTransferRequestPage = () => {
             await postCreateRequest(payload);
             setConfig(null);
             navigate('/home/requests');
+
         } catch (error) {
             console.error("Submission failed:", error);
             setConfig({
                 isAlert: true,
                 title: "Submission Failed",
-                description: error.message || "Failed to create transfer request.",
+                description: `Failed to create transfer request.\n${error}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null)
+
             });
         } finally {
             setIsSubmitting(false);
@@ -181,6 +165,7 @@ const CreateTransferRequestPage = () => {
         }
 
         const validationError = validateForm(data, requestValidationSchema);
+        
         if (Object.keys(validationError).length > 0) {
             setConfig({
                 isAlert: true,
@@ -255,6 +240,7 @@ const CreateTransferRequestPage = () => {
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </div>
     );

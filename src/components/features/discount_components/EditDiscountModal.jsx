@@ -110,7 +110,7 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
         confirmText: "Save Changes",
         onConfirm: async () => {
             try {
-                setIsSubmitting(false);
+                setIsSubmitting(true);
                 await updateDiscount(selectedDiscount.discountId, payload);
 
                 toast({

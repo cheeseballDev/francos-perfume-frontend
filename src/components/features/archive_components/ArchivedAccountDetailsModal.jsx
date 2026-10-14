@@ -24,7 +24,7 @@ const ArchivedAccountDetailsModal = ({ isOpen, onClose, selectedArchivedAcccount
             try {
                 setIsSubmitting(true);
                 await restoreArchivedAccount(selectedArchivedAcccount.accountArchiveId);
-
+                
                 toast({
                     title: "Success",
                     description: "Account restored successfully.",
@@ -92,6 +92,7 @@ const ArchivedAccountDetailsModal = ({ isOpen, onClose, selectedArchivedAcccount
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </>
     );

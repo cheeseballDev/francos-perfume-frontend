@@ -27,7 +27,7 @@ export const useAccountArchive = () => {
         pageSize: 10,
     });
 
-    const fetchAllArchivedAccounts = useCallback(() => {
+    const fetchAllArchivedAccounts = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {

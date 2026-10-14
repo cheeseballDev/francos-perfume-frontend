@@ -46,7 +46,7 @@ export const useTransaction = () => {
 
 
 
-    const fetchTransactions = useCallback(() => {
+    const fetchTransactions = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {

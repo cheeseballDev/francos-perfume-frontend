@@ -19,7 +19,6 @@ export default function RequestDetailsPage() {
 
     const { requestId } = useParams();
     const navigate = useNavigate();
-    const [requestPayload, setRequestPayload] = useState({});
     const [remarks, setRemarks] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     
@@ -68,16 +67,15 @@ export default function RequestDetailsPage() {
 
     const handleRejectRequest = async () => {
         if (!remarks.trim()) return;
-        setIsSubmitting(true);
         try {
+            setIsSubmitting(true);
             await patchRejectRequest(requestId, remarks);
             navigate(0);
-        } catch (err) {
-            console.error("Failed to reject request:", err);
+        } catch (error) {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: err.message || "Failed to reject the request.",
+                description: `Failed to reject the request.${error}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -88,9 +86,8 @@ export default function RequestDetailsPage() {
     };
 
     const handleApproveRequest = async () => {
-        setIsSubmitting(true);
         try {
-
+            setIsSubmitting(true);
             const payload = (data.items || []).map((item) => {
             const approvalState = itemApprovals[item.requestItemId];
             return {
@@ -103,15 +100,13 @@ export default function RequestDetailsPage() {
                         : 0,
                 };
             });
-            console.log(payload);
             await patchApproveRequest(requestId, payload);
             navigate(0);
-        } catch (err) {
-            console.error("Failed to approve request:", err);
+        } catch (error) {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: err.message || "Failed to approve the request.",
+                description: `Failed to approve the request.\n${error}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -122,16 +117,15 @@ export default function RequestDetailsPage() {
     };
 
     const handleCancelRequest = async () => {
-        setIsSubmitting(true);
         try {
+            setIsSubmitting(true);
             await patchCancelRequest(requestId);
             navigate("/home/requests");
-        } catch (err) {
-            console.error("Failed to cancel request:", err);
+        } catch (error) {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: err.message || "Failed to cancel the request.",
+                description: `Failed to cancel the request.\n${error}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -181,7 +175,6 @@ export default function RequestDetailsPage() {
                 )}
             </div>
 
-            {/* FIXED: Changed breakpoints from lg to xl to force stacking on smaller screens */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <div className="xl:col-span-2 space-y-6">
 
@@ -219,6 +212,7 @@ export default function RequestDetailsPage() {
                         handleApproveRequest={handleApproveRequest}
                         handleRejectRequest={handleRejectRequest}
                         selectedRequest={data}
+                        isSubmitting={isSubmitting}
                     />
                 </div>
             </div>
@@ -227,6 +221,7 @@ export default function RequestDetailsPage() {
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </div>
     );

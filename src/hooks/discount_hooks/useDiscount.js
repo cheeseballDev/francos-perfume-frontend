@@ -7,7 +7,6 @@ export const useDiscounts = () => {;
     const [discounts, setDiscounts] = useState([]);
     const isFirstLoad = useRef(true);
     
-    // can add the page and page size here
     const [asyncState, setAsyncState] = useState({
         isLoading: true,
         isFetching: false,
@@ -39,7 +38,7 @@ export const useDiscounts = () => {;
         pageSize: 10,
     });
 
-    const fetchAllDiscounts = useCallback(() => {
+    const fetchAllDiscounts = useCallback(async () => {
       if (isFirstLoad.current) {
         setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
       } else {
@@ -80,24 +79,10 @@ export const useDiscounts = () => {;
         }
     }
 
-    /*
-    NO ENDPOINT EXISTS FOR UPDATING DISCOUNT AT THE MOMENT.
-    const updateDiscount = async (id, dto) => {
-        try {
-            const data = updateDiscountDetails(id, dto);
-            fetchAllProducts();
-            return data;
-        } catch (err) {
-            setAsyncState({ error: err })
-        }
-    }
-    */
-
     const createDiscount = async (dto) => {
         try {
             const data = await postAddNewDiscount(dto);
             await fetchAllDiscounts();
-
             return data;
         } catch (err) {
             setAsyncState({ error: err })

@@ -38,7 +38,6 @@ const DeliveryConfirmationPage = () => {
             
             const initial = {};
             (data.items || []).forEach((item) => {
-                // We use ProductId to track state since it perfectly matches the backend change
                 initial[item.productId] = {
                     isReceived: true,
                     receivedQty: item.quantity,
@@ -104,14 +103,14 @@ const DeliveryConfirmationPage = () => {
             confirmText: isComplete ? "Confirm Completion" : "Confirm Partial",
             confirmVariant: isComplete ? "default" : "destructive",
             onConfirm: async () => {
-                setIsSubmitting(true);
                 try {
+                    setIsSubmitting(true);
                     const payload = {
                         expiryDate: new Date().toISOString(),
                         items: items.map(item => {
                             const receipt = itemReceipts[item.productId];
                             return {
-                                requestItemId: item.productId, // Sends ProductId so your C# query finds it instantly!
+                                requestItemId: item.productId,
                                 receivedQty: Number(receipt.receivedQty),
                                 remarks: receipt.reason || null
                             };
@@ -120,12 +119,11 @@ const DeliveryConfirmationPage = () => {
                     
                     await postReceiveDelivery(deliveryId, payload);
                     navigate("/home/deliveries");
-                } catch (err) {
-                    console.error("Failed to confirm delivery:", err);
+                } catch (error) {
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: err.response?.data || err.message || "Failed to confirm delivery.",
+                        description: `Failed to confirm delivery.${error}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
@@ -246,7 +244,12 @@ const DeliveryConfirmationPage = () => {
                 </Button>
             </div>
 
-            <ConfirmDialog isOpen={!!config} onClose={() => setConfig(null)} config={config} />
+            <ConfirmDialog 
+                isOpen={!!config} 
+                onClose={() => setConfig(null)} 
+                config={config} 
+                isLoading={isSubmitting}
+            />
         </div>
     );
 };

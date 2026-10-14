@@ -26,22 +26,21 @@ const DeliveriesPage = () => {
 
     const { user } = useAuth();
 
-    const navigate = useNavigate(); // <-- Initialized navigate
+    const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams();
     const [config, setConfig] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Extract active tab and search query directly from URL state
     const activeTab = searchParams.get("direction") || "";
     const searchQuery = searchParams.get("search") || "";
 
-    // Sync URL parameters with the backend filter hook
     useEffect(() => {
         updateFilter('direction', activeTab);
         updateFilter('search', searchQuery);
     }, [activeTab, searchQuery]);
 
     const handleTabChange = (direction) => {
-             setSearchParams(prev => {
+        setSearchParams(prev => {
             if (direction) prev.set("direction", direction);
             else prev.delete("direction");
             return prev;
@@ -66,15 +65,15 @@ const DeliveriesPage = () => {
             confirmText: "Mark In Transit",
             onConfirm: async () => {
                 try {
+                    setIsSubmitting(true);
                     await postDispatchDelivery(deliveryId);
                     fetchDeliveries();
                     setConfig(null);
-                } catch (err) {
-                    console.error("Failed to mark as in transit:", err);
+                } catch (error) {
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: err.message || "Failed to mark as in transit.",
+                        description: `Failed to mark as in transit.${error}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
@@ -93,6 +92,7 @@ const DeliveriesPage = () => {
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
+                    setIsSubmitting(true);
                     await postCancelDelivery(deliveryId);
                     fetchDeliveries();
                     setConfig(null);
@@ -106,6 +106,8 @@ const DeliveriesPage = () => {
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
                     });
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
             onCancel: () => setConfig(null),
@@ -119,6 +121,7 @@ const DeliveriesPage = () => {
             confirmText: "Accept Request",
             onConfirm: async () => {
                 try {
+                    setIsSubmitting(true);
                     await postReceiveDelivery(deliveryId, { accepted: true });
                     fetchDeliveries();
                     setConfig(null);
@@ -132,6 +135,8 @@ const DeliveriesPage = () => {
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
                     });
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
             onCancel: () => setConfig(null),
@@ -146,6 +151,7 @@ const DeliveriesPage = () => {
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
+                    setIsSubmitting(true);
                     await postReceiveDelivery(deliveryId, { accepted: false });
                     fetchDeliveries();
                     setConfig(null);
@@ -159,13 +165,15 @@ const DeliveriesPage = () => {
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
                     });
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
             onCancel: () => setConfig(null),
         });
     };
 
-    // FIXED: Replaced the dialog with navigation to the stock-checking page
+
     const handleConfirmDelivery = (deliveryId) => {
         navigate(`/home/deliveries/${deliveryId}/confirm`);
     };
@@ -282,6 +290,7 @@ const DeliveriesPage = () => {
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </div>
     );

@@ -113,6 +113,7 @@ const AccountInfoModal = ({
         confirmText: "Archive Account",
             onConfirm: async () => {
                 try {
+                    setIsSubmitting(true);
                     await archive(accountId);
                     
                     toast({

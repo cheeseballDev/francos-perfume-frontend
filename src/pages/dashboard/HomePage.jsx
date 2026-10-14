@@ -1,12 +1,18 @@
 import { useAuth } from "@/auth/UseAuth";
+import DashboardPanel from "@/components/features/home_components/DashboardPanel";
+import AuditLogItem from "@/components/features/home_components/home_items/AuditLogItem";
+import DeliveryItem from "@/components/features/home_components/home_items/DeliveryItem";
+import LowStockItem from "@/components/features/home_components/home_items/LowStockItem";
+import RequestItem from "@/components/features/home_components/home_items/RequestItem";
+import TransactionItem from "@/components/features/home_components/home_items/TransactionItem";
 import DashboardSkeleton from "@/components/loaders/DashboardSkeleton";
 import { getAllAuditLogs } from "@/services/AuditLogService";
 import { getAllDeliveries } from "@/services/DeliveryService";
-import { getAllInventory } from "@/services/inventoryService";
+import { getAllInventory } from "@/services/InventoryService";
 import { getLowStockKPI } from "@/services/KPIService";
 import { getAllRequests } from "@/services/RequestService";
 import { getAllTransactions } from "@/services/TransactionService";
-import { AlertCircle, Archive, Banknote, BarChart3, Boxes, Clock, Package, Receipt, ShieldAlert } from "lucide-react";
+import { Banknote, BarChart3, Boxes, Clock, Package, Receipt, ShieldAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StatusCard from "../../components/shared/StatusCard";
@@ -17,116 +23,10 @@ const getArray = (res) => {
     return res.items || res.data || [];
 };
 
-// Date Formatter
-const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString('en-US', {
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-    });
-};
-
-const DashboardPanel = ({ title, actionText, onAction, children, className = "" }) => (
-    <div className={`bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col h-full ${className}`}>
-        <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-foreground">{title}</h3>
-            {actionText && (
-                <button 
-                    onClick={onAction}
-                    className="text-sm font-bold text-primary hover:underline"
-                >
-                    {actionText}
-                </button>
-            )}
-        </div>
-        <div className="flex-1 flex flex-col gap-3">
-            {children}
-        </div>
-        {actionText && (
-            <button 
-                onClick={onAction}
-                className="w-full mt-4 py-2 bg-muted hover:bg-muted/80 text-foreground font-semibold rounded-md transition-colors"
-            >
-                {actionText}
-            </button>
-        )}
-    </div>
-);
-
-const AuditLogItem = ({ log }) => (
-    <div className="flex items-start gap-3 pb-3 border-b border-border last:border-0">
-        <Archive className="w-5 h-5 text-emerald-500 mt-1" />
-        <div>
-            <p className="text-sm font-bold text-foreground">{log?.action || "System Action"}</p>
-            <p className="text-xs text-muted-foreground">By {log?.performedBy || log?.userName || "System"} • {formatDate(log?.timestamp || log?.createdAt)}</p>
-        </div>
-    </div>
-);
-
-const RequestItem = ({ request }) => (
-    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg border border-border">
-        <div>
-            <p className="text-sm font-bold text-foreground">{request?.requestDisplayId || `REQ-${request?.requestId || '000'}`}</p>
-            <p className="text-xs text-muted-foreground">{request?.requestedFrom || "Source"} → {request?.deliveredTo || "Destination"}</p>
-        </div>
-        <div className="text-right">
-            <span className="text-xs font-bold px-2 py-1 bg-amber-500/20 text-amber-600 rounded-md truncate max-w-[120px] inline-block">
-                {request?.requestStatus || "Pending"}
-            </span>
-            <p className="text-xs font-bold text-muted-foreground mt-1">
-                {request?.items?.length || 0} Products
-            </p>
-        </div>
-    </div>
-);
-
-const DeliveryItem = ({ delivery }) => (
-    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg border border-border">
-        <div>
-            <p className="text-sm font-bold text-foreground">{delivery?.deliveryDisplayId || `DEL-${delivery?.deliveryId || '000'}`}</p>
-            <p className="text-xs text-muted-foreground">{delivery?.fromBranch || "Source"} → {delivery?.toBranch || "Destination"}</p>
-        </div>
-        <div className="text-right">
-            <span className="text-xs font-bold px-2 py-1 rounded-md bg-purple-500/20 text-purple-600">
-                {delivery?.deliveryStatus || "In Transit"}
-            </span>
-        </div>
-    </div>
-);
-
-const LowStockItem = ({ item }) => (
-    <div className="flex justify-between items-center p-3 bg-red-50/50 rounded-lg border border-red-100">
-        <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-md flex items-center justify-center">
-                <AlertCircle className="w-5 h-5 text-red-500" />
-            </div>
-            <div>
-                <p className="text-sm font-bold text-foreground">{item?.productName || "Unknown Product"}</p>
-                <p className="text-xs text-muted-foreground">{item?.branchName || "Branch"} - {item?.quantity || 0} units left</p>
-                <p className="text-[10px] text-muted-foreground">BATCH: {item?.batchCode || "N/A"} • EXP: {formatDate(item?.expiryDate)}</p>
-            </div>
-        </div>
-        <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500/20 text-red-600 rounded-sm text-center">Low Stock</span>
-        </div>
-    </div>
-);
-
-const TransactionItem = ({ tx }) => (
-    <div className="flex justify-between items-center p-3 border-b border-border last:border-0">
-        <div>
-            <p className="text-xs font-bold text-muted-foreground uppercase">ID: {tx?.transactionDisplayId || tx?.transactionId}</p>
-            <p className="text-sm text-foreground">{tx?.items?.length || 0} items purchased</p>
-            <p className="text-xs text-muted-foreground">{formatDate(tx?.transactionDate || tx?.createdAt)}</p>
-        </div>
-        <span className="text-sm font-bold text-emerald-500">+ ₱{Number(tx?.totalAmount || tx?.grandTotal || 0).toLocaleString()}</span>
-    </div>
-);
-
-const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) => {
+const DashboardHome = ({ isLoading: externalLoading = false }) => {
     const { user } = useAuth();
     const navigate = useNavigate(); 
-    const userRole = role?.toLowerCase();
+    const userRole = user.trueRole;
     const branchId = user?.branchId;
 
     const [data, setData] = useState({
@@ -140,15 +40,16 @@ const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) =
     
     const [isFetching, setIsFetching] = useState(true);
 
+    // TODO: TO CHANGE INTO PROPER
     useEffect(() => {
         const fetchDashboardData = async () => {
             setIsFetching(true);
             try {
-                if (userRole === "admin") {
+                if (userRole === "ADMIN") {
                     const logs = await getAllAuditLogs({ limit: 10 });
                     setData(prev => ({ ...prev, auditLogs: getArray(logs) }));
                 } 
-                else if (userRole !== "cashier") {
+                else if (userRole !== "CASHIER") {
                     const basePromises = [
                         getAllRequests({ status: 'PENDING', branchId }),
                         getAllDeliveries({ status: 'PENDING', branchId }),
@@ -156,7 +57,7 @@ const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) =
                         getLowStockKPI().catch(() => []) 
                     ];
 
-                    if (userRole === "manager" || userRole === "owner") {
+                    if (userRole === "MANAGER" || userRole === "OWNER") {
                         basePromises.push(getAllTransactions({ branchId, limit: 10 }));
                     }
 
@@ -168,7 +69,7 @@ const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) =
                         deliveries: getArray(results[1]),
                         inventory: getArray(results[2]),
                         lowStock: getArray(results[3]),
-                        transactions: userRole === "manager" || userRole === "owner" ? getArray(results[4]) : []
+                        transactions: userRole === "MANAGER" || userRole === "OWNER" ? getArray(results[4]) : []
                     });
                 }
             } catch (error) {
@@ -185,7 +86,7 @@ const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) =
 
     const isLoading = externalLoading || isFetching;
 
-    if (userRole === "cashier") {
+    if (userRole === "CASHIER") {
         return (
             <div className="flex flex-col items-center justify-center h-[80vh] text-center animate-fade-in font-montserrat">
                 <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
@@ -226,9 +127,9 @@ const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) =
                 <div className="flex flex-col gap-6">
                     
                     {/* ADMIN VIEW */}
-                    {userRole === "admin" && (
+                    {userRole === "ADMIN" && (
                         <div className="grid grid-cols-1 lg:grid-cols-2">
-                            <DashboardPanel 
+                            <DashboardPanel
                                 title="Recent Audit Logs" 
                                 actionText="View All" 
                                 onAction={() => navigate('/home/audit-log')}
@@ -244,7 +145,7 @@ const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) =
                     )}
 
                     {/* STAFF / MANAGER / OWNER VIEW (Shared Top Cards) */}
-                    {userRole !== "admin" && (
+                    {userRole !== "ADMIN" && (
                         <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
                             {topCards.map((card, index) => (
                                 <StatusCard 
@@ -260,7 +161,7 @@ const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) =
                     )}
 
                     {/* MANAGER / OWNER ONLY (Sales Chart) */}
-                    {(userRole === "manager" || userRole === "owner") && (
+                    {(userRole === "MANAGER" || userRole === "OWNER") && (
                         <div className="bg-card border border-border rounded-xl p-6 shadow-sm w-full h-[350px] flex flex-col items-center justify-center text-muted-foreground">
                             <div className="w-full flex justify-between items-center mb-6 self-start">
                                 <h3 className="font-bold text-foreground text-lg">Sales Forecast and Predictive Analysis</h3>
@@ -275,7 +176,7 @@ const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) =
                     )}
 
                     {/* BOTTOM GRIDS (Staff, Manager, Owner) */}
-                    {userRole !== "admin" && (
+                    {userRole !== "ADMIN" && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             
                             {/* Left Column */}
@@ -311,7 +212,7 @@ const DashboardHome = ({ role = "staff", isLoading: externalLoading = false }) =
                                 </DashboardPanel>
 
                                 {/* Transactions Panel (Manager / Owner Only) */}
-                                {(userRole === "manager" || userRole === "owner") && (
+                                {(userRole === "MANAGER" || userRole === "OWNER") && (
                                     <DashboardPanel 
                                         title="Recent Transactions" 
                                         actionText="View All Transactions"

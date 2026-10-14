@@ -56,10 +56,6 @@ const DiscountPage = () => {
         updateFilter('search', query);
     }
 
-    const handleClose = () => {
-        
-    }
-
     return (
         <div className="flex flex-col h-full animate-fade-in relative font-montserrat">
 
