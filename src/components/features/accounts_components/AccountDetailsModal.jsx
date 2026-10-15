@@ -55,7 +55,7 @@ const AccountInfoModal = ({
                 } catch (error) {
                     toast({
                         title: "Reset Password Failed",
-                        description: `An error occurred while resetting the password of the account.\n${error}`,
+                        description: `An error occurred while resetting the password of the account.\n${error.response?.data}`,
                         variant: "destructive",
                     });   
 

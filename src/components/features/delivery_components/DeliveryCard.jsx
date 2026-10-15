@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 
 const DeliveryCard = ({
     delivery,
-    activeTab, // Kept for prop compatibility, but no longer restricts button visibility
     onMarkInTransit,
     onCancelRequest,
     onAcceptRequest,
@@ -16,8 +15,7 @@ const DeliveryCard = ({
 
     const isInbound = delivery.direction === "INBOUND";
     
-    // Normalize status to uppercase for reliable matching
-    const deliveryStatus = (delivery.deliveryStatus || "").toUpperCase();
+    const deliveryStatus = delivery.deliveryStatus;
 
     const deliveryId = delivery.deliveryDisplayId;
     const route = `From ${delivery.fromBranchName} To ${delivery.toBranchName}`;
@@ -29,9 +27,6 @@ const DeliveryCard = ({
     };
 
     const renderActions = () => {
-        // --------------------------------------------------
-        // OUTBOUND LOGIC (The current user's branch is sending the stock)
-        // --------------------------------------------------
         if (!isInbound) {
             const isPendingDispatch = deliveryStatus === "PENDING" || deliveryStatus === "PENDING DISPATCH";
             const canCancel = deliveryStatus !== "IN TRANSIT" && deliveryStatus !== "COMPLETED" && deliveryStatus !== "CANCELLED";
@@ -55,9 +50,6 @@ const DeliveryCard = ({
             );
         }
 
-        // --------------------------------------------------
-        // INBOUND LOGIC (The current user's branch is receiving the stock)
-        // --------------------------------------------------
         if (isInbound) {
             const needsAcceptance = deliveryStatus === "PENDING";
             const inTransit = deliveryStatus === "IN TRANSIT" || deliveryStatus === "ACCEPTED" || deliveryStatus === "DISPATCHED";
