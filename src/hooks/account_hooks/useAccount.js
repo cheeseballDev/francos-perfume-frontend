@@ -1,4 +1,4 @@
-import { getAccountFilters, getAllAccounts, getOneAccountDetails, patchResetAccountPassword, patchToggleAccountStatus, patchUpdateAccountDetails, postAddNewAccount } from "@/services/AccountService";
+import { getAccountFilters, getAllAccounts, getOneAccountDetails, patchResetAccountPassword, patchToggleAccountStatus, patchUpdateAccountDetails, patchUpdateAccountPassword, postAddNewAccount } from "@/services/AccountService";
 import { patchArchiveAccount } from "@/services/ArchiveService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -115,8 +115,17 @@ export const useAccount = () => {
         }
     };
 
-    const updatePassword = async (accountId) => {
-        // TO BE ADDED
+    const updatePassword = async (accountId, dto) => {
+        try {
+            const data = await patchUpdateAccountPassword(accountId, dto);
+            await fetchAccountDetails(accountId);
+            return data;
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+        }
     };
 
     const updateAuth = (accountId) => {
@@ -186,13 +195,14 @@ export const useAccount = () => {
         pagination,
         filter,
         updateFilter,
-        fetchAccount: fetchAccountDetails,
-        archive: archiveAccount,
-        toggleStatus: toggleAccountStatus,
+        fetchAccountDetails,
+        archiveAccount,
+        toggleAccountStatus,
         resetPassword,
         filterOptions,
         updateAccount,
         createAccount,
         fetchAllAccounts,
+        updatePassword
     };
 }

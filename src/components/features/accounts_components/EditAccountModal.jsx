@@ -21,10 +21,10 @@ const getAccountFormData = (account) => ({
 });
 
 const accountValidationSchema = {
-    firstName: [isValid.required],
-    lastName: [isValid.required],
+    firstName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
+    lastName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
     email: [isValid.required, isValid.email],
-    contactNumber: [isValid.required, isValid.phone],
+    contactNumber: [isValid.phone],
     branchLocation: [isValid.required],
     employeeRole: [isValid.required],
     employeeShift: [isValid.required],
@@ -37,7 +37,7 @@ const ROLE_RANKS = {
   OWNER: 4,
 };
 
-const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = [], updateAccount }) => {
+const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = [], updateAccount, setSelectedAccount }) => {
     const { user } = useAuth();
     const { toast } = useToast();
 
@@ -86,7 +86,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
         setData((prev) => ({ ...prev, [field]: value }));
         
         if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: null }));
+            setErrors((prev) => ({ ...prev, [field]: null }));
         }
     };
 
@@ -122,6 +122,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
                 setIsSubmitting(false);
                 setConfig(null);
                 setData(null);
+                setSelectedAccount(null);
             }
         } 
         })
@@ -233,7 +234,6 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
 
           <div className="grid grid-cols-2 gap-6 mb-8">
             <Button 
-              variant="outline"
               onClick={onClose}
             >
               Cancel

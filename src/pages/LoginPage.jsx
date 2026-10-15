@@ -1,63 +1,61 @@
+import ForcePasswordChangeModal from '@/components/features/settings_component/ForcePasswordChangeModal';
 import FormField from '@/components/shared/FormField';
 import { Button } from '@/components/ui/button';
 import { useLogin } from '@/hooks/useLogin';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import logo from '../assets/FrancoPerfumeLogo.png';
 
-// FIXED: Import the modal based on your folder structure
-import ForcePasswordChangeModal from '@/auth/ForcePasswordChangeModal';
-
 const LoginPage = () => {
-  const {
-    //error,
-    isLoading,
-    displayName, 
-    handleLogin, 
-    handleModuleSelect,
-    view, 
-    setView, 
-    password, 
-    setPassword,
-    email, 
-    setEmail, 
-    // ADDED: Extract the new modal states and submission handler from your hook
-    showPasswordModal,
-    setShowPasswordModal,
-    handlePasswordUpdate
-  } = useLogin();
+    const {
+        isLoading,
+        displayName, 
+        handleLogin, 
+        handleModuleSelect,
+        view, 
+        setView, 
+        password, 
+        setPassword,
+        email, 
+        setEmail, 
+        showPasswordModal,
+        setShowPasswordModal,
+        handlePasswordUpdate,
+        firstName,
+        lastName
+    } = useLogin();
   
-  if (view === 'module') {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background font-montserrat p-4 relative">
-        <div 
-          onClick={() => { setView('login') }}
-          className="absolute top-8 left-8 flex items-center gap-1 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeft size={20} />
-          <span className="text-sm font-medium">Go Back</span>
-        </div>
+    if (view === 'module') {
+        return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background font-montserrat p-4 relative">
+            <div 
+                onClick={() => { setView('login') }}
+                className="absolute top-8 left-8 flex items-center gap-1 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+            >
+            <ChevronLeft size={20} />
+            <span className="text-sm font-medium">Go Back</span>
+            </div>
 
-        <h2 className="text-2xl font-bold text-foreground mb-1 tracking-tight">Select A Module</h2>
-        <p className="text-muted-foreground mb-10 text-sm">Welcome back {displayName}.</p>
-        
-        <div className="w-full max-w-sm flex flex-col gap-4">
-          <Button 
-            onClick={() => handleModuleSelect('CASHIER')}
-            className="w-full bg-primary text-primary-foreground hover:opacity-90"
-          >
-            Access POS
-          </Button>
-          
-          <Button
-            onClick={() => handleModuleSelect('MANAGER')}
-            className="w-full bg-primary text-primary-foreground hover:opacity-90"
-          >
-            Access Dashboard
-          </Button>
+            <h2 className="text-2xl font-bold text-foreground mb-1 tracking-tight">Select A Module</h2>
+            <p className="text-muted-foreground mb-10 text-sm">Welcome back {displayName}.</p>
+            
+            <div className="w-full max-w-sm flex flex-col gap-4">
+            <Button 
+                onClick={() => handleModuleSelect('CASHIER')}
+                className="w-full bg-primary text-primary-foreground hover:opacity-90"
+            >
+                Access POS
+            </Button>
+            
+            <Button
+                onClick={() => handleModuleSelect('MANAGER')}
+                className="w-full bg-primary text-primary-foreground hover:opacity-90"
+            >
+                Access Dashboard
+            </Button>
+            </div>
         </div>
-      </div>
-    )
-  }
+        )
+    }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background font-montserrat p-4">
@@ -85,7 +83,11 @@ const LoginPage = () => {
                 required
             />
 
-            <Button type="submit" disabled={isLoading} className="mt-2 w-full bg-primary text-primary-foreground hover:opacity-90">
+            <Button 
+                type="submit" 
+                disabled={isLoading} 
+                className="mt-2 w-full bg-primary text-primary-foreground hover:opacity-90"
+                >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -102,13 +104,14 @@ const LoginPage = () => {
         </p>
       </div>
 
-      {/* ADDED: The modal is rendered here, controlled by the hook */}
-      <ForcePasswordChangeModal 
-          isOpen={showPasswordModal}
-          isLoading={isLoading}
-          onClose={() => setShowPasswordModal(false)}
-          onSubmit={handlePasswordUpdate}
-      />
+        <ForcePasswordChangeModal 
+            isOpen={showPasswordModal}
+            onClose={() => setShowPasswordModal(false)}
+            onSuccess={handlePasswordUpdate}
+            oldPassword={password}
+            firstName={firstName}
+            lastName={lastName}
+        />
     </div>
   )
 };

@@ -3,10 +3,10 @@ import apiClient from "./APIClient";
 const PATH = "/auth";
 
 export const login = async (email, password, newPassword = null) => {
-  const response = await apiClient.post(`${PATH}/login`, { 
-    email, 
-    password, 
-    newPassword 
-  });
-  return response.data;
+    const response = await apiClient.post(`${PATH}/login`, { 
+        email, 
+        password, 
+        newPassword 
+    });
+    return response.data;
 };

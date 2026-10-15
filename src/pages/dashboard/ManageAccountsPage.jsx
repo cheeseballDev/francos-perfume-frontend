@@ -18,9 +18,9 @@ const ManageAccountsPage = () => {
         pagination,
         filter,
         updateFilter,
-        fetchAccount,
-        archive,
-        toggleStatus,
+        fetchAccountDetails,
+        archiveAccount,
+        toggleAccountStatus,
         resetPassword,
         filterOptions,
         updateAccount,
@@ -43,7 +43,7 @@ const ManageAccountsPage = () => {
         }
         setSelectedAccount(row);    
 
-        const profile = await fetchAccount(row.employeeId);
+        const profile = await fetchAccountDetails(row.employeeId);
             if (profile) {
             setSelectedAccount(prev => prev ? { ...prev, ...profile }: profile);
         }
@@ -123,10 +123,11 @@ const ManageAccountsPage = () => {
       isOpen={isAccountInfoModalOpen}
       onClose={() => setIsAccountInfoModalOpen(false)}
       selectedAccount={selectedAccount}
-      archive={archive}
-      toggleStatus={toggleStatus}
+      archiveAccount={archiveAccount}
+      toggleAccountStatus={toggleAccountStatus}
       resetPassword={resetPassword}
       setIsEditAccountModalOpen={setIsEditAccountModalOpen}
+      setSelectedAccount={setSelectedAccount}
     />
 
     <EditAccountModal 
@@ -135,6 +136,7 @@ const ManageAccountsPage = () => {
       selectedAccount={selectedAccount}
       filterOptions={filterOptions}
       updateAccount={updateAccount}
+      setSelectedAccount={setSelectedAccount}
     />
 
     <div className="flex justify-end mt-4">

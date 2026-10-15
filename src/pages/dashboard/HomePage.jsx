@@ -40,7 +40,7 @@ const DashboardHome = ({ isLoading: externalLoading = false }) => {
     
     const [isFetching, setIsFetching] = useState(true);
 
-    // TODO: TO CHANGE INTO PROPER
+    // TODO: TO CHANGE INTO PROPER KPIs
     useEffect(() => {
         const fetchDashboardData = async () => {
             setIsFetching(true);

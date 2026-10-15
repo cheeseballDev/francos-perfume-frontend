@@ -12,10 +12,11 @@ const AccountInfoModal = ({
     isOpen,
     onClose,
     selectedAccount,
-    archive,
-    toggleStatus,
+    archiveAccount,
+    toggleAccountStatus,
     resetPassword,
     setIsEditAccountModalOpen,
+    setSelectedAccount,
 }) => {
     const { toast } = useToast();
     const { user } = useAuth();
@@ -61,7 +62,7 @@ const AccountInfoModal = ({
                 } finally {
                     setIsSubmitting(false);
                     setConfig(null);
-
+                    setSelectedAccount(null);
                 }
             } 
         });
@@ -78,7 +79,7 @@ const AccountInfoModal = ({
             onConfirm: async () => {
                 try {
                     setIsSubmitting(true);
-                    await toggleStatus(accountId);
+                    await toggleAccountStatus(accountId);
 
                     toast({
                         title: "Success",
@@ -101,6 +102,7 @@ const AccountInfoModal = ({
                 } finally {
                     setIsSubmitting(false);
                     setConfig(null);
+                    setSelectedAccount(null);
                 }
             },
         });
@@ -114,7 +116,7 @@ const AccountInfoModal = ({
             onConfirm: async () => {
                 try {
                     setIsSubmitting(true);
-                    await archive(accountId);
+                    await archiveAccount(accountId);
                     
                     toast({
                         title: "Success",
@@ -133,6 +135,7 @@ const AccountInfoModal = ({
                 } finally {
                     setIsSubmitting(false);
                     setConfig(null);
+                    setSelectedAccount(null);
                 }
             },
         });
@@ -148,13 +151,13 @@ const AccountInfoModal = ({
 
           <div className="p-8">
             <div className="grid grid-cols-3 gap-6 mb-6">
-              <DetailItem label="First name" value={selectedAccount.firstName || "N/A"} />
-              <DetailItem label="Middle name" value={selectedAccount.middleName || "N/A"} />
-              <DetailItem label="Last name" value={selectedAccount.lastName || "N/A"} />
+                <DetailItem label="First name" value={selectedAccount.firstName || "N/A"} />
+                <DetailItem label="Middle name" value={selectedAccount.middleName || "N/A"} />
+                <DetailItem label="Last name" value={selectedAccount.lastName || "N/A"} />
             </div>
 
             <div className="mb-6">
-              <DetailItem label="Address" value={selectedAccount.address || "N/A"} uppercase={true} />
+                <DetailItem label="Address" value={selectedAccount.address || "N/A"} uppercase={true} />
             </div>
 
             <div className="grid grid-cols-2 gap-6 mb-6">
