@@ -3,7 +3,7 @@ import ImportTransactionModal from '@/components/features/transactions_component
 import { transactionColumns } from '@/components/features/transactions_components/TransactionColumns';
 import TransactionDetailsModal from '@/components/features/transactions_components/TransactionDetailsModal';
 import TransactionTableSkeleton from '@/components/loaders/TransactionTableSkeleton';
-import { FilterDropDown, SearchBar } from '@/components/shared';
+import { FilterDropdown, SearchBar } from '@/components/shared';
 import DataTable from '@/components/shared/DataTable';
 import { Button } from '@/components/ui/button';
 import { useTransaction } from '@/hooks/transaction_hooks/useTransaction';
@@ -69,7 +69,7 @@ export default function TransactionsPage() {
                         />
                     </div>
                     <div className="w-full sm:w-auto">
-                        <FilterDropDown 
+                        <FilterDropdown 
                             filter={filter}
                             updateFilter={updateFilter}
                             filterOptions={filterOptions}

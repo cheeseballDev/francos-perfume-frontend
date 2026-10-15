@@ -1,7 +1,7 @@
 import { useAuth } from "@/auth/UseAuth";
 import { requestColumns } from "@/components/features/request_components/RequestColumns";
 import RequestTableSkeleton from "@/components/loaders/RequestTableSkeleton";
-import { FilterDropDown, SearchBar } from "@/components/shared";
+import { FilterDropdown, SearchBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useRequest } from "@/hooks/request_hooks/useRequest";
@@ -123,7 +123,7 @@ const RequestPage = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-                <FilterDropDown 
+                <FilterDropdown 
                     filter={filter}
                     updateFilter={updateFilter}
                     filterOptions={filterOptions}

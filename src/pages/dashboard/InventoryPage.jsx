@@ -3,7 +3,7 @@ import TableSkeleton from "@/components/loaders/TableSkeleton";
 import { formatDateForInput, formatDateForTable } from "@/utils/formattingUtils";
 import { useState } from "react";
 import EditBatchModal from "../../components/features/inventory_components/EditBatchModal";
-import FilterDropDown from "../../components/shared/FilterDropDown";
+import FilterDropdown from "../../components/shared/FilterDropdown";
 import SearchBar from "../../components/shared/SearchBar";
 import { useInventory } from "../../hooks/inventory_hooks/useInventory";
 
@@ -94,7 +94,7 @@ const InventoryPage = () => {
                 />
             </div>
             <div className="w-full sm:w-auto">
-                <FilterDropDown 
+                <FilterDropdown 
                     filter={filter}
                     updateFilter={updateFilter}
                     filterOptions={filterOptions}

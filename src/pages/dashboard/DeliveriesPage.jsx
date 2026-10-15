@@ -1,7 +1,7 @@
 import { useAuth } from "@/auth/UseAuth";
 import DeliveryCard from "@/components/features/delivery_components/DeliveryCard";
 import DeliverySkeletonList from "@/components/loaders/DeliverySkeletonList";
-import { FilterDropDown } from "@/components/shared";
+import { FilterDropdown } from "@/components/shared";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import PaginationBar from "@/components/shared/PaginationBar";
 import SearchBar from "@/components/shared/SearchBar";
@@ -271,7 +271,7 @@ const handleMarkInTransit = (deliveryId) => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <FilterDropDown
+                    <FilterDropdown
                         filter={filter}
                         updateFilter={updateFilter}
                         filterOptions={filterOptions}

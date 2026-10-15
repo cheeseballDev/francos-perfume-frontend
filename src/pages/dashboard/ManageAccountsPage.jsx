@@ -3,7 +3,7 @@ import AccountInfoModal from "@/components/features/accounts_components/AccountD
 import CreateAccountModal from "@/components/features/accounts_components/CreateAccountModal";
 import EditAccountModal from "@/components/features/accounts_components/EditAccountModal";
 import AccountTableSkeleton from "@/components/loaders/AccountTableSkeleton";
-import { FilterDropDown } from "@/components/shared";
+import { FilterDropdown } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "@/hooks/account_hooks/useAccount";
@@ -85,7 +85,7 @@ const ManageAccountsPage = () => {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <FilterDropDown 
+        <FilterDropdown 
           filter={filter}
           updateFilter={updateFilter}
           filterOptions={filterOptions}

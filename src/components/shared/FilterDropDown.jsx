@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
-const FilterDropDown = ({ filter, updateFilter, filterOptions }) => {  
+const FilterDropdown = ({ filter, updateFilter, filterOptions }) => {  
     if (!Array.isArray(filterOptions) || filterOptions.length === 0) {
         return null;
     }
@@ -31,4 +31,4 @@ const FilterDropDown = ({ filter, updateFilter, filterOptions }) => {
     )
 }
 
-export default FilterDropDown;
+export default FilterDropdown;

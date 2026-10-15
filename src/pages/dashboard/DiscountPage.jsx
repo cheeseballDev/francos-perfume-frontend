@@ -4,7 +4,7 @@ import { discountColumns } from "@/components/features/discount_components/Disco
 import DiscountInfoModal from "@/components/features/discount_components/DiscountInfoModal";
 import EditDiscountModal from "@/components/features/discount_components/EditDiscountModal";
 import DiscountTableSkeleton from "@/components/loaders/DiscountTableSkeleton";
-import { FilterDropDown, SearchBar } from "@/components/shared";
+import { FilterDropdown, SearchBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useDiscounts } from "@/hooks/discount_hooks/useDiscount";
@@ -83,7 +83,7 @@ const DiscountPage = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-                <FilterDropDown
+                <FilterDropdown
                 filter={filter}
                 updateFilter={updateFilter}
                 filterOptions={filterOptions}

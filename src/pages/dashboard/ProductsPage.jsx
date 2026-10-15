@@ -2,7 +2,7 @@ import CreateProductModal from '@/components/features/product_components/CreateP
 import EditProductModal from '@/components/features/product_components/EditProductModal';
 import ProductGrid from '@/components/features/product_components/ProductGrid';
 import ProductGridSkeleton from '@/components/loaders/ProductGridSkeleton';
-import { FilterDropDown, SearchBar } from '@/components/shared';
+import { FilterDropdown, SearchBar } from '@/components/shared';
 import PaginationBar from '@/components/shared/PaginationBar';
 import { Button } from '@/components/ui/button';
 import { useProduct } from '@/hooks/product_hooks/useProduct';
@@ -73,7 +73,7 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <FilterDropDown 
+                    <FilterDropdown 
                         filter={filter}
                         updateFilter={updateFilter}
                         filterOptions={filterOptions}
