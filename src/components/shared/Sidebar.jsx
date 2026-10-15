@@ -16,7 +16,7 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/FrancoPerfumeLogo.png";
 
-const SideBar = () => {
+const Sidebar = () => {
   const location = useLocation();
   const { user } = useAuth();
   const companyPictureAlt = "Franco's Logo";
@@ -165,4 +165,4 @@ const SideBar = () => {
   );
 };
 
-export default SideBar;
+export default Sidebar;
