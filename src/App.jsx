@@ -140,7 +140,8 @@ const App = () => {
                 <Route path="requests/create" element={<CreateTransferRequestPage />} />
                 <Route path="deliveries" element={<DeliveriesPage />} />
                 <Route path="deliveries/:deliveryId" element={<DeliveryDetailsPage />} />
-                <Route path="deliveries/confirm/:deliveryId" element={<DeliveryConfirmationPage />} />
+                {/* FIXED ROUTE TO MATCH BUTTON NAVIGATION */}
+                <Route path="deliveries/:deliveryId/confirm" element={<DeliveryConfirmationPage />} />
                 <Route path="barcode" element={<BarcodePage />} /> 
               </Route>
 

@@ -30,7 +30,7 @@ export const accountColumns = [
     },
     {
         header: "Status",
-        accessorKey: "accountStatus",
-        render: (row) => formatLabel(row.accountStatus) || "N/A"
+        accessorKey: "status",
+        render: (row) => formatLabel(row.status) || "N/A"
     }
 ]

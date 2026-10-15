@@ -1,20 +1,16 @@
-import { useAuth } from "@/auth/UseAuth";
-import { checkout } from "@/services/PointOfSaleService";
-// FIXED: Import the newly renamed function
+import { postCheckout } from "@/services/PointOfSaleService";
 import { extractReceiptData, formatCheckoutPayload } from "@/utils/pointOfSaleDTO";
 import { useState } from "react";
 
 export const useCheckout = (cart, grandTotal, appliedDiscountId) => {
-    const { user } = useAuth();
     const [isProcessing, setIsProcessing] = useState(false);
 
     const handleFinalCheckout = async (paymentDetails, onSuccess) => {
         setIsProcessing(true);
         try {
             
-            // FIXED: Use the new function name and perfectly mapped payload
             const posDto = formatCheckoutPayload(paymentDetails, grandTotal, appliedDiscountId, cart);
-            const result = await checkout(posDto, user?.accessToken);
+            const result = await postCheckout(posDto);
             
             const { receiptNumber, vat } = extractReceiptData(result);
 

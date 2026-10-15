@@ -15,18 +15,18 @@ export const getDiscountDetails = async (id) => {
     return response.data;
 }
 
-export const patchDiscount = async (id, dto) => {
+export const patchUpdateDiscountDetails = async (id, dto) => {
     const response = await apiClient.patch(`${PATH}/${id}`, dto);
     return response.data;
 }
 
-export const addNewDiscount = async (dto) => {
+export const postAddNewDiscount = async (dto) => {
     const response = await apiClient.post(`${PATH}`, dto);
     return response.data;
 }
 
 
-export const toggleDiscountStatus = async (id) => {
+export const patchToggleDiscountStatus = async (id) => {
     const response = await apiClient.patch(`${PATH}/status/${id}`);
     return response.data;
 }

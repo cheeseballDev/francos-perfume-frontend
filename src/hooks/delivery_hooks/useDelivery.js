@@ -42,7 +42,7 @@ export const useDelivery = () => {
         status: [],
     });
 
-    const fetchDeliveries = useCallback(() => {
+    const fetchDeliveries = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {
@@ -102,6 +102,8 @@ export const useDelivery = () => {
     useEffect(() => {
         fetchDeliveryFilters();
     }, [fetchDeliveryFilters]);
+
+    
 
     return {
         deliveries,

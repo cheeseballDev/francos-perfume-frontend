@@ -11,39 +11,38 @@ export const getAllAccounts = async (filter) => {
     return response.data;
 };
 
-export const getAccountDetails = async (id) => {
-    const response = await apiClient.get(`${PATH}/${id}`);
+export const getOneAccountDetails = async (accountId) => {
+    const response = await apiClient.get(`${PATH}/${accountId}`);
     return response.data;
 };
 
-export const addNewAccount = async (dto) => {
+export const postAddNewAccount = async (dto) => {
     const response = await apiClient.post(`${PATH}`, dto);
     return response.data;
 };
 
-
-export const updateAccountDetails = async (id, dto) => {
-    const response = await apiClient.patch(`${PATH}/update/${id}`, dto);
+export const patchUpdateAccountDetails = async (accountId, dto) => {
+    const response = await apiClient.patch(`${PATH}/update/${accountId}`, dto);
     return response.data;
 };
 
-export const updateAccountPassword = async (id, dto) => {
-    const response = await apiClient.patch(`${PATH}/update/password/${id}`, dto);
+export const patchUpdateAccountPassword = async (accountId, dto) => {
+    const response = await apiClient.patch(`${PATH}/update/password/${accountId}`, dto);
     return response.data;
 };
 
-export const resetAccountPassword = async (id) => {
-    const response = await apiClient.patch(`${PATH}/reset/password/${id}`);
+export const patchResetAccountPassword = async (accountId) => {
+    const response = await apiClient.patch(`${PATH}/reset/password/${accountId}`);
     return response.data;
 };
 
-export const updateAccountAuth = async (id, dto) => {
-    const response = await apiClient.patch(`${PATH}/update/auth/${id}`, dto);
+export const patchUpdateAccountAuth = async (accountId, dto) => {
+    const response = await apiClient.patch(`${PATH}/update/auth/${accountId}`, dto);
     return response.data;
 };
 
-export const toggleAccountStatus = async (id) => {
-    const response = await apiClient.patch(`${PATH}/status/${id}`);
+export const patchToggleAccountStatus = async (accountId) => {
+    const response = await apiClient.patch(`${PATH}/status/${accountId}`);
     return response.data;
 };
 

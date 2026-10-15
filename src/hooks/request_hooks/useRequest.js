@@ -8,6 +8,8 @@ export const useRequest = () => {
     const isFirstLoad = useRef(true);
 
     const [requests, setRequest] = useState([]);
+    const [branchOptions, setBranchOptions] = useState([]);
+    const [productOptions, setProductOptions] = useState([]);
 
     const [asyncState, setAsyncState] = useState({
         isLoading: true,
@@ -36,7 +38,7 @@ export const useRequest = () => {
         { key: "requestStatus", label: "Filter: Status", allLabel: "All Statuses" },
     ]
 
-    const fetchRequests = useCallback(() => {
+    const fetchRequests = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {
@@ -79,10 +81,10 @@ export const useRequest = () => {
       return () => clearTimeout(timer);
     }, [fetchRequests]);
 
-    const fetchRequestFilters = useCallback(async () => {
+    const fetchRequestFilters = useCallback(async (branchId = null) => {
         setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
-            const data = await getRequestFilters();
+            const data = await getRequestFilters(branchId);
             setFilterOptions(buildFilterOptions(data, REQUEST_FILTER_SCHEMA));
             return data;
         } catch (err) {
@@ -97,6 +99,37 @@ export const useRequest = () => {
         fetchRequestFilters();
     }, [fetchRequestFilters]);
 
+    const fetchBranches = useCallback(async () => {
+        try {
+            const raw = await getRequestFilters();
+            if (!raw) return;
+            setBranchOptions((raw.branches || []).map(branch => ({
+                value: branch.branchId,
+                label: branch.branchLocation,
+            })));
+        } catch (err) {
+            console.error("Failed to fetch branches", err);
+        }
+    }, []);
+
+    const fetchProductsByBranch = useCallback(async (branchId) => {
+        if (!branchId) {
+            setProductOptions([]);
+            return;
+        }
+        try {
+            const raw = await getRequestFilters(branchId);
+            if (!raw) return;
+            setProductOptions((raw.products || []).map(p => ({
+                value: p.productId,
+                label: p.productName,
+                availableQty: p.productQty || 0,
+            })));
+        } catch (err) {
+            console.error("Failed to fetch products", err);
+        }
+    }, []);
+
     return { 
         requests, 
         asyncState, 
@@ -106,6 +139,10 @@ export const useRequest = () => {
         updateFilter,
         filterOptions,
         fetchRequestDetails,
-        fetchRequestFilters
+        fetchRequestFilters,
+        branchOptions,
+        productOptions,
+        fetchBranches,
+        fetchProductsByBranch,
     }
 }

@@ -12,32 +12,34 @@ export const buildApprovalSteps = (approvals, requestedFrom) => {
             }
             return {
                 title: `${stageName.replace(/\b\w/g, l => l.toUpperCase())} Review`,
-                subtitle: approval.approver || "Waiting for approval",
+                subtitle: approval.approverName
+                            ? `${approval.approverName} (${approval.approved})`
+                            : "Waiting for approval",
                 status: approval.status,
             };
         });
 };
 
-export const renderTimelineSubtitle = (stage, status, approver) => {
-    if (stage != "DISPATCH" && stage != "IN TRANSIT") {
+export const renderTimelineSubtitle = (stage, status, approverName, approverId, remarks) => {
+    if (stage != "DISPATCH" && stage != "TRANSIT") {
         if (status != "PENDING") {
-            return `Approved by ${approver}`;
+            return `Approved by ${approverName} (${approverId})`;
         }
         return "Waiting for approval";
     }
 
     if (stage === "DISPATCH" || status === "DISPATCHED") {
         if (status != "PENDING") {
-            return `Dispatched by ${approver}`;
+            return `Dispatched by ${approverName} (${approverId})`;
         }
         return `To be dispatched`;
     }
 
     if (stage === "TRANSIT") {
         if (status === "RECEIVED") {
-            return `Received by ${approver}`;
+            return `Received by ${approverName} (${approverId})`;
         }
-        return `Sent by: ${approver}`;
+        return `${remarks}`;
     }
     
     return "Unknown status";
@@ -80,7 +82,6 @@ export const renderBadgeForRequestTimeline = (status) => {
     }
 };
 
-// Helper to render step icons
 export const renderTimelineIcon = (status) => {
     switch (status?.toUpperCase()) {
         case "APPROVED":

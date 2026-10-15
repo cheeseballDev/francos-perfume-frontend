@@ -1,9 +1,9 @@
 import { useAuth } from "@/auth/UseAuth";
-import ConfirmDialog from "@/components/shared/ConfirmDialog"; // ADDED: Import ConfirmDialog
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useRequestDetails } from "@/hooks/request_hooks/useRequestDetails";
-import { approveRequest, cancelRequest, rejectRequest } from "@/services/RequestService";
+import { patchApproveRequest, patchCancelRequest, patchRejectRequest } from "@/services/RequestService";
 import { canUserApproveRequest } from "@/utils/requestAuthorizationUtils";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -19,7 +19,6 @@ export default function RequestDetailsPage() {
 
     const { requestId } = useParams();
     const navigate = useNavigate();
-    const [requestPayload, setRequestPayload] = useState({});
     const [remarks, setRemarks] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     
@@ -68,16 +67,15 @@ export default function RequestDetailsPage() {
 
     const handleRejectRequest = async () => {
         if (!remarks.trim()) return;
-        setIsSubmitting(true);
         try {
-            await rejectRequest(requestId, remarks);
+            setIsSubmitting(true);
+            await patchRejectRequest(requestId, remarks);
             navigate(0);
-        } catch (err) {
-            console.error("Failed to reject request:", err);
+        } catch (error) {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: err.message || "Failed to reject the request.",
+                description: `Failed to reject the request.${error}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -88,9 +86,8 @@ export default function RequestDetailsPage() {
     };
 
     const handleApproveRequest = async () => {
-        setIsSubmitting(true);
         try {
-
+            setIsSubmitting(true);
             const payload = (data.items || []).map((item) => {
             const approvalState = itemApprovals[item.requestItemId];
             return {
@@ -103,15 +100,13 @@ export default function RequestDetailsPage() {
                         : 0,
                 };
             });
-            console.log(payload);
-            await approveRequest(requestId, payload);
+            await patchApproveRequest(requestId, payload);
             navigate(0);
-        } catch (err) {
-            console.error("Failed to approve request:", err);
+        } catch (error) {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: err.message || "Failed to approve the request.",
+                description: `Failed to approve the request.\n${error}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -122,16 +117,15 @@ export default function RequestDetailsPage() {
     };
 
     const handleCancelRequest = async () => {
-        setIsSubmitting(true);
         try {
-            await cancelRequest(requestId);
+            setIsSubmitting(true);
+            await patchCancelRequest(requestId);
             navigate("/home/requests");
-        } catch (err) {
-            console.error("Failed to cancel request:", err);
+        } catch (error) {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: err.message || "Failed to cancel the request.",
+                description: `Failed to cancel the request.\n${error}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -181,8 +175,8 @@ export default function RequestDetailsPage() {
                 )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="xl:col-span-2 space-y-6">
 
                     <RequestInformation 
                         request={data} 
@@ -205,7 +199,7 @@ export default function RequestDetailsPage() {
                     </div>
                 </div>
 
-                <div className="lg:col-span-1 space-y-6">
+                <div className="xl:col-span-1 space-y-6">
                     <RequestTimeline
                         selectedRequest={data}
                     />
@@ -218,6 +212,7 @@ export default function RequestDetailsPage() {
                         handleApproveRequest={handleApproveRequest}
                         handleRejectRequest={handleRejectRequest}
                         selectedRequest={data}
+                        isSubmitting={isSubmitting}
                     />
                 </div>
             </div>
@@ -226,6 +221,7 @@ export default function RequestDetailsPage() {
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </div>
     );

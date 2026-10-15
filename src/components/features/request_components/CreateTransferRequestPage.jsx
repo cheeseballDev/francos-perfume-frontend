@@ -1,7 +1,7 @@
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from '@/components/ui/button';
 import { useRequest } from '@/hooks/request_hooks/useRequest';
-import { createRequest } from '@/services/RequestService';
+import { postCreateRequest } from '@/services/RequestService';
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -28,7 +28,13 @@ const requestValidationSchema = {
 const CreateTransferRequestPage = () => {
     const navigate = useNavigate();
 
-    const { fetchRequestFilters } = useRequest();
+    const { 
+        fetchRequestFilters,
+        branchOptions,
+        productOptions,
+        fetchBranches,
+        fetchProductsByBranch
+    } = useRequest();
     
     const [data, setData] = useState(INITIAL_DATA_STATE);
     const [selectedProduct, setSelectedProduct] = useState('');
@@ -38,70 +44,44 @@ const CreateTransferRequestPage = () => {
     const [config, setConfig] = useState(null);
 
     const totalUnits = (data.items || []).reduce((sum, item) => sum + item.quantity, 0);
-    
-    const [branchOptions, setBranchOptions] = useState([]);
-    const [productOptions, setProductOptions] = useState([]);
 
     useEffect(() => {
-        fetchRequestFilters().then(data => {
-            if (!data) return;
-            setBranchOptions((data.branches).map(branch => ({
-                value: branch.branchId,
-                label: branch.branchLocation,
-            })));
-            setProductOptions((data.products).map(product => ({
-                value: product.productId,
-                label: product.productName,
-                availableQty: product.productQty || 0,
-            })));
-        });
-    }, [fetchRequestFilters]);
+        fetchBranches();
+    }, [fetchBranches]);
 
     useEffect(() => {
-        if (!data.fromBranch) {
-            setProductOptions([]);
-            return;
-        }
-
-        fetchRequestFilters().then(raw => {
-            if (!raw) return;
-            setProductOptions((raw.products || []).map(p => ({
-                value: p.productId,
-                label: p.productName,
-                availableQty: p.productQty || 0,
-            })));
-        });
-    }, [data.fromBranch, fetchRequestFilters]);
+        fetchProductsByBranch(data.fromBranch);
+    }, [data.fromBranch, fetchProductsByBranch]);
 
     const handleAddProduct = () => {
-    if (!selectedProduct) return;
+        if (!selectedProduct) return;
 
-    const productOption = productOptions.find(p => p.value === selectedProduct);
-    if (!productOption) return;
+        const productOption = productOptions.find(p => p.value === selectedProduct);
+        if (!productOption) return;
 
-    const fromBranchName = branchOptions.find(
-        b => b.value === data.fromBranch
-    )?.label?.toUpperCase();
-    
-    const isWarehouse = fromBranchName === 'WAREHOUSE';
+        const fromBranchName = branchOptions.find(
+            b => b.value === data.fromBranch
+        )?.label?.toUpperCase();
+        
+        const isWarehouse = fromBranchName === 'WAREHOUSE';
 
-    const existingItem = data.items?.find(p => p.productId === productOption.value);
-    const alreadyAddedQty = existingItem ? existingItem.quantity : 0;
+        const existingItem = data.items?.find(p => p.productId === productOption.value);
+        const alreadyAddedQty = existingItem ? existingItem.quantity : 0;
 
-    const maxAvailable = productOption.availableQty ?? 0;
-    const remainingAllowed = isWarehouse ? Infinity : (maxAvailable - alreadyAddedQty);
+        const maxAvailable = productOption.availableQty ?? 0;
+        const remainingAllowed = isWarehouse ? Infinity : (maxAvailable - alreadyAddedQty);
 
-    if (!isWarehouse && quantity > remainingAllowed) {
-        setConfig({
-            isAlert: true,
-            title: "Exceeds Available Stock",
-            description: `You can only add up to ${remainingAllowed} more unit(s) of this product.`,
-            confirmVariant: "destructive",
-            confirmText: "Acknowledge",
-            onConfirm: () => setConfig(null)
-        });
-        return;
-    }
+        if (!isWarehouse && quantity > remainingAllowed) {
+            setConfig({
+                isAlert: true,
+                title: "Exceeds Available Stock",
+                description: `You can only add up to ${remainingAllowed} more unit(s) of this product.`,
+                confirmVariant: "destructive",
+                confirmText: "Acknowledge",
+                onConfirm: () => setConfig(null)
+            });
+            return;
+        }
 
         setData(prev => {
             const existingIndex = prev.items.findIndex(p => p.productId === productOption.value);
@@ -151,18 +131,20 @@ const CreateTransferRequestPage = () => {
                 }))
             };
 
-            await createRequest(payload);
+            await postCreateRequest(payload);
             setConfig(null);
             navigate('/home/requests');
+
         } catch (error) {
             console.error("Submission failed:", error);
             setConfig({
                 isAlert: true,
                 title: "Submission Failed",
-                description: error.message || "Failed to create transfer request.",
+                description: `Failed to create transfer request.\n${error}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null)
+
             });
         } finally {
             setIsSubmitting(false);
@@ -183,6 +165,7 @@ const CreateTransferRequestPage = () => {
         }
 
         const validationError = validateForm(data, requestValidationSchema);
+        
         if (Object.keys(validationError).length > 0) {
             setConfig({
                 isAlert: true,
@@ -257,6 +240,7 @@ const CreateTransferRequestPage = () => {
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </div>
     );

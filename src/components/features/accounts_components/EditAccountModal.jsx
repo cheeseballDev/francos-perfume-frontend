@@ -21,13 +21,13 @@ const getAccountFormData = (account) => ({
 });
 
 const accountValidationSchema = {
-  firstName: [isValid.required],
-  lastName: [isValid.required],
-  email: [isValid.required, isValid.email],
-  contactNumber: [isValid.required, isValid.phone],
-  branchLocation: [isValid.required],
-  employeeRole: [isValid.required],
-  employeeShift: [isValid.required],
+    firstName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
+    lastName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
+    email: [isValid.required, isValid.email],
+    contactNumber: [isValid.phone],
+    branchLocation: [isValid.required],
+    employeeRole: [isValid.required],
+    employeeShift: [isValid.required],
 };
 
 const ROLE_RANKS = {
@@ -37,7 +37,7 @@ const ROLE_RANKS = {
   OWNER: 4,
 };
 
-const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = [], updateAccount }) => {
+const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = [], updateAccount, setSelectedAccount }) => {
     const { user } = useAuth();
     const { toast } = useToast();
 
@@ -46,7 +46,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const isManager = user?.trueRole?.toUpperCase() === 'MANAGER';
+    const isManager = user?.trueRole === 'MANAGER';
 
     useEffect(() => {
         if (isOpen && selectedAccount) {
@@ -86,7 +86,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
         setData((prev) => ({ ...prev, [field]: value }));
         
         if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: null }));
+            setErrors((prev) => ({ ...prev, [field]: null }));
         }
     };
 
@@ -115,20 +115,20 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
             } catch (error) {
                 toast({
                     title: "Update Failed",
-                    description: error?.message || "An error occurred while updating the account.",
+                    description: `An error occurred while updating the account.\n${error}`,
                     variant: "destructive",
                 });
             } finally {
                 setIsSubmitting(false);
                 setConfig(null);
                 setData(null);
+                setSelectedAccount(null);
             }
         } 
         })
     }
 
-
-  return (
+    return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent
@@ -142,27 +142,30 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
 
           <div className='grid grid-cols-3 gap-4 py-4'>
             <FormField 
-              label="First Name"
-              value={data.firstName}
-              onChange={e => handleChange('firstName', e.target.value)}
-              placeholder="Enter first name here..."
-              error={errors.firstName}
+                label="First Name"
+                value={data.firstName}
+                maxLength={25}
+                onChange={e => handleChange('firstName', e.target.value)}
+                placeholder="Enter first name here..."
+                error={errors.firstName}
             />
 
             <FormField 
-              label="Middle Name"
-              value={data.middleName}
-              onChange={e => handleChange('middleName', e.target.value)}
-              placeholder="Enter middle name here..."
-              error={errors.middleName}
+                label="Middle Name"
+                value={data.middleName}
+                maxLength={25}
+                onChange={e => handleChange('middleName', e.target.value)}
+                placeholder="Enter middle name here..."
+                error={errors.middleName}
             />
 
             <FormField 
-              label="Last Name"
-              value={data.lastName}
-              onChange={e => handleChange('lastName', e.target.value)}
-              placeholder="Enter last name here..."
-              error={errors.lastName}
+                label="Last Name"
+                value={data.lastName}
+                maxLength={25}
+                onChange={e => handleChange('lastName', e.target.value)}
+                placeholder="Enter last name here..."
+                error={errors.lastName}
             />
           </div>
 
@@ -170,6 +173,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
             <FormField 
               label="Address"
               value={data.address}
+              maxLength={50}
               onChange={e => handleChange('address', e.target.value)}
               placeholder="Enter address here..."
               error={errors.address}
@@ -179,6 +183,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
           <div className="grid grid-cols-2 gap-6 mb-6">
             <FormField 
               label="Email"
+              maxLength={30}
               value={data.email}
               onChange={e => handleChange('email', e.target.value)}
               placeholder="Enter email here..."
@@ -186,9 +191,13 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
             />
             <FormField 
               label="Contact Number"
+              maxLength={11}
               value={data.contactNumber}
-              onChange={e => handleChange('contactNumber', e.target.value)}
-              placeholder="Enter contact number here..."
+              onChange={e => {
+                    const numericString = e.target.value.replace(/[^\d+]/g, '');
+                    handleChange('contactNumber', numericString);
+                }}
+              placeholder="E.g 09123456789"
               error={errors.contactNumber}
             />
           </div>
@@ -225,7 +234,6 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
 
           <div className="grid grid-cols-2 gap-6 mb-8">
             <Button 
-              variant="outline"
               onClick={onClose}
             >
               Cancel

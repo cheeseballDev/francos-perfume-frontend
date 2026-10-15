@@ -2,6 +2,7 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DetailItem from "@/components/shared/DetailItem";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 import { Edit, KeyRound, MinusSquareIcon, PlusSquareIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -14,11 +15,15 @@ const DiscountInfoModal = ({
     toggleStatus,
     setIsEditDiscountModalOpen,
 }) => {
+    const { toast } = useToast();
+    
     const [config, setConfig] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!isOpen || !selectedDiscount) return null;
     const discountId = selectedDiscount.discountId;
-    const isActive = selectedDiscount?.discountStatus?.toUpperCase() === "ACTIVE";
+    const isActive = selectedDiscount?.discountStatus === "ACTIVE";
+    
 
     const handleEditDiscount = () => {
         setIsEditDiscountModalOpen(true);
@@ -31,9 +36,28 @@ const DiscountInfoModal = ({
             description: "The discount will be deleted. This action is irreversible.",
             confirmText: "Delete Discount",
             onConfirm: async () => {
-                await removeDiscount(discountId);
-                setSelectedDiscount(null);
-                onClose();
+                try {
+                    setIsSubmitting(true);
+                    await removeDiscount(discountId);
+                    
+                    toast({
+                        title: "Success",
+                        description: "Discount deleted successfully.",
+                    });
+
+                    onClose();
+
+                } catch (error) {
+                    toast({
+                        title: "Deletion Failed",
+                        description: `An error occurred while deleting the discount.\n${error}`,
+                        variant: "destructive",
+                    });
+                } finally {
+                    setIsSubmitting(false);
+                    setConfig(null);
+                    setSelectedDiscount(null);
+                }
             },
         });
     };
@@ -48,9 +72,33 @@ const DiscountInfoModal = ({
                 : "This discount will be available to use again in the Point-Of-Sale system.",
             confirmText: `${isActive ? "Deactivate" : "Activate"} Discount`,
             onConfirm: async () => {
-                await toggleStatus(discountId);
-                setSelectedDiscount(null);
-                onClose();
+                try {
+                    setIsSubmitting(true);
+                    await toggleStatus(discountId);
+
+                    toast({
+                        title: "Success",
+                        description: isActive
+                            ? "Discount successfully deactivated."
+                            : "Discount successfully reactivated.",
+                    });
+
+                    onClose();
+
+                } catch (error) {
+                    toast({
+                        title: "Reset Password Failed",
+                        description: isActive 
+                        ? `An error occurred while deactivating the discount.\n${error}`
+                        : `An error occurred while reactivating the discount.\n${error}`,
+                        variant: "destructive",
+                    });
+
+                } finally {
+                    setIsSubmitting(false);
+                    setConfig(null);
+                    setSelectedDiscount(null);
+                }
             },
         });
     };
@@ -117,6 +165,7 @@ const DiscountInfoModal = ({
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </>
     );

@@ -1,11 +1,6 @@
+import DetailItem from '@/components/shared/DetailItem';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
-const DetailItem = ({ label, value }) => (
-    <div className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-muted-foreground">{label}</span>
-        <span className="text-sm font-semibold text-foreground">{value}</span>
-    </div>
-);
+import { formatDateTimeForTable } from '@/utils/formattingUtils';
 
 const TransactionDetailsModal = ({ isOpen, onClose, selectedTransaction }) => {
     if (!isOpen || !selectedTransaction) return null;
@@ -24,7 +19,7 @@ const TransactionDetailsModal = ({ isOpen, onClose, selectedTransaction }) => {
                         <DetailItem label="Amount" value={selectedTransaction.amount ? `₱${selectedTransaction.amount}` : "N/A"}/>
                         <DetailItem 
                             label="Date and Time" 
-                            value={selectedTransaction.transactionDate ? new Date(selectedTransaction.transactionDate).toLocaleString() : "N/A"}
+                            value={formatDateTimeForTable(selectedTransaction.transactionDate) || "N/A"}
                         />
                     </div>
 

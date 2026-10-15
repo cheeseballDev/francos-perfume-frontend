@@ -1,171 +1,314 @@
-import React, { useState, useEffect } from 'react';
-import { User } from 'lucide-react';
-import EditUserDetailsModal from './EditUserDetailModal'; 
-import EditAccountPasswordModal from './EditAccountPasswordModal'; 
-import { Button } from "@/components/ui/button"; 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { useAccount } from "@/hooks/account_hooks/useAccount";
+import { isValid, validateForm } from "@/utils/validationUtils";
+import { Loader2, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import EditAccountPasswordModal from './EditAccountPasswordModal';
 
-const UserSettingsCard = ({ user }) => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  
-  const [profileData, setProfileData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+const INITIAL_FORM_STATE = {
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    address: '',
+    email: '',
+    contactNumber: '',
+    branchLocation: '',
+    employeeRole: '',
+};
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      // Robust ID extraction matching your auth state
-      const targetId = user?.employee_id || user?.id || user?.employeeId || user?.nameid;
+const userValidationSchema = {
+    firstName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
+    lastName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
+    middleName: [isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
+    contactNumber: [isValid.phone]
+};
 
-      if (!targetId) {
-        console.error("No valid user ID found in session.");
-        setIsLoading(false); // Stop loading if no ID is found
-        return;
-      }
-      
-      try {
-        const response = await fetch(`http://localhost:5000/api/Employees/${targetId}`, {
-          headers: {
-            'Authorization': `Bearer ${user.accessToken}`
-          }
-        });
+const UserSettingsCard = ({ accountId }) => {
+    const { fetchAccountDetails, updateAccount, updatePassword } = useAccount();
+    const { toast } = useToast();
+    
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [profileData, setProfileData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errors, setErrors] = useState({});
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [formData, setFormData] = useState(INITIAL_FORM_STATE);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                setIsLoading(true);
+                const data = await fetchAccountDetails(accountId);
+                setProfileData(data);
+                setFormData({
+                    firstName: data?.firstName || '',
+                    middleName: data?.middleName || '',
+                    lastName: data?.lastName || '',
+                    address: data?.address || '',
+                    email: data?.email || '',
+                    contactNumber: data?.contactNumber || '',
+                    branchLocation: data?.branchLocation || '',
+                    employeeRole: data?.employeeRole || ''
+                });
+            } catch (error) {
+                toast({
+                    title: "Failed to get user profile",
+                    description: `An error occurred while getting the details of the account.\n${error}`,
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchProfile();
+    }, [accountId, fetchAccountDetails, toast]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
         
-        if (response.ok) {
-          const result = await response.json();
-          setProfileData(result.data || result); 
-        } else {
-          console.error("GET Profile returned a 404/Error. Check the fetch URL.");
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: null }));
         }
-      } catch (error) {
-        console.error("Failed to fetch profile details:", error);
-      } finally {
-        setIsLoading(false);
-      }
     };
 
-    fetchProfileData();
-  }, [user]);
+    const handleCancelEdit = () => {
+        setFormData({
+            firstName: profileData?.firstName || '',
+            middleName: profileData?.middleName || '',
+            lastName: profileData?.lastName || '',
+            address: profileData?.address || '',
+            email: profileData?.email || '',
+            contactNumber: profileData?.contactNumber || '',
+            branchLocation: profileData?.branchLocation || '',
+            employeeRole: profileData?.employeeRole || '',
+        });
+        setIsEditing(false);
+    };
 
-  const handleSaveProfile = (updatedFields) => {
-    setProfileData(prevData => ({
-      ...prevData,
-      ...updatedFields
-    }));
-  };
-
-  const profile = {
-    firstName: profileData?.first_name || 'N/A',
-    middleName: profileData?.middle_name || 'N/A',
-    lastName: profileData?.last_name || 'N/A',
-    address: profileData?.address || 'N/A',
-    email: profileData?.email || user?.email || 'N/A',
-    contactNo: profileData?.contact_number || 'N/A',
-    branch: profileData?.branch_display_id || user?.branchId || 'N/A',
-    role: profileData?.employee_role?.toUpperCase() || user?.trueRole?.toUpperCase() || 'N/A',
-    profilePic: profileData?.employee_image_url || null
-  };
-
-  if (isLoading) {
-    return <div className="p-8 font-montserrat text-muted-foreground">Loading profile data...</div>;
-  }
-
-  return (
-    <>
-      <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-8 font-montserrat max-w-2xl">
+    const handleSaveEdit = async () => {
+        const validationErrors = validateForm(formData, userValidationSchema);
         
-        <div className="flex items-center gap-6 mb-10">
-          <div className="h-24 w-24 rounded-full border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0">
-            {profile.profilePic ? (
-              <img src={profile.profilePic} alt="Profile" className="h-full w-full object-cover" />
-            ) : (
-              <User size={48} className="text-muted-foreground stroke-[1.5]" />
-            )}
-          </div>
-          
-          <div className="flex-grow">
-            <h3 className="text-[22px] font-bold text-foreground tracking-tight">Profile picture</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">PNG, JPEG under 15 MB</p>
-          </div>
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
 
-          <div className="flex flex-col gap-3 shrink-0">
-            <Button>
-              Upload new picture
-            </Button>
-            <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10">
-              Remove picture
-            </Button>
-          </div>
-        </div>
+        try {
+            setIsSaving(true);
+            await updateAccount(accountId, formData);
+            setProfileData(prev => ({ ...prev, ...formData }));
+            
+            toast({
+                title: "Success",
+                description: "Profile details updated successfully.",
+            });
+            setIsEditing(false);
+        } catch (error) {
+            toast({
+                title: "Update Failed",
+                description: error?.message || "An error occurred while updating profile details.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
-        <div className="grid grid-cols-3 gap-y-6 gap-x-4 mb-10">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">First name:</p>
-            <p className="font-bold text-foreground">{profile.firstName}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Middle name:</p>
-            <p className="font-bold text-foreground">{profile.middleName}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Last name:</p>
-            <p className="font-bold text-foreground">{profile.lastName}</p>
-          </div>
+    const handleToBeAdded = () => {
+        toast({
+            title: "Feature to be added.",
+            description: `Do not report this as a bug.`,
+            variant: "destructive",
+        });
+    };
 
-          <div className="col-span-3">
-            <p className="text-sm text-muted-foreground mb-1">Address:</p>
-            <p className="font-bold text-foreground uppercase">{profile.address}</p>
-          </div>
+    if (isLoading) {
+        return <div className="p-8 font-montserrat text-muted-foreground flex items-center gap-2"><Loader2 className="animate-spin" /> Loading profile data...</div>;
+    }
 
-          <div className="col-span-2">
-            <p className="text-sm text-muted-foreground mb-1">Email:</p>
-            <p className="font-bold text-foreground truncate pr-4">{profile.email}</p>
-          </div>
-          <div className="col-span-1">
-            <p className="text-sm text-muted-foreground mb-1">Contact no.:</p>
-            <p className="font-bold text-foreground">{profile.contactNo}</p>
-          </div>
+    return (
+        <>
+            <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-8 font-montserrat max-w-3xl">
+                
+                <div className="flex items-center gap-6 mb-10 pb-6 border-b border-border">
+                    <div className="h-24 w-24 rounded-full border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0">
+                        {profileData?.employeeImageUrl ? (
+                            <img src={profileData.employeeImageUrl} alt="Profile" className="h-full w-full object-cover" />
+                        ) : (
+                            <User size={48} className="text-muted-foreground stroke-[1.5]" />
+                        )}
+                    </div>
+                    
+                    <div className="flex-grow">
+                        <h3 className="text-[22px] font-bold text-foreground tracking-tight">Profile picture</h3>
+                        <p className="text-sm text-muted-foreground mt-0.5">PNG, JPEG under 15 MB</p>
+                    </div>
 
-          <div className="col-span-2">
-            <p className="text-sm text-muted-foreground mb-1">Branch:</p>
-            <p className="font-bold text-foreground">{profile.branch}</p>
-          </div>
-          <div className="col-span-1">
-            <p className="text-sm text-muted-foreground mb-1">Role:</p>
-            <p className="font-bold text-foreground uppercase">{profile.role}</p>
-          </div>
-        </div>
+                    <div className="flex flex-col gap-3 shrink-0">
+                        <Button 
+                        onClick={handleToBeAdded} 
+                        variant="outline" 
+                        >
+                            Upload new picture
+                        </Button>
+                        <Button 
+                        variant="destructive"
+                        onClick={handleToBeAdded}>
+                            Remove picture
+                        </Button>
+                    </div>
+                </div>
 
-        <div className="flex gap-4">
-          <Button 
-            onClick={() => setIsEditModalOpen(true)}
-            className="w-40 font-bold"
-          >
-            Edit details
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => setIsPasswordModalOpen(true)}
-            className="w-48 font-bold border-destructive text-destructive hover:bg-destructive/10"
-          >
-            Update Password
-          </Button>
-        </div>
-      </div>
+                <div className="space-y-6 mb-10">
+                    <div className="grid grid-cols-3 gap-6">
+                        <div>
+                            <label className="text-sm text-muted-foreground mb-1 block">First name</label>
+                            {isEditing ? (
+                                <Input 
+                                    name="firstName"
+                                    maxLength={25}
+                                    value={formData.firstName} 
+                                    onChange={handleInputChange} 
+                                />
+                            ) : (
+                                <p className="font-bold text-foreground py-2">{profileData?.firstName || 'N/A'}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="text-sm text-muted-foreground mb-1 block">Middle name</label>
+                            {isEditing ? (
+                                <Input 
+                                    name="middleName" 
+                                    maxLength={25}
+                                    value={formData.middleName} 
+                                    onChange={handleInputChange} 
+                                />
+                            ) : (
+                                <p className="font-bold text-foreground py-2">{profileData?.middleName || 'N/A'}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="text-sm text-muted-foreground mb-1 block">Last name</label>
+                            {isEditing ? (
+                                <Input 
+                                    name="lastName" 
+                                    maxLength={25}
+                                    value={formData.lastName} 
+                                    onChange={handleInputChange} 
+                                />
+                            ) : (
+                                <p className="font-bold text-foreground py-2">{profileData?.lastName || 'N/A'}</p>
+                            )}
+                        </div>
+                    </div>
 
-      <EditUserDetailsModal 
-        isOpen={isEditModalOpen} 
-        onClose={() => setIsEditModalOpen(false)} 
-        user={user} 
-        profileData={profileData} 
-        onSave={handleSaveProfile} 
-      />
-      
-      <EditAccountPasswordModal 
-        isOpen={isPasswordModalOpen} 
-        onClose={() => setIsPasswordModalOpen(false)} 
-        user={user} 
-      />
-    </>
-  );
+                    <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Address</label>
+                        {isEditing ? (
+                            <Input 
+                                name="address" 
+                                maxLength={50}
+                                value={formData.address} 
+                                onChange={handleInputChange} 
+                            />
+                        ) : (
+                            <p className="font-bold text-foreground uppercase py-2">{profileData?.address || 'N/A'}</p>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div>
+                            <label className="text-sm text-muted-foreground mb-1 block">Email</label>
+                            {isEditing ? (
+                                <Input 
+                                    name="email" 
+                                    maxLength={30}
+                                    value={formData.email} 
+                                    onChange={handleInputChange} 
+                                />
+                            ) : (
+                                <p className="font-bold text-foreground py-2">{profileData?.email || 'N/A'}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="text-sm text-muted-foreground mb-1 block">Contact number</label>
+                            {isEditing ? (
+                                <Input 
+                                    name="contactNumber" 
+                                    maxLength={30}
+                                    value={formData.contactNumber} 
+                                    onChange={handleInputChange} 
+                                />
+                            ) : (
+                                <p className="font-bold text-foreground py-2">{profileData?.contactNumber || 'N/A'}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div>
+                            <label className="text-sm text-muted-foreground mb-1 block">Branch</label>
+                            <p className="font-bold text-foreground py-2">{profileData?.branchLocation || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label className="text-sm text-muted-foreground mb-1 block">Role</label>
+                            <p className="font-bold text-foreground uppercase py-2">{profileData?.employeeRole || 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex gap-4 justify-end pt-4 border-t border-border">
+                    {isEditing ? (
+                        <>
+                            <Button 
+                                variant="outline" 
+                                onClick={handleCancelEdit} 
+                                disabled={isSaving}
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                onClick={handleSaveEdit} 
+                                disabled={isSaving}
+                                className="min-w-[120px]"
+                            >
+                                {isSaving && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
+                                Save Changes
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button 
+                                onClick={() => setIsEditing(true)}
+                                className="w-40 font-bold"
+                            >
+                                Edit details
+                            </Button>
+                            <Button 
+                                variant="outline"
+                                className="border-destructive text-destructive hover:bg-destructive/10"
+                                onClick={() => setIsPasswordModalOpen(true)}
+                            >
+                                Update Password
+                            </Button>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            <EditAccountPasswordModal 
+                isOpen={isPasswordModalOpen} 
+                onClose={() => setIsPasswordModalOpen(false)}
+                user={formData}
+                accountId={accountId}
+                updatePassword={updatePassword}
+            />
+        </>
+    );
 };
 
 export default UserSettingsCard;

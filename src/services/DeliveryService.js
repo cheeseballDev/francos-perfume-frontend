@@ -14,29 +14,23 @@ export const getDeliveryDetails = async (deliveryId) => {
     return response.data;
 };
 
-/*
-export const createDeliveryFromRequest = async (requestId) => {
-    const response = await apiClient.post(`${PATH}/${requestId}`);
-    return response.data;
-};
-*/
 
-export const dispatchDelivery = async (deliveryId) => {
+export const postDispatchDelivery = async (deliveryId) => {
     const response = await apiClient.post(`${PATH}/${deliveryId}/dispatch`);
     return response.data;
 };
 
-export const receiveDelivery = async (deliveryId, dto) => {
+export const postReceiveDelivery = async (deliveryId, dto) => {
     const response = await apiClient.post(`${PATH}/${deliveryId}/receive`, dto);
     return response.data;
 };
 
-export const closeDeliveryRequest = async (requestId) => {
+export const patchCloseDeliveryRequest = async (requestId) => {
     const response = await apiClient.patch(`${PATH}/${requestId}/close`);
     return response.data;
 };
 
-export const cancelDelivery = async (deliveryId) => {
+export const postCancelDelivery = async (deliveryId) => {
     const response = await apiClient.post(`${PATH}/${deliveryId}/cancel`);
     return response.data;
 };

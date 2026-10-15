@@ -33,7 +33,33 @@ export const isValid = {
         value && !/^\d+(\.\d+)?$/.test(String(value)) ? 'Valid numbers or decimals only' : null,
 
     prefix: (value) =>
-        value.length !== 3 ? `Must be 3 characters only` : null
+        value.length !== 3 ? `Must be 3 characters only` : null,
+
+    noNumbers: (value) => 
+        value && /\d/.test(value) ? 'Numbers are not allowed' : null,
+
+    password: (value) => {
+        if (!value) return 'Password is required';
+        
+        if (value.length < 12) {
+            return 'Password must be at least 12 characters';
+        }
+        if (!/[A-Z]/.test(value)) {
+            return 'Password must contain at least one uppercase letter';
+        }
+        if (!/[a-z]/.test(value)) {
+            return 'Password must contain at least one lowercase letter';
+        }
+        if (!/[0-9]/.test(value)) {
+            return 'Password must contain at least one number';
+        }
+        if (!/[#.\-?!@$%^&*]/.test(value)) {
+            return 'Password must contain at least one special character (#, ., -, ?, !, @, $, %, ^, &, *)';
+        }
+        
+        return null;
+    }
+
 };
 
 export const checkIfValid = (value, rules = []) => {

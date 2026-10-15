@@ -7,12 +7,12 @@ import PaginationBar from "@/components/shared/PaginationBar";
 import SearchBar from "@/components/shared/SearchBar";
 import StatusCard from "@/components/shared/StatusCard";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
-import { cancelDelivery, dispatchDelivery, receiveDelivery } from "@/services/DeliveryService";
+import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
 import { ArrowDownLeft, ArrowUpRight, Clock, ListFilter } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-
+import { useNavigate, useSearchParams } from "react-router-dom";
 const DeliveriesPage = () => {
     const {
         deliveries,
@@ -25,22 +25,23 @@ const DeliveriesPage = () => {
     } = useDelivery();
 
     const { user } = useAuth();
+    const { toast } = useToast();
 
+    const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams();
     const [config, setConfig] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Extract active tab and search query directly from URL state
     const activeTab = searchParams.get("direction") || "";
     const searchQuery = searchParams.get("search") || "";
 
-    // Sync URL parameters with the backend filter hook
     useEffect(() => {
         updateFilter('direction', activeTab);
         updateFilter('search', searchQuery);
     }, [activeTab, searchQuery]);
 
     const handleTabChange = (direction) => {
-             setSearchParams(prev => {
+        setSearchParams(prev => {
             if (direction) prev.set("direction", direction);
             else prev.delete("direction");
             return prev;
@@ -58,18 +59,24 @@ const DeliveriesPage = () => {
         updateFilter("search", query);
     };
 
-    const handleMarkInTransit = (deliveryId) => {
+const handleMarkInTransit = (deliveryId) => {
         setConfig({
             title: "Mark as In Transit?",
             description: "This will notify the receiving branch that the delivery is on its way.",
             confirmText: "Mark In Transit",
             onConfirm: async () => {
                 try {
-                    await dispatchDelivery(deliveryId);
+                    setIsSubmitting(true);
+                    await postDispatchDelivery(deliveryId);
                     fetchDeliveries();
                     setConfig(null);
+                    toast({
+                        title: "Success",
+                        description: "Delivery marked as in transit successfully.",
+                        className: "bg-emerald-600 text-white border-emerald-700",
+                    });
                 } catch (err) {
-                    console.error("Failed to mark as in transit:", err);
+                    console.error("Failed to mark delivery as in transit:", err);
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
@@ -78,6 +85,8 @@ const DeliveriesPage = () => {
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
                     });
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
             onCancel: () => setConfig(null),
@@ -89,11 +98,18 @@ const DeliveriesPage = () => {
             title: "Cancel this request?",
             description: "This cannot be undone. The request will be terminated.",
             confirmText: "Cancel Request",
+            confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
-                    await cancelDelivery(deliveryId);
+                    setIsSubmitting(true);
+                    await postCancelDelivery(deliveryId);
                     fetchDeliveries();
                     setConfig(null);
+                    toast({
+                        title: "Success",
+                        description: "Delivery request cancelled successfully.",
+                        className: "bg-emerald-600 text-white border-emerald-700",
+                    });
                 } catch (err) {
                     console.error("Failed to cancel delivery:", err);
                     setConfig({
@@ -104,6 +120,8 @@ const DeliveriesPage = () => {
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
                     });
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
             onCancel: () => setConfig(null),
@@ -117,9 +135,15 @@ const DeliveriesPage = () => {
             confirmText: "Accept Request",
             onConfirm: async () => {
                 try {
-                    await receiveDelivery(deliveryId, { accepted: true });
+                    setIsSubmitting(true);
+                    await postReceiveDelivery(deliveryId, { accepted: true });
                     fetchDeliveries();
                     setConfig(null);
+                    toast({
+                        title: "Success",
+                        description: "Delivery request accepted successfully.",
+                        className: "bg-emerald-600 text-white border-emerald-700",
+                    });
                 } catch (err) {
                     console.error("Failed to accept delivery:", err);
                     setConfig({
@@ -130,6 +154,8 @@ const DeliveriesPage = () => {
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
                     });
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
             onCancel: () => setConfig(null),
@@ -141,11 +167,18 @@ const DeliveriesPage = () => {
             title: "Reject this delivery request?",
             description: "This will notify the source branch that the request has been rejected.",
             confirmText: "Reject Request",
+            confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
-                    await receiveDelivery(deliveryId, { accepted: false });
+                    setIsSubmitting(true);
+                    await postReceiveDelivery(deliveryId, { accepted: false });
                     fetchDeliveries();
                     setConfig(null);
+                    toast({
+                        title: "Success",
+                        description: "Delivery request rejected successfully.",
+                        className: "bg-emerald-600 text-white border-emerald-700",
+                    });
                 } catch (err) {
                     console.error("Failed to reject delivery:", err);
                     setConfig({
@@ -156,36 +189,17 @@ const DeliveriesPage = () => {
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
                     });
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
             onCancel: () => setConfig(null),
         });
     };
 
+
     const handleConfirmDelivery = (deliveryId) => {
-        setConfig({
-            title: "Confirm delivery received?",
-            description: "This will mark the delivery as completed and update your inventory.",
-            confirmText: "Confirm Delivery",
-            onConfirm: async () => {
-                try {
-                    await receiveDelivery(deliveryId, { received: true });
-                    fetchDeliveries();
-                    setConfig(null);
-                } catch (err) {
-                    console.error("Failed to confirm delivery:", err);
-                    setConfig({
-                        isAlert: true,
-                        title: "Action Failed",
-                        description: err.message || "Failed to confirm the delivery.",
-                        confirmVariant: "destructive",
-                        confirmText: "Acknowledge",
-                        onConfirm: () => setConfig(null) 
-                    });
-                }
-            },
-            onCancel: () => setConfig(null),
-        });
+        navigate(`/home/deliveries/${deliveryId}/confirm`);
     };
 
     return (
@@ -201,25 +215,19 @@ const DeliveriesPage = () => {
                 <StatusCard
                     title="Pending Dispatches"
                     Icon={Clock}
-                    //secondValue={forDispatchInbound}
                     subText=" inbound, "
-                    //thirdValue={forDispatchOutbound}
                     secondSubText=" outbound"
                 />
                 <StatusCard
                     title="Outbound Deliveries"
                     Icon={Clock}
-                    //secondValue={outboundInTransit}
                     subText=" in-transit "
-                    //thirdValue={outboundCompleted}
                     secondSubText=" completed"
                 />
                 <StatusCard
                     title="Inbound Deliveries"
                     Icon={Clock}
-                    //secondValue={inboundInTransit}
                     subText=" in-transit "
-                    //thirdValue={inboundCompleted}
                     secondSubText=" completed"
                 />
             </div>
@@ -306,6 +314,7 @@ const DeliveriesPage = () => {
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </div>
     );

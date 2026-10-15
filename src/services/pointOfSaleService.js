@@ -11,7 +11,7 @@ export const getAllProductsPOS = async (filter) => {
     return response.data;
 };
 
-export const checkout = async (checkoutData) => {
+export const postCheckout = async (checkoutData) => {
     const response = await apiClient.post(`${PATH}/checkout`, checkoutData);
     return response.data;
 };

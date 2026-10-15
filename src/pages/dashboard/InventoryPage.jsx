@@ -75,32 +75,32 @@ const InventoryPage = () => {
   
   return (
     <div className="flex flex-col h-screen overflow-auto-y animate-fade-in relative font-montserrat">
-      <div className="flex justify-between items-end mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight leading-none mb-2">
-            Inventory
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Overview of all available parfum products
-          </p>
+        <div className="flex justify-between items-end mb-6">
+            <div>
+            <h1 className="text-3xl font-bold text-foreground tracking-tight leading-none mb-2">
+                Inventory
+            </h1>
+            <p className="text-muted-foreground text-sm">
+                Overview of all available parfum products
+            </p>
+            </div>
         </div>
-      </div>
 
-      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
-        <div className="w-full sm:max-w-md">
-            <SearchBar
-                value={searchQuery}
-                onChange={handleSearchChange}
-            />
+        <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+            <div className="w-full sm:max-w-md">
+                <SearchBar
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                />
+            </div>
+            <div className="w-full sm:w-auto">
+                <FilterDropDown 
+                    filter={filter}
+                    updateFilter={updateFilter}
+                    filterOptions={filterOptions}
+                />
+            </div>
         </div>
-        <div className="w-full sm:w-auto">
-            <FilterDropDown 
-                filter={filter}
-                updateFilter={updateFilter}
-                filterOptions={filterOptions}
-            />
-        </div>
-    </div>
 
       <div className="flex flex-col gap-4 pb-4 flex-1">
         {asyncState?.isLoading ? (

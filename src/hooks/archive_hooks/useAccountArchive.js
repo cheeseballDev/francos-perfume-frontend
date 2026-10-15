@@ -1,10 +1,8 @@
-import { useAuth } from "@/auth/UseAuth";
-import { getAllArchivedAccounts } from "@/services/ArchiveService";
+import { getAllArchivedAccounts, getOneArchivedAccount, patchRestoreArchivedAccount } from "@/services/ArchiveService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
 export const useAccountArchive = () => {
-    const { user } = useAuth();
     const [archivedAccounts, setArchivedAccounts] = useState([]);
     const isFirstLoad = useRef(true);
 
@@ -29,14 +27,14 @@ export const useAccountArchive = () => {
         pageSize: 10,
     });
 
-    const fetchArchivedAccounts = useCallback(() => {
+    const fetchAllArchivedAccounts = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {
             setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         }
 
-        getAllArchivedAccounts(filter, user?.accessToken)
+        getAllArchivedAccounts(filter)
             .then(data => {
                 isFirstLoad.current = false;
                 setArchivedAccounts(data.data);
@@ -52,17 +50,40 @@ export const useAccountArchive = () => {
             .finally(() => {
                 setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
             });
-    }, [filter, user?.accessToken]);
+    }, [filter]);
 
     useEffect(() => {
-        if (!user?.accessToken) {
-            return;
-        }
         const timer = setTimeout(() => {
-            fetchArchivedAccounts();
+            fetchAllArchivedAccounts();
         }, 0);
         return () => clearTimeout(timer); 
-    }, [fetchArchivedAccounts, user?.accessToken])
+    }, [fetchAllArchivedAccounts])
+
+    const fetchArchivedAccount = useCallback(async (archiveId) => {
+        try {
+            const data = await getOneArchivedAccount(archiveId);
+            return data;
+        } catch (err) {
+            setAsyncState({ error: err });
+            throw err;
+        }
+    }, [])
+
+    const restoreArchivedAccount = useCallback(async (archiveId) => {
+        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        try {
+            await patchRestoreArchivedAccount(archiveId);
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            await fetchAllArchivedAccounts();
+            setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
+            throw err;
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+        }
+    }, [fetchAllArchivedAccounts])
+
 
 
     return { 
@@ -71,6 +92,7 @@ export const useAccountArchive = () => {
         pagination, 
         filter,
         updateFilter,
-        fetchArchivedAccounts,     
+        fetchArchivedAccount,
+        restoreArchivedAccount,
     };
 }

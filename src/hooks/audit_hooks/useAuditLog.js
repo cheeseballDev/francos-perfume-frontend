@@ -1,5 +1,6 @@
 import { useAuth } from "@/auth/UseAuth";
-import { getAllAuditLogs } from "@/services/AuditLogService";
+import { supabase } from "@/lib/SupabaseClient";
+import { getAllAuditLogs, getOneAuditLogDetails } from "@/services/AuditLogService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
@@ -28,15 +29,14 @@ export const useAuditLog = () => {
         pageSize: 10,
     })
 
-    const fetchAuditLogs = useCallback(() => {
+    const fetchAuditLogs = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {
             setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         }
 
-
-        getAllAuditLogs(filter, user?.accessToken)
+        getAllAuditLogs(filter)
             .then(data => {
                 isFirstLoad.current = false;
                 setAuditLogs(data.data);
@@ -53,18 +53,34 @@ export const useAuditLog = () => {
                 setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
             });
 
-    }, [filter, user?.accessToken]);
+    }, [filter]);
 
     useEffect(() => {
-        if (!user?.accessToken) {
-            return;
-        }
-        const timer = setTimeout(() => {
-            fetchAuditLogs();
-        }, 0);
-        return () => clearTimeout(timer); 
-    }, [fetchAuditLogs, user?.accessToken])
+        const channel = supabase
+            .channel("public:audit_logs")
+            .on(
+                "postgres_changes",
+                { event: "INSERT", schema: "public", table: "audit_log" }, 
+                () => {
+                    fetchAuditLogs();
+                }
+            )
+            .subscribe();
 
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [fetchAuditLogs]);
+
+    const fetchAuditLogDetails = useCallback(async (logId) => {
+        try {
+            const data = await getOneAuditLogDetails(logId);
+            return data;
+        } catch (err) {
+            setAsyncState({ error: err });
+            throw err;
+        }
+    }, []);
 
     return { 
         auditLogs, 
@@ -72,7 +88,8 @@ export const useAuditLog = () => {
         pagination, 
         filter, 
         fetchAuditLogs, 
-        updateFilter 
+        updateFilter,
+        fetchAuditLogDetails
     };
 
 }

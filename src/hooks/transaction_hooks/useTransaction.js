@@ -1,4 +1,6 @@
-import { getAllTransactions, getTransactionDetails } from "@/services/TransactionService";
+import { supabase } from "@/lib/SupabaseClient";
+import { getAllTransactions, getTransactionDetails, getTransactionFilters } from "@/services/TransactionService";
+import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
@@ -19,17 +21,33 @@ export const useTransaction = () => {
         totalEntries: 0,
     });
 
+    const [filterOptions, setFilterOptions] = useState({
+        branches: [],
+        employees: [],
+        paymentMethods: [],
+    });
+
+    const TRANSACTION_FILTER_SCHEMA = [
+        { key: "branches", label: "Filter: Branches", allLabel: "All Branches" },
+        { key: "employees", label: "Filter: Processed By", allLabel: "All Employees" },
+        { key: "paymentMethods", label: "Filter: Payment Method", allLabel: "All Payment Methods" },
+    ]
+
 
     const { filter, updateFilter, resetFilter } = useFilter({
         search: '',
         fromDate: '',
         toDate: '',
-        processedBy: '',
+        branches: '',
+        employees: '',
+        paymentMethods: '',
         pageCount: 1,
         pageSize: 10,
     })
 
-    const fetchTransactions = useCallback(() => {
+
+
+    const fetchTransactions = useCallback(async () => {
         if (isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {
@@ -56,10 +74,20 @@ export const useTransaction = () => {
     }, [filter])
 
     useEffect(() => {
-      const timer = setTimeout(() => {
-        fetchTransactions();
-      }, 0);
-      return () => clearTimeout(timer);
+        const channel = supabase
+            .channel("public:sales_order")
+            .on(
+                "postgres_changes",
+                { event: "INSERT", schema: "public", table: "sales_order" }, 
+                () => {
+                    fetchTransactions();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [fetchTransactions]);
 
     const fetchTransactionDetails = useCallback(async (transactionId) => {
@@ -72,11 +100,29 @@ export const useTransaction = () => {
         }
     }, []) 
 
+    const fetchTransactionFilters = useCallback(async () => {
+        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const data = await getTransactionFilters();
+            setFilterOptions(buildFilterOptions(data, TRANSACTION_FILTER_SCHEMA));
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchTransactionFilters();
+    }, [fetchTransactionFilters]);
+
     return { 
         transactions, 
         asyncState, 
         pagination, 
         filter,
+        filterOptions,
         fetchTransactions, 
         updateFilter,
         fetchTransactionDetails,

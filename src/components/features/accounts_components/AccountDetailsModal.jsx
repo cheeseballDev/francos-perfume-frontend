@@ -3,76 +3,143 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DetailItem from "@/components/shared/DetailItem";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 import { formatLabel } from "@/utils/formattingUtils";
 import { Archive, Edit, KeyRound, MinusSquareIcon, PlusSquareIcon } from "lucide-react";
 import { useState } from "react";
 
 const AccountInfoModal = ({
-  isOpen,
-  onClose,
-  selectedAccount,
-  setSelectedAccount,
-  archive,
-  toggleStatus,
-  resetPassword,
-  setIsEditAccountModalOpen,
+    isOpen,
+    onClose,
+    selectedAccount,
+    archiveAccount,
+    toggleAccountStatus,
+    resetPassword,
+    setIsEditAccountModalOpen,
+    setSelectedAccount,
 }) => {
-  const { user } = useAuth();
-  const [config, setConfig] = useState(null);
+    const { toast } = useToast();
+    const { user } = useAuth();
+    const [config, setConfig] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (!isOpen || !selectedAccount) return null;
+    if (!isOpen || !selectedAccount) return null;
 
-  const isManager = user?.trueRole?.toUpperCase() === "MANAGER";
-  const accountId = selectedAccount.employeeId;
-  const isActive = selectedAccount?.status?.toUpperCase() === "ACTIVE";
+    const isManager = user?.trueRole === "MANAGER";
+    const accountId = selectedAccount.employeeId;
+    const isActive = selectedAccount?.status === "ACTIVE";
 
-  const handleEditAccount = () => {
-    setIsEditAccountModalOpen(true);
-    onClose();
-  };
-
-  const handleResetPassword = () => {
-    setConfig({
-      title: "Are you sure you want to reset the password for this account?",
-      description:
-        "The user of this account will be logged out and an email will be sent including their one-time generated password.",
-      confirmText: "Reset Password",
-      onConfirm: async () => {
-        await resetPassword(accountId);
-        setSelectedAccount(null);
+    const handleEditAccount = () => {
+        setIsEditAccountModalOpen(true);
         onClose();
-      },
-    });
-  };
+    };
 
-  const handleToggleStatus = () => {
-    const text = isActive ? "deactivate" : "activate";
-    setConfig({
-      title: `Are you sure you want to ${text} this account?`,
-      description: isActive
-        ? "This account will no longer be able to log in."
-        : "This account will regain access to the system.",
-      confirmText: `${isActive ? "Deactivate" : "Activate"} Account`,
-      onConfirm: async () => {
-        await toggleStatus(accountId);
-        setSelectedAccount(null);
-        onClose();
-      },
-    });
-  };
+    const handleResetPassword = () => {
+        setConfig({
+        title: "Are you sure you want to reset the password for this account?",
+        description:
+            "The user of this account will be logged out and an email will be sent including their one-time generated password.",
+        confirmText: "Reset Password",
+        onConfirm: async () => {
+            try {
+                setIsSubmitting(true);
+                await resetPassword(accountId);
 
-  const handleArchiveAccount = () => {
-    setConfig({
-      title: "Are you sure you want to archive this account?",
-      description: "This account will no longer exist in the accounts table.",
-      confirmText: "Archive Account",
-      onConfirm: async () => {
-        await archive(accountId);
-        setSelectedAccount(null);
-        onClose();
-      },
-    });
-  };
+                toast({
+                    title: "Success",
+                    description: "Account password reset successfully.",
+                });
+
+                onClose();
+
+                } catch (error) {
+                    toast({
+                        title: "Reset Password Failed",
+                        description: `An error occurred while resetting the password of the account.\n${error.response?.data}`,
+                        variant: "destructive",
+                    });   
+
+                } finally {
+                    setIsSubmitting(false);
+                    setConfig(null);
+                    setSelectedAccount(null);
+                }
+            } 
+        });
+    };
+
+    const handleToggleStatus = () => {
+        const text = isActive ? "deactivate" : "activate";
+        setConfig({
+        title: `Are you sure you want to ${text} this account?`,
+        description: isActive
+            ? "This account will no longer be able to log in."
+            : "This account will regain access to the system.",
+        confirmText: `${isActive ? "Deactivate" : "Activate"} Account`,
+            onConfirm: async () => {
+                try {
+                    setIsSubmitting(true);
+                    await toggleAccountStatus(accountId);
+
+                    toast({
+                        title: "Success",
+                        description: isActive
+                            ? "Account successfully deactivated."
+                            : "Account successfully reactivated.",
+                    });
+
+                    onClose();
+
+                } catch (error) {
+                    toast({
+                        title: "Reset Password Failed",
+                        description: isActive 
+                        ? `An error occurred while deactivating the account.\n${error}`
+                        : `An error occurred while reactivating the account.\n${error}`,
+                        variant: "destructive",
+                    });
+
+                } finally {
+                    setIsSubmitting(false);
+                    setConfig(null);
+                    setSelectedAccount(null);
+                }
+            },
+        });
+    };
+
+    const handleArchiveAccount = () => {
+        setConfig({
+        title: "Are you sure you want to archive this account?",
+        description: "This account will no longer exist in the accounts table.",
+        confirmText: "Archive Account",
+            onConfirm: async () => {
+                try {
+                    setIsSubmitting(true);
+                    await archiveAccount(accountId);
+                    
+                    toast({
+                        title: "Success",
+                        description: "Account archived successfully.",
+                    });
+
+                    onClose();
+
+                } catch (error) {
+                    toast({
+                        title: "Account Archiving Failed",
+                        description: `An error occurred while archiving the account.\n${error}`,
+                        variant: "destructive",
+                    });
+                    
+                } finally {
+                    setIsSubmitting(false);
+                    setConfig(null);
+                    setSelectedAccount(null);
+                }
+            },
+        });
+    };
 
   return (
     <>
@@ -84,13 +151,13 @@ const AccountInfoModal = ({
 
           <div className="p-8">
             <div className="grid grid-cols-3 gap-6 mb-6">
-              <DetailItem label="First name" value={selectedAccount.firstName || "N/A"} />
-              <DetailItem label="Middle name" value={selectedAccount.middleName || "N/A"} />
-              <DetailItem label="Last name" value={selectedAccount.lastName || "N/A"} />
+                <DetailItem label="First name" value={selectedAccount.firstName || "N/A"} />
+                <DetailItem label="Middle name" value={selectedAccount.middleName || "N/A"} />
+                <DetailItem label="Last name" value={selectedAccount.lastName || "N/A"} />
             </div>
 
             <div className="mb-6">
-              <DetailItem label="Address" value={selectedAccount.address || "N/A"} uppercase={true} />
+                <DetailItem label="Address" value={selectedAccount.address || "N/A"} uppercase={true} />
             </div>
 
             <div className="grid grid-cols-2 gap-6 mb-6">
@@ -141,6 +208,7 @@ const AccountInfoModal = ({
         isOpen={!!config}
         onClose={() => setConfig(null)}
         config={config}
+        isLoading={isSubmitting}
       />
     </>
   );

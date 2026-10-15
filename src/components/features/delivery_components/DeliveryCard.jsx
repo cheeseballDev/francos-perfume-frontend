@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 
 const DeliveryCard = ({
     delivery,
-    activeTab,
     onMarkInTransit,
     onCancelRequest,
     onAcceptRequest,
@@ -15,7 +14,8 @@ const DeliveryCard = ({
     const navigate = useNavigate();
 
     const isInbound = delivery.direction === "INBOUND";
-    const deliveryStatus = (delivery.deliveryStatus)
+    
+    const deliveryStatus = delivery.deliveryStatus;
 
     const deliveryId = delivery.deliveryDisplayId;
     const route = `From ${delivery.fromBranchName} To ${delivery.toBranchName}`;
@@ -27,62 +27,51 @@ const DeliveryCard = ({
     };
 
     const renderActions = () => {
-        if (activeTab === "FOR_DISPATCH") {
-            if (!isInbound) {
-                return (
-                    <div className="bg-background p-4 rounded-xl border border-border shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {deliveryStatus == "PENDING" && (
-                            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => onMarkInTransit(delivery.deliveryId)}>
-                                <Truck size={15} className="mr-2" /> Mark as In Transit
-                            </Button>
-                        )}
-                        {deliveryStatus !== "IN TRANSIT" && deliveryStatus !== "COMPLETED" && deliveryStatus !== "CANCELLED" && (
-                            <Button variant="destructive" onClick={() => onCancelRequest(delivery.deliveryId)}>
-                                <XCircle size={15} className="mr-2" /> Cancel Request
-                            </Button>
-                        )}
-                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleViewDetails}>
-                            <Eye size={15} className="mr-2" /> View Details
-                        </Button>
-                    </div>
-                );
-            }
+        if (!isInbound) {
+            const isPendingDispatch = deliveryStatus === "PENDING" || deliveryStatus === "PENDING DISPATCH";
+            const canCancel = deliveryStatus !== "IN TRANSIT" && deliveryStatus !== "COMPLETED" && deliveryStatus !== "CANCELLED";
+
             return (
-                <div className="grid grid-cols-3 gap-2 mt-3">
-                    {deliveryStatus !== "ACCEPTED" && deliveryStatus !== "COMPLETED" && (
-                        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => onAcceptRequest(delivery.deliveryId)}>
-                            <CheckCircle size={15} className="mr-2" /> Accept Request
+                <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                    {isPendingDispatch && (
+                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => onMarkInTransit(delivery.deliveryId)}>
+                            <Truck size={15} className="mr-2" /> Mark as In Transit
                         </Button>
                     )}
-                    {deliveryStatus !== "ACCEPTED" && deliveryStatus !== "COMPLETED" && (
-                        <Button variant="destructive" onClick={() => onRejectRequest(delivery.deliveryId)}>
-                            <XCircle size={15} className="mr-2" /> Reject Request
+                    {canCancel && (
+                        <Button variant="destructive" className="flex-1" onClick={() => onCancelRequest(delivery.deliveryId)}>
+                            <XCircle size={15} className="mr-2" /> Cancel Request
                         </Button>
                     )}
-                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleViewDetails}>
+                    <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleViewDetails}>
                         <Eye size={15} className="mr-2" /> View Details
                     </Button>
                 </div>
             );
         }
 
-        if (activeTab === "OUTBOUND") {
-            return (
-                <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-3" onClick={handleViewDetails}>
-                    <Eye size={15} className="mr-2" /> View Details
-                </Button>
-            );
-        }
+        if (isInbound) {
+            const needsAcceptance = deliveryStatus === "PENDING";
+            const inTransit = deliveryStatus === "IN TRANSIT" || deliveryStatus === "ACCEPTED" || deliveryStatus === "DISPATCHED";
 
-        if (activeTab === "INBOUND") {
             return (
-                <div className="grid grid-cols-2 gap-2 mt-3">
-                    {deliveryStatus !== "COMPLETED" && (
-                        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => onConfirmDelivery(delivery.deliveryId)}>
+                <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                    {needsAcceptance && (
+                        <>
+                            <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => onAcceptRequest(delivery.deliveryId)}>
+                                <CheckCircle size={15} className="mr-2" /> Accept Request
+                            </Button>
+                            <Button variant="destructive" className="flex-1" onClick={() => onRejectRequest(delivery.deliveryId)}>
+                                <XCircle size={15} className="mr-2" /> Reject Request
+                            </Button>
+                        </>
+                    )}
+                    {inTransit && (
+                        <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => onConfirmDelivery(delivery.deliveryId)}>
                             <CheckCircle size={15} className="mr-2" /> Confirm Delivery
                         </Button>
                     )}
-                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleViewDetails}>
+                    <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleViewDetails}>
                         <Eye size={15} className="mr-2" /> View Details
                     </Button>
                 </div>
@@ -100,12 +89,8 @@ const DeliveryCard = ({
                     <div>
                         <div className="flex items-center gap-2">
                             <h3 className="font-bold text-lg text-foreground">{deliveryId}</h3>
-                            <StatusBadge
-                                status={delivery.direction}
-                            />
-                            <StatusBadge
-                                status={delivery.deliveryStatus}
-                            />
+                            <StatusBadge status={delivery.direction} />
+                            <StatusBadge status={delivery.deliveryStatus} />
                         </div>
                         {delivery.requestDisplayId && (
                             <p className="text-xs italic text-muted-foreground mt-0.5">

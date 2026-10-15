@@ -6,10 +6,6 @@ export const auditLogColumns = [
         accessorKey: "logDisplayId"
     },
     {
-        header: "Employee ID",
-        accessorKey: "employeeDisplayId"
-    },
-    {
         header: "Branch",
         accessorKey: "branchLocation",
         render: (row) => formatLabel(row.branchLocation) || "N/A"
@@ -21,6 +17,10 @@ export const auditLogColumns = [
     {
         header: "Action",
         accessorKey: "logAction"
+    },
+    {
+        header: "Done By",
+        accessorKey: "employeeName"
     },
     {
         header: "Timestamp",
