@@ -22,7 +22,9 @@ export const RequestApprovalActions = ({ user, allProductsApproved, remarks, set
             <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
                 <h2 className="text-base font-bold text-foreground">No Action Required</h2>
                 <p className="text-sm text-muted-foreground">
-                    This request is currently in the <span className="font-bold text-foreground">{requestStage}</span> stage. No approval or rejection actions are required at this time.
+                    This request is currently in the <span className="font-bold text-foreground">{requestStage}</span> stage. No approval or rejection actions are required at this time. 
+                    <br />
+                    Please wait for the delivery and go to the <span className="font-bold text-foreground">DELIVERY PAGE</span> to confirm the delivery.
                 </p>
             </div>
         );

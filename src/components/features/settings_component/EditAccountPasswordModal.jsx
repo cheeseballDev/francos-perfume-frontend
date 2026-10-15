@@ -9,12 +9,13 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
     const { toast } = useToast();
 
     const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowNewPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [config, setConfig] = useState(null);
+    const [currentPasswordError, setCurrentPasswordError] = useState('');
 
     if (!isOpen) return null;
 
@@ -46,10 +47,12 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
 
     
     const handleClose = () => {
-        setPassword('');
+        setNewPassword('');
+        setCurrentPassword('');
         setConfirmPassword('');
+        setCurrentPasswordError('');
         setShowCurrentPassword(false);
-        setShowPassword(false);
+        setShowNewPassword(false);
         setConfig(null);
         onClose();
     };
@@ -74,8 +77,12 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
     
         try {
             setIsSubmitting(true);
-            // to add: currentPassword
-            await updatePassword(accountId, newPassword);
+            const data = {
+                oldPassword: currentPassword,
+                newPassword
+            };
+
+            await updatePassword(accountId, data);
             
             toast({
                 title: "Success",
@@ -86,11 +93,8 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
             handleClose();
 
         } catch (error) {
-            toast({
-                title: "Update Password Failed",
-                description: `An error occurred while updating the password.${error}`,
-                variant: "destructive",
-            });
+            const errorMessage = error.response?.data;
+            setCurrentPasswordError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
@@ -123,9 +127,14 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
                                 type={showCurrentPassword ? "text" : "password"} 
                                 placeholder="Enter current password..." 
                                 required
-                                className="w-full border border-input bg-background rounded-md p-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
+                                className={`w-full border bg-background rounded-md p-2.5 pr-10 text-sm focus:outline-none focus:ring-2 text-foreground transition-colors ${
+                                    currentPasswordError ? 'border-destructive focus:ring-destructive' : 'border-input focus:ring-ring'
+                                }`}
                                 value={currentPassword} 
-                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setCurrentPassword(e.target.value)
+                                    setCurrentPasswordError('');
+                                }}
                             />
                             <button
                                 type="button"
@@ -136,6 +145,9 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
                                 {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
+                        {currentPasswordError && (
+                            <p className="text-xs text-destructive mt-1">{currentPasswordError}</p>
+                        )}
                     </div>
 
                     <div>
@@ -143,15 +155,15 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
                         <div className="relative">
                             <input 
                                 type={showPassword ? "text" : "password"} 
-                                placeholder="Enter your password here..." 
+                                placeholder="Enter your new password here..." 
                                 required
                                 className="w-full border border-input bg-background rounded-md p-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
                                 value={newPassword} 
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => setNewPassword(e.target.value)}
                             />
                             <button
                                 type="button"
-                                onClick={() => setShowPassword(!showPassword)}
+                                onClick={() => setShowNewPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                 tabIndex={-1}
                             >

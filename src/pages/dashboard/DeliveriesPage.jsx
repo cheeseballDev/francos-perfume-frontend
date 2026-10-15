@@ -7,12 +7,12 @@ import PaginationBar from "@/components/shared/PaginationBar";
 import SearchBar from "@/components/shared/SearchBar";
 import StatusCard from "@/components/shared/StatusCard";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
 import { ArrowDownLeft, ArrowUpRight, Clock, ListFilter } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom"; // <-- Added useNavigate
-
+import { useNavigate, useSearchParams } from "react-router-dom";
 const DeliveriesPage = () => {
     const {
         deliveries,
@@ -25,6 +25,7 @@ const DeliveriesPage = () => {
     } = useDelivery();
 
     const { user } = useAuth();
+    const { toast } = useToast();
 
     const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams();
@@ -58,7 +59,7 @@ const DeliveriesPage = () => {
         updateFilter("search", query);
     };
 
-    const handleMarkInTransit = (deliveryId) => {
+const handleMarkInTransit = (deliveryId) => {
         setConfig({
             title: "Mark as In Transit?",
             description: "This will notify the receiving branch that the delivery is on its way.",
@@ -69,15 +70,23 @@ const DeliveriesPage = () => {
                     await postDispatchDelivery(deliveryId);
                     fetchDeliveries();
                     setConfig(null);
-                } catch (error) {
+                    toast({
+                        title: "Success",
+                        description: "Delivery marked as in transit successfully.",
+                        className: "bg-emerald-600 text-white border-emerald-700",
+                    });
+                } catch (err) {
+                    console.error("Failed to mark delivery as in transit:", err);
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: `Failed to mark as in transit.${error}`,
+                        description: err.message || "Failed to mark as in transit.",
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
                     });
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
             onCancel: () => setConfig(null),
@@ -96,6 +105,11 @@ const DeliveriesPage = () => {
                     await postCancelDelivery(deliveryId);
                     fetchDeliveries();
                     setConfig(null);
+                    toast({
+                        title: "Success",
+                        description: "Delivery request cancelled successfully.",
+                        className: "bg-emerald-600 text-white border-emerald-700",
+                    });
                 } catch (err) {
                     console.error("Failed to cancel delivery:", err);
                     setConfig({
@@ -125,6 +139,11 @@ const DeliveriesPage = () => {
                     await postReceiveDelivery(deliveryId, { accepted: true });
                     fetchDeliveries();
                     setConfig(null);
+                    toast({
+                        title: "Success",
+                        description: "Delivery request accepted successfully.",
+                        className: "bg-emerald-600 text-white border-emerald-700",
+                    });
                 } catch (err) {
                     console.error("Failed to accept delivery:", err);
                     setConfig({
@@ -155,6 +174,11 @@ const DeliveriesPage = () => {
                     await postReceiveDelivery(deliveryId, { accepted: false });
                     fetchDeliveries();
                     setConfig(null);
+                    toast({
+                        title: "Success",
+                        description: "Delivery request rejected successfully.",
+                        className: "bg-emerald-600 text-white border-emerald-700",
+                    });
                 } catch (err) {
                     console.error("Failed to reject delivery:", err);
                     setConfig({

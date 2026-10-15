@@ -5,9 +5,8 @@ const RequestTimeline = ({
     }) => {
 
     const { approvals = [], items = [] } = selectedRequest;
-
     const totalProducts = items?.length || 0;
-    const totalUnits = items?.reduce((sum, item) => sum + (item.receivedQty || 0), 0);
+    const totalUnits = items?.reduce((sum, item) => sum + (item.requestedQty || 0), 0);
 
     return (
         <div className="space-y-6">
@@ -36,7 +35,7 @@ const RequestTimeline = ({
                                             {item.stage}
                                         </h3>
                                         <div className="text-xs mt-1 flex items-center gap-1 font-medium text-muted-foreground">
-                                            {renderTimelineSubtitle(item.stage, item.status, item.approver)}
+                                            {renderTimelineSubtitle(item.stage, item.status, item.approverName, item.approverId, item.remarks)}
                                         </div>
                                     </div>
                                     <div>{renderBadgeForRequestTimeline(item.status)}</div>
