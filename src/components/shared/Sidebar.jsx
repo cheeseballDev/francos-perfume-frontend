@@ -1,17 +1,17 @@
 import { useAuth } from "@/auth/UseAuth";
 import {
-  Archive,
-  Barcode,
-  Boxes,
-  ChartNoAxesCombined,
-  FileClock,
-  HandHelping,
-  LayoutDashboard,
-  Logs,
-  ShoppingBag,
-  Tag,
-  Truck,
-  UserPen
+    Archive,
+    Barcode,
+    Boxes,
+    ChartNoAxesCombined,
+    FileClock,
+    HandHelping,
+    LayoutDashboard,
+    Logs,
+    ShoppingBag,
+    Tag,
+    Truck,
+    UserPen
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/FrancoPerfumeLogo.png";
