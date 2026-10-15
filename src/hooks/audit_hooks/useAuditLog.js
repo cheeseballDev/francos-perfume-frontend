@@ -1,4 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
+import { supabase } from "@/lib/SupabaseClient";
 import { getAllAuditLogs, getOneAuditLogDetails } from "@/services/AuditLogService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
@@ -55,10 +56,20 @@ export const useAuditLog = () => {
     }, [filter]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchAuditLogs();
-        }, 0);
-        return () => clearTimeout(timer); 
+        const channel = supabase
+            .channel("public:audit_logs")
+            .on(
+                "postgres_changes",
+                { event: "INSERT", schema: "public", table: "audit_log" }, 
+                () => {
+                    fetchAuditLogs();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [fetchAuditLogs]);
 
     const fetchAuditLogDetails = useCallback(async (logId) => {

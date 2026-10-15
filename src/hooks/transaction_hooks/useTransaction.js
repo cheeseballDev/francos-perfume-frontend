@@ -1,3 +1,4 @@
+import { supabase } from "@/lib/SupabaseClient";
 import { getAllTransactions, getTransactionDetails, getTransactionFilters } from "@/services/TransactionService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -73,10 +74,20 @@ export const useTransaction = () => {
     }, [filter])
 
     useEffect(() => {
-      const timer = setTimeout(() => {
-        fetchTransactions();
-      }, 0);
-      return () => clearTimeout(timer);
+        const channel = supabase
+            .channel("public:sales_order")
+            .on(
+                "postgres_changes",
+                { event: "INSERT", schema: "public", table: "sales_order" }, 
+                () => {
+                    fetchTransactions();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [fetchTransactions]);
 
     const fetchTransactionDetails = useCallback(async (transactionId) => {
