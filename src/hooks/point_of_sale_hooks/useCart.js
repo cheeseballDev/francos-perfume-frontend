@@ -7,11 +7,10 @@ export const useCart = () => {
 
     const handleAddToCart = (product, quantity) => {
         setCart(prevCart => {
-            // Standardize the ID check so it never misses a duplicate
-            const targetId = product.product_id || product.productId || product.id;
+            const targetId = product.productId;
             
             const existing = prevCart.find(item => 
-                (item.product_id || item.productId || item.id) === targetId
+                (item.productId) === targetId
             );
             
             if (existing) {
@@ -24,10 +23,9 @@ export const useCart = () => {
             
             return [...prevCart, { 
                 ...product, 
-                // Force standardize the properties for the cart
-                product_id: targetId,
-                name: product.name || product.productName || product.product_name || 'Unknown Item', 
-                price: product.price || product.productPrice || product.product_price || 0, 
+                productId: targetId,
+                name: product.productName, 
+                price: product.productPrice, 
                 cartQty: quantity 
             }];
         });
@@ -35,7 +33,7 @@ export const useCart = () => {
 
     const handleRemoveFromCart = (productId) => {
         setCart(prevCart => prevCart.filter(item => 
-            (item.product_id || item.productId || item.id) !== productId
+            (item.productId) !== productId
         ));
     };
 
@@ -49,5 +47,17 @@ export const useCart = () => {
     const discountAmount = subtotal * appliedDiscountRate;
     const grandTotal = subtotal - discountAmount;
 
-  return { cart, handleAddToCart, handleRemoveFromCart, handleClearCart, subtotal, discountAmount, grandTotal, appliedDiscountId, appliedDiscountRate, setAppliedDiscountId, setAppliedDiscountRate }
+    return { 
+        cart, 
+        handleAddToCart, 
+        handleRemoveFromCart, 
+        handleClearCart, 
+        subtotal, 
+        discountAmount, 
+        grandTotal, 
+        appliedDiscountId, 
+        appliedDiscountRate, 
+        setAppliedDiscountId, 
+        setAppliedDiscountRate 
+    }
 }

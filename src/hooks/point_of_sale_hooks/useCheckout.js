@@ -1,3 +1,4 @@
+
 import { postCheckout } from "@/services/PointOfSaleService";
 import { extractReceiptData, formatCheckoutPayload } from "@/utils/pointOfSaleDTO";
 import { useState } from "react";
