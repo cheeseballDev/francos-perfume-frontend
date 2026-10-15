@@ -2,14 +2,14 @@ import { useState } from "react";
 import { AuthContext } from "./AuthContext";
 
 const loadFromSession = () => {
-  const savedUser = sessionStorage.getItem('user');
+  const savedUser = localStorage.getItem('user');
   if (!savedUser) return null;
 
   try {
     return JSON.parse(savedUser);
   } catch (error) {
     console.error("Failed to parse stored user session", error);
-    sessionStorage.removeItem('user');
+    localStorage.removeItem('user');
     return null;
   }
 };
@@ -18,12 +18,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(loadFromSession);
 
   const login = (userData) => {
-    sessionStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = () => {
-    sessionStorage.clear();
+    localStorage.clear();
     setUser(null);
   };
 
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     setUser((prev) => {
       if (!prev) return null;
       const updatedUser = { ...prev, activeRole: newActiveRole };
-      sessionStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     });
   };

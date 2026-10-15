@@ -34,7 +34,7 @@ const ManageAccountsPage = () => {
     const [isAccountInfoModalOpen, setIsAccountInfoModalOpen] = useState(false);
     const [isEditAccountModalOpen, setIsEditAccountModalOpen] = useState(false);
 
-    const role = sessionStorage.getItem("trueRole");
+    const role = localStorage.getItem("trueRole");
 
     const handleRowClick = async (row) => {
         if (selectedAccount?.employeeId === row.employeeId) {

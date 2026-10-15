@@ -31,7 +31,7 @@ export const useNotifications = () => {
     useEffect(() => {
         fetchNotifications();
 
-        const userData = JSON.parse(sessionStorage.getItem("user"));
+        const userData = JSON.parse(localStorage.getItem("user"));
         const employeeId = userData.employeeId;
 
         const channel = supabase

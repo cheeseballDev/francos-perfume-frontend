@@ -48,7 +48,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
         }
 
         const targetRoleRank = ROLE_RANKS[option.value.toUpperCase()] || 0;
-        const currentUserRank = ROLE_RANKS[sessionStorage.getItem("trueRole")] || 0;
+        const currentUserRank = ROLE_RANKS[localStorage.getItem("trueRole")] || 0;
 
         return targetRoleRank < currentUserRank;
     });

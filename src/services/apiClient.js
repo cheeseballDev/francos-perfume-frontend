@@ -24,7 +24,7 @@ apiClient.interceptors.request.use(
             return config;
         }
 
-        const userData = sessionStorage.getItem("user");
+        const userData = localStorage.getItem("user");
 
         if (userData) {
         try {

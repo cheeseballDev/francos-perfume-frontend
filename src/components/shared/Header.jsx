@@ -10,29 +10,40 @@ const Header = () => {
 
     const [currentDate, setCurrentDate] = useState("");
     const [userLocation, setUserLocation] = useState("Loading...");
-    const [isNotifOpen, setIsNotifOpen] = useState(false);
-    
-    const [isDark, setIsDark] = useState(
-        () => document.documentElement.classList.contains('dark')
-    );
+    const [isDark, setIsDark] = useState(() => {
+        const savedTheme = localStorage.getItem('theme');
+        return savedTheme ? savedTheme === 'dark' : false;
+    });
 
     const toggleTheme = () => {
         const root = document.documentElement;
-        if (isDark) {
-        root.classList.remove('dark');
+        const newThemeState = !isDark;
+        
+        if (newThemeState) {
+            root.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
         } else {
-        root.classList.add('dark');
+            root.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
         }
-        setIsDark(!isDark);
+        setIsDark(newThemeState);
     };
-    
+
+    useEffect(() => {
+        const root = document.documentElement;
+        if (isDark) {
+            root.classList.add('dark');
+        } else {
+            root.classList.remove('dark');
+        }
+    }, [isDark]);
+        
   useEffect(() => {
         try {
-        setCurrentDate(formatDateForTable(new Date()));
-        setUserLocation(user.branchLocation);
+            setCurrentDate(formatDateForTable(new Date()));
+            setUserLocation(user.branchLocation);
         } catch (error) {
-        console.error("Header initialization error:", error);
-        setUserLocation("Error loading location");
+            setUserLocation(`Error loading location\n${error.response?.data}`);
         }
     }, [user.branchLocation]);
 
