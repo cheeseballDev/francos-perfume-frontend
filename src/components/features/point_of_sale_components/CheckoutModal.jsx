@@ -1,4 +1,3 @@
-import React from "react";
 import { X } from "lucide-react";
 
 const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
@@ -40,17 +39,14 @@ const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
             
             <div className="flex flex-col gap-4">
               <button 
-                onClick={() => onPaymentSelect('GCash')}
+                onClick={() => onPaymentSelect('GCASH')}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xl py-4 rounded-lg shadow-sm transition-colors flex justify-center items-center gap-2"
               >
-                <span className="bg-[#0052FE] text-white rounded-full w-6 h-6 flex items-center justify-center text-xs italic font-black">
-                  G
-                </span> 
                 GCash
               </button>
               
               <button 
-                onClick={() => onPaymentSelect('Cash')}
+                onClick={() => onPaymentSelect('CASH')}
                 className="w-full bg-secondary hover:bg-secondary/80 text-secondary-foreground font-bold text-xl py-4 rounded-lg shadow-sm transition-colors"
               >
                 Cash

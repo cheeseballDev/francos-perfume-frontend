@@ -1,70 +1,115 @@
-import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useDiscounts } from '@/hooks/discount_hooks/useDiscount';
 import { X } from 'lucide-react';
+import { useState } from 'react';
 
 const DiscountModal = ({ isOpen, onClose, onApply }) => {
-  const [discountPrefix, setDiscountPrefix] = useState('PWD');
-  const [recipients, setRecipients] = useState(1);
+    const {
+        discounts
+    } = useDiscounts();
 
-  if (!isOpen) return null;
+    const [selectedDiscountId, setSelectedDiscountId] = useState('');
 
-  const handleApplyClick = () => {
-    onApply(0.20); 
-  };
+    if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm transition-all">
-      <div className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-md overflow-hidden animate-fade-in border border-border">
-        
-        <div className="flex justify-between items-center p-6 pb-4">
-          <h3 className="text-2xl font-bold text-foreground">Add Discount</h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
-            <X size={28} />
-          </button>
-        </div>
-        
-        <div className="p-6 pt-2 flex flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <label className="text-[15px] text-muted-foreground font-medium">Enter discount prefix:</label>
-            <select 
-              value={discountPrefix} 
-              onChange={(e) => setDiscountPrefix(e.target.value)}
-              className="border border-input rounded px-3 py-1.5 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-ring bg-transparent cursor-pointer text-foreground"
-            >
-              <option value="PWD" className="bg-background text-foreground">PWD</option>
-              <option value="SENIOR" className="bg-background text-foreground">SENIOR</option>
-              <option value="PROMO" className="bg-background text-foreground">PROMO</option>
-            </select>
-          </div>
+    const activeDiscounts = (discounts || []).filter(d => d.discountStatus === 'ACTIVE');
 
-          <div className="flex items-center justify-between">
-            <label className="text-[15px] text-muted-foreground font-medium">Enter number of recipients:</label>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setRecipients(Math.max(1, recipients - 1))}
-                className="w-10 h-8 flex items-center justify-center bg-secondary text-secondary-foreground font-bold rounded hover:bg-secondary/80 transition-colors"
-              >
-                -
-              </button>
-              <div className="w-14 h-8 flex items-center justify-center border border-input rounded bg-transparent font-bold text-[15px] text-foreground" >
-                {recipients}
-              </div>
-              <button 
-                onClick={() => setRecipients(recipients + 1)}
-                className="w-10 h-8 flex items-center justify-center bg-secondary text-secondary-foreground font-bold rounded hover:bg-secondary/80 transition-colors"
-              >
-                +
-              </button>
+    const selectedDiscount = activeDiscounts.find(
+        (d) => String(d.discountId) === String(selectedDiscountId)
+    );
+
+    const handleApplyClick = () => {
+        if (!selectedDiscount) return;
+
+        const discountValue = 
+        selectedDiscount.discountType === 'PERCENTAGE'
+            ? (selectedDiscount.discountPercent > 1 ? selectedDiscount.discountPercent / 100 : selectedDiscount.discountPercent)
+            : selectedDiscount.discountAmount;
+
+        onApply(discountValue, selectedDiscount.discountId, selectedDiscount.discountType);
+        onClose();
+    };
+
+    return (
+        <div className="p-6 fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm transition-all">
+        <div className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-md overflow-hidden animate-fade-in border border-border">
+            <div className="m-6">
+                <div className="flex justify-between items-center ">
+                <h3 className="text-2xl font-bold text-foreground">Add Discount</h3>
+                <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+                    <X size={28} />
+                </button>
             </div>
-          </div>
+            
+            <div className="mt-4 space-y-6">
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Select Discount Option:</label>
+                    <Select
+                        value={selectedDiscountId} 
+                        onValueChange={setSelectedDiscountId}
+                    >
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Choose a discount..." />
+                        </SelectTrigger>
+                        <SelectContent className="z-[110]">
+                            {activeDiscounts.map((discount) => (
+                                <SelectItem key={discount.discountId} value={String(discount.discountId)}>
+                                    {discount.discountPrefix}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                
+                {selectedDiscount && (
+                    <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-2 transition-all">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Discount Details</p>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-foreground">Discount Name:</span>
+                            <span className="text-sm font-bold px-2 py-0.5">
+                                {selectedDiscount.discountName}
+                            </span>
+                        </div>
 
-          <button 
-            onClick={handleApplyClick}
-            className="w-full bg-primary text-primary-foreground font-extrabold py-3.5 rounded mt-4 hover:bg-primary/90 transition-colors tracking-widest text-[15px]"
-          >
-            APPLY DISCOUNT
-          </button>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-foreground">Type:</span>
+                            <span className="text-sm font-bold px-2 py-0.5">
+                                {selectedDiscount.discountType}
+                            </span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-foreground">Value:</span>
+                            <span className="text-sm font-bold text-emerald-500 flex items-center">
+                                {selectedDiscount.discountType === 'PERCENTAGE' ? (
+                                    <>
+
+                                        {selectedDiscount.discountPercent > 1 
+                                            ? selectedDiscount.discountPercent 
+                                            : selectedDiscount.discountPercent * 100} %
+                                    </>
+                                ) : (
+                                    <>
+                                        ₱ {selectedDiscount.discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    </>
+                                )}
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+            <Button
+                disabled={!selectedDiscountId}
+                onClick={handleApplyClick}
+                className="w-full font-bold py-3.5 rounded mt-4 hover:bg-primary/90 transition-colors"
+            >
+                APPLY DISCOUNT
+            </Button>
+
+            </div>
+            </div>
         </div>
-      </div>
     </div>
   );
 };

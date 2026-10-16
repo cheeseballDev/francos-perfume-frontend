@@ -1,37 +1,79 @@
 import { supabase } from "@/lib/SupabaseClient";
-import { getAllProductsPOS } from "@/services/PointOfSaleService";
-import { useCallback, useEffect, useState } from "react";
+import { getAllPOSProducts, getPOSFilters } from "@/services/PointOfSaleService";
+import { buildFilterOptions } from "@/utils/formattingUtils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFilter } from "../useFilter";
 
 export const usePointOfSale = () => {
     const [products, setProducts] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    const [filter, setFilter] = useState({
-        search: '',
-        product_type: '',
-        product_gender: '',
+    const isFirstLoad = useRef(true);
+    
+    const [asyncState, setAsyncState] = useState({
+        isLoading: true,
+        isFetching: false,
+        error: null,
     });
 
-    const fetchProducts = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const response = await getAllProductsPOS(filter);
-            setProducts(response.data);
-        } catch (err) {
-            setError(err);
-        } finally {
-            setIsLoading(false);
-        }
+    const [pagination, setPagination] = useState({
+        totalPages: 1,
+        totalEntries: 0,
+    });
+
+    const [filterOptions, setFilterOptions] = useState({
+        productType: [],
+        productGender: [],
+    });
+
+    const PRODUCT_FILTER_SCHEMA = [
+        { key: "productType", label: "Filter: Type", allLabel: "All Types" },
+        { key: "productGender", label: "Filter: Gender", allLabel: "All Gender" },
+    ]
+
+
+    const { filter, updateFilter, resetFilter } = useFilter({
+        search: '',
+        fromDate: '',
+        toDate: '',
+        productType: '',
+        productGender: '',
+        pageCount: 1,
+        pageSize: 10,
+    });
+
+    const fetchAllPOSProducts = useCallback(async () => {
+        if (isFirstLoad.current) {
+        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+      } else {
+        setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
+      }
+
+      getAllPOSProducts(filter)
+        .then(data => {
+            isFirstLoad.current = false;
+            
+            setProducts(data.data);
+            setPagination({
+                totalPages: data.totalProductsPages || 0,
+                totalEntries: data.totalProducts || 0,
+            });
+        })
+        .catch((err) => {
+            setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
+        })
+        .finally(() => {
+            setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
+        });
+
     }, [filter]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            fetchProducts();
+            fetchAllPOSProducts();
         }, 300); 
 
         return () => clearTimeout(timer);
-    }, [fetchProducts]);
+    }, [fetchAllPOSProducts]);
 
     useEffect(() => {
         const channel = supabase
@@ -40,14 +82,14 @@ export const usePointOfSale = () => {
                 "postgres_changes",
                 { event: "*", schema: "public", table: "inventory" }, 
                 () => {
-                    fetchProducts();
+                    fetchAllPOSProducts();
                 }
             )
             .on(
                 "postgres_changes",
                 { event: "*", schema: "public", table: "inventory_batch_items" }, 
                 () => {
-                    fetchProducts();
+                    fetchAllPOSProducts();
                 }
             )
             .subscribe();
@@ -55,23 +97,32 @@ export const usePointOfSale = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [fetchProducts]);
+    }, [fetchAllPOSProducts]);
 
-    const updateFilter = (key, value) =>  {
-        setFilter(prev => {
-            if (key !== 'page') {
-                return { ...prev, [key]: value, page: 1 };
-            }
-            return { ...prev, [key]: value };
-        });
-    };
-        
+    const fetchProductFilters = useCallback(async () => {
+        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const data = await getPOSFilters();
+            setFilterOptions(buildFilterOptions(data, PRODUCT_FILTER_SCHEMA));
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, error: err }));
+            throw err;
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchProductFilters();
+    }, [fetchProductFilters]);
+
     return { 
         products, 
-        isLoading,
-        error, 
+        asyncState,
+        pagination,
         filter, 
-        updateFilter, 
-        fetchProducts 
+        updateFilter,
+        filterOptions,
+        fetchAllPOSProducts 
     }; 
 }

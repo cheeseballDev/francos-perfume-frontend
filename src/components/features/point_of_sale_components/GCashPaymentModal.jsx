@@ -2,21 +2,21 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment }) => {
-  const [referenceId, setReferenceId] = useState("");
+  const [referenceNumber, setReferenceNumber] = useState("");
 
   if (!isOpen) return null;
 
-  const isValid = referenceId.trim().length > 0;
+  const isValid = referenceNumber.trim().length > 0;
 
   const handleConfirm = () => {
     if (isValid) {
-      onConfirmPayment({ method: "GCash", referenceId: referenceId.trim() });
-      setReferenceId("");
+      onConfirmPayment({ method: "GCASH", referenceNumber: referenceNumber.trim() });
+      setReferenceNumber("");
     }
   };
 
   const handleClose = () => {
-    setReferenceId("");
+    setReferenceNumber("");
     onClose();
   };
 
@@ -29,14 +29,15 @@ const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment }) => {
             <span className="text-muted-foreground font-medium text-sm tracking-widest uppercase">
               REFERENCE ID:
             </span>
-            <input
-              type="text"
-              placeholder="Enter reference ID..."
-              value={referenceId}
-              onChange={(e) => setReferenceId(e.target.value)}
-              className="flex-1 border border-input bg-transparent rounded-md px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-              autoFocus
-            />
+                <input
+                    type="text"
+                    placeholder="Enter reference ID..."
+                    value={referenceNumber}
+                    maxLength="13"
+                    onChange={(e) => setReferenceNumber(e.target.value)}
+                    className="flex-1 border border-input bg-transparent rounded-md px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                    autoFocus
+                />
           </div>
 
         </div>

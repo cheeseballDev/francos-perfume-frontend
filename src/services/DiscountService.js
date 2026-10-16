@@ -25,7 +25,6 @@ export const postAddNewDiscount = async (dto) => {
     return response.data;
 }
 
-
 export const patchToggleDiscountStatus = async (id) => {
     const response = await apiClient.patch(`${PATH}/status/${id}`);
     return response.data;

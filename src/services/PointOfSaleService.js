@@ -3,7 +3,7 @@ import apiClient from "./APIClient";
 
 const PATH = "/pos";
 
-export const getAllProductsPOS = async (filter) => {
+export const getAllPOSProducts = async (filter) => {
     const cleanedFilter = cleanFilters(filter);
     const response = await apiClient.get(`${PATH}`, {
         params: cleanedFilter,
@@ -17,5 +17,6 @@ export const postCheckout = async (checkoutData) => {
 };
 
 export const getPOSFilters = async () => {
-    
+    const response = await apiClient(`${PATH}/filters`);
+    return response.data;
 }

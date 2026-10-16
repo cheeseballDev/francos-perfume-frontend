@@ -1,4 +1,4 @@
-import React from 'react';
+import logo from '../../../assets/FrancoPerfumeLogo.png';
 
 const ProductCard = ({ name, type, gender, imageUrl, price, onAddToCart }) => {
   return (
@@ -14,7 +14,7 @@ const ProductCard = ({ name, type, gender, imageUrl, price, onAddToCart }) => {
         {imageUrl ? (
           <img src={imageUrl} alt={name} className="h-full object-contain drop-shadow-xl" />
         ) : (
-          <div className="w-16 h-24 bg-gradient-to-b from-yellow-300 to-yellow-600 rounded-t-full shadow-2xl opacity-80"></div>
+          <img src={logo} className="h-full object-contain drop-shadow-xl" />
         )}
       </div>
       
