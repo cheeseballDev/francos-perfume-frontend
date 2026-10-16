@@ -69,8 +69,9 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
         } catch (error) {
             toast({
                 title: "Creation Failed",
-                description: `An error occurred while creating the product.\n${error}`,
+                description: `An error occurred while creating the product.\n${error.response?.data}`,
                 variant: "destructive",
+                duration: 5000
             });
 
         } finally {

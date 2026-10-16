@@ -1,11 +1,9 @@
-import { useAuth } from "@/auth/UseAuth";
 import { supabase } from "@/lib/SupabaseClient";
 import { getAllAuditLogs, getOneAuditLogDetails } from "@/services/AuditLogService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
 export const useAuditLog = () => {
-    const { user } = useAuth();
     const [auditLogs, setAuditLogs] = useState([]);
     const isFirstLoad = useRef(true);
     
@@ -40,7 +38,7 @@ export const useAuditLog = () => {
             .then(data => {
                 isFirstLoad.current = false;
                 setAuditLogs(data.data);
-
+                
                 setPagination({
                     totalPages: data.totalAuditPages || 0,
                     totalEntries: data.totalAuditLogs || 0,
@@ -56,11 +54,18 @@ export const useAuditLog = () => {
     }, [filter]);
 
     useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchAuditLogs();
+        }, 300);
+        return () => clearTimeout(timer); 
+    }, [fetchAuditLogs]);
+
+    useEffect(() => {
         const channel = supabase
             .channel("public:audit_logs")
             .on(
                 "postgres_changes",
-                { event: "INSERT", schema: "public", table: "audit_log" }, 
+                { event: "*", schema: "public", table: "audit_log" }, 
                 () => {
                     fetchAuditLogs();
                 }

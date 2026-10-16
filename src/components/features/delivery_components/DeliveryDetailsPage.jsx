@@ -1,11 +1,12 @@
+import { useAuth } from "@/auth/UseAuth";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
 import { ArrowLeft, CheckCircle, Loader2, Truck, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import DeliveryInformation from "./delivery_detail_components/DeliveryInformation";
+import DeliveryInformation from "./DeliveryInformation";
 
 export default function DeliveryDetailsPage() {
     const { deliveryId } = useParams();
@@ -15,21 +16,23 @@ export default function DeliveryDetailsPage() {
     const [selectedDelivery, setSelectedDelivery] = useState(null);
     const [config, setConfig] = useState(null);
 
-    const loadDeliveryData = async () => {
+    const { user } = useAuth();
+
+    const loadDeliveryData = useCallback(async () => {
         try {
             const response = await fetchDeliveryDetails(deliveryId);
             if (response) {
-                setSelectedDelivery(response.data || response);
+                setSelectedDelivery(response.data);
             }
         } catch (error) {
             console.error("Failed to fetch delivery details:", error);
         }
-    };
+    }, [deliveryId, fetchDeliveryDetails]);
 
     useEffect(() => {
         if (!deliveryId) return;
         loadDeliveryData();
-    }, [deliveryId, fetchDeliveryDetails]);
+    }, [deliveryId, fetchDeliveryDetails, loadDeliveryData]);
 
     if (!selectedDelivery) {
         return (
@@ -43,11 +46,10 @@ export default function DeliveryDetailsPage() {
     const isInbound = selectedDelivery.direction === "INBOUND";
     const isOutbound = selectedDelivery.direction === "OUTBOUND";
     const deliveryStatus = (selectedDelivery.deliveryStatus || "").toUpperCase();
+    const isSameDestination = user?.branchLocation === selectedDelivery.toBranchName;
 
     const totalProducts = selectedDelivery.items?.length || 0;
     const totalUnits = selectedDelivery.items?.reduce((sum, item) => sum + (item.quantity || 0), 0);
-
-    // --- Action Handlers with Confirmation Dialogs --- //
 
     const handleMarkInTransit = () => {
         setConfig({
@@ -57,7 +59,7 @@ export default function DeliveryDetailsPage() {
             onConfirm: async () => {
                 try {
                     await postDispatchDelivery(deliveryId);
-                    await loadDeliveryData(); // Refresh UI
+                    await loadDeliveryData();
                 } catch (err) {
                     console.error("Failed to mark as in transit:", err);
                 } finally {
@@ -77,7 +79,7 @@ export default function DeliveryDetailsPage() {
             onConfirm: async () => {
                 try {
                     await postCancelDelivery(deliveryId);
-                    navigate("/home/deliveries"); // Go back since it's cancelled
+                    navigate("/home/deliveries");
                 } catch (err) {
                     console.error("Failed to cancel delivery:", err);
                 } finally {
@@ -96,7 +98,7 @@ export default function DeliveryDetailsPage() {
             onConfirm: async () => {
                 try {
                     await postReceiveDelivery(deliveryId, { accepted: true });
-                    await loadDeliveryData(); // Refresh UI
+                    await loadDeliveryData();
                 } catch (err) {
                     console.error("Failed to accept delivery:", err);
                 } finally {
@@ -116,7 +118,7 @@ export default function DeliveryDetailsPage() {
             onConfirm: async () => {
                 try {
                     await postReceiveDelivery(deliveryId, { accepted: false });
-                    navigate("/home/deliveries"); // Go back since it's rejected
+                    navigate("/home/deliveries");
                 } catch (err) {
                     console.error("Failed to reject delivery:", err);
                 } finally {
@@ -126,8 +128,6 @@ export default function DeliveryDetailsPage() {
             onCancel: () => setConfig(null),
         });
     };
-
-    // --- Dynamic Action Panel Rendering --- //
 
     const renderActionPanel = () => {
         if (isOutbound) {
@@ -159,7 +159,7 @@ export default function DeliveryDetailsPage() {
             const needsAcceptance = deliveryStatus === "PENDING";
             const inTransit = deliveryStatus === "IN TRANSIT" || deliveryStatus === "ACCEPTED" || deliveryStatus === "DISPATCHED";
 
-            if (needsAcceptance) {
+            if (needsAcceptance && !isSameDestination) {
                 return (
                     <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
                         <h2 className="text-base font-bold text-foreground">Required Action</h2>
@@ -174,7 +174,7 @@ export default function DeliveryDetailsPage() {
                 );
             }
 
-            if (inTransit) {
+            if (inTransit && isSameDestination) {
                 return (
                     <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
                         <h2 className="text-base font-bold text-foreground">Required Action</h2>
@@ -187,7 +187,6 @@ export default function DeliveryDetailsPage() {
             }
         }
 
-        // Default state if no actions are required (Completed, Cancelled, etc.)
         return (
             <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-2 text-center">
                 <h2 className="text-base font-bold text-foreground">No Action Required</h2>

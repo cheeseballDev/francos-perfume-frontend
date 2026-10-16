@@ -78,8 +78,9 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
                 } catch (error) {
                     toast({
                         title: 'Import Failed',
-                        description: error?.message || 'An error occurred while importing.',
+                        description: `An error occurred while importing.\n${error.response?.data}`,
                         variant: 'destructive',
+                        duration: 5000
                     });
                 } finally {
                     setIsSubmitting(false);

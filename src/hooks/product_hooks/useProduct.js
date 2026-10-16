@@ -68,7 +68,7 @@ export const useProduct = () => {
     useEffect(() => {
     const timer = setTimeout(() => {
         fetchAllProducts();
-    }, 0);
+    }, 300);
     return () => clearTimeout(timer);
     }, [fetchAllProducts]);
 

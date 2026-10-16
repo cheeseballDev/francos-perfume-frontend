@@ -58,8 +58,9 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
         } catch (error) {
             toast({
                 title: "Update Failed",
-                description: error?.message || "An error occurred while updating the batch.",
+                description: `An error occurred while updating the batch.\n${error.response?.data}`,
                 variant: "destructive",
+                duration: 5000
             });
         } finally {
             setIsSubmitting(false);

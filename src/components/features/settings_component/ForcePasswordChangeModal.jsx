@@ -63,8 +63,9 @@ const ForcePasswordChangeModal = ({ isOpen, onClose, onSuccess, oldPassword, fir
         } catch (error) {
             toast({
                 title: "Update Password Failed",
-                description: `An error occurred while updating the password.\n${error}`,
+                description: `An error occurred while updating the password.\n${error.response?.data}`,
                 variant: "destructive",
+                duration: 5000
             });
         } finally {
             setIsSubmitting(false);

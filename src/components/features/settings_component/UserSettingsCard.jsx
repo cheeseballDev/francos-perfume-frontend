@@ -110,7 +110,7 @@ const UserSettingsCard = ({ accountId }) => {
         } catch (error) {
             toast({
                 title: "Update Failed",
-                description: error?.message || "An error occurred while updating profile details.",
+                description: `An error occurred while updating profile details.\n${error.response?.data}`,
                 variant: "destructive",
             });
         } finally {
@@ -123,6 +123,7 @@ const UserSettingsCard = ({ accountId }) => {
             title: "Feature to be added.",
             description: `Do not report this as a bug.`,
             variant: "destructive",
+            duration: 5000
         });
     };
 

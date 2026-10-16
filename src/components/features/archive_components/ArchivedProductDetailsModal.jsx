@@ -33,8 +33,9 @@ const ArchivedProductDetailsModal = ({ isOpen, onClose, selectedArchivedProduct,
             } catch (error) {
                 toast({
                     title: "Update Failed",
-                    description: `An error occurred while restoring the product.\n${error}`,
+                    description: `An error occurred while restoring the product.\n${error.response?.data}`,
                     variant: "destructive",
+                    duration: 5000
                 });
             } finally {
                 setIsSubmitting(false);

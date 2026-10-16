@@ -59,12 +59,12 @@ const DeliveriesPage = () => {
         updateFilter("search", query);
     };
 
-const handleMarkInTransit = (deliveryId) => {
+    const handleMarkInTransit = (deliveryId) => {
         setConfig({
             title: "Mark as In Transit?",
             description: "This will notify the receiving branch that the delivery is on its way.",
             confirmText: "Mark In Transit",
-            onConfirm: async () => {
+            onConfirm: async () => {['']
                 try {
                     setIsSubmitting(true);
                     await postDispatchDelivery(deliveryId);
@@ -75,12 +75,12 @@ const handleMarkInTransit = (deliveryId) => {
                         description: "Delivery marked as in transit successfully.",
                         className: "bg-emerald-600 text-white border-emerald-700",
                     });
-                } catch (err) {
-                    console.error("Failed to mark delivery as in transit:", err);
+                } catch (error) {
+                    console.error("Failed to mark delivery as in transit:", error);
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: err.message || "Failed to mark as in transit.",
+                        description: `Failed to mark as in transit.\n${error.response?.data}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
@@ -110,12 +110,12 @@ const handleMarkInTransit = (deliveryId) => {
                         description: "Delivery request cancelled successfully.",
                         className: "bg-emerald-600 text-white border-emerald-700",
                     });
-                } catch (err) {
-                    console.error("Failed to cancel delivery:", err);
+                } catch (error) {
+                    console.error("Failed to cancel delivery:", error);
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: err.message || "Failed to cancel the delivery request.",
+                        description: `Failed to cancel the delivery request.\n${error.response?.data}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
@@ -144,12 +144,12 @@ const handleMarkInTransit = (deliveryId) => {
                         description: "Delivery request accepted successfully.",
                         className: "bg-emerald-600 text-white border-emerald-700",
                     });
-                } catch (err) {
-                    console.error("Failed to accept delivery:", err);
+                } catch (error) {
+                    console.error("Failed to accept delivery:", error);
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: err.message || "Failed to accept the delivery request.",
+                        description: `Failed to accept the delivery request.\n${error.response?.data}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
@@ -179,12 +179,12 @@ const handleMarkInTransit = (deliveryId) => {
                         description: "Delivery request rejected successfully.",
                         className: "bg-emerald-600 text-white border-emerald-700",
                     });
-                } catch (err) {
-                    console.error("Failed to reject delivery:", err);
+                } catch (error) {
+                    console.error("Failed to reject delivery:", error);
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: err.message || "Failed to reject the delivery request.",
+                        description: `Failed to reject the delivery request.\n${error.response?.data}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 

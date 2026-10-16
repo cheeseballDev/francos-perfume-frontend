@@ -33,8 +33,9 @@ const ArchivedAccountDetailsModal = ({ isOpen, onClose, selectedArchivedAcccount
             } catch (error) {
                 toast({
                     title: "Update Failed",
-                    description: `An error occurred while restoring the account.\n${error}`,
+                    description: `An error occurred while restoring the account.\n${error.response?.data}`,
                     variant: "destructive",
+                    duration: 5000
                 });
             } finally {
                 setIsSubmitting(false);

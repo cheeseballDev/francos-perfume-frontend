@@ -1,6 +1,6 @@
 import { useAuth } from '@/auth/UseAuth';
 import { formatDateForTable } from '@/utils/formattingUtils';
-import { Moon, Sun } from 'lucide-react'; // ADDED: Imported icons for the theme toggle
+import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import NotificationDropdown from './NotificationDropdown';
 import ProfileDropdown from './ProfileDropdown';

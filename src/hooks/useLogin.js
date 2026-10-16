@@ -67,8 +67,9 @@ export const useLogin = () => {
         } catch (error) {
             toast({
                 title: "Login Failed",
-                description: `An error occurred while logging in.${error}`,
+                description: `An error occurred while logging in.${error.response?.data}`,
                 variant: "destructive",
+                duration: 5000
             })
         } finally {
             setIsLoading(false);

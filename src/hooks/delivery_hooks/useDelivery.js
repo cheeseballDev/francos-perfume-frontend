@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
 const DELIVERY_FILTER_SCHEMA = [
-    { key: "fromBranch", label: "Filter: From Branch", allLabel: "All From Branches" },
-    { key: "toBranch", label: "Filter: To Branch", allLabel: "All To Branch" },
+    { key: "fromBranches", label: "Filter: From Branch", allLabel: "All 'From Branch'" },
+    { key: "toBranches", label: "Filter: To Branch", allLabel: "All 'To Branch'" },
     { key: "status", label: "Filter: Status", allLabel: "All Status" },
 ];
 
@@ -28,8 +28,8 @@ export const useDelivery = () => {
         search: '',
         fromDate: '',
         toDate: '',
-        fromBranch: '',
-        toBranch: '',
+        fromBranches: '',
+        toBranches: '',
         status: '',
         direction: '',
         pageCount: 1,
@@ -37,8 +37,8 @@ export const useDelivery = () => {
     });
 
     const [filterOptions, setFilterOptions] = useState({
-        fromBranch: [],
-        toBranch: [],
+        fromBranches: [],
+        toBranches: [],
         status: [],
     });
 
@@ -102,8 +102,6 @@ export const useDelivery = () => {
     useEffect(() => {
         fetchDeliveryFilters();
     }, [fetchDeliveryFilters]);
-
-    
 
     return {
         deliveries,

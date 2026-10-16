@@ -30,10 +30,6 @@ const DashboardHome = () => {
         auditLogs
     } = useAuditLog();
 
-    console.log(auditLogs);
-
-    console.log(lowStock, inventoryStock, pendingApprovals, upcomingDeliveries, totalRevenue, totalTransactions);
-
     const topCards = [
         { 
             title: "Total Inventory", 
@@ -43,7 +39,7 @@ const DashboardHome = () => {
                     <span className="text-destructive font-semibold ">
                         {lowStock?.lowStockProductCount ?? 0} items
                     </span>
-                    in LOW STOCK.
+                    in low stock.
                 </>
             ),
             Icon: Boxes, 
@@ -51,28 +47,28 @@ const DashboardHome = () => {
         },
         { 
             title: "Total Revenue", 
-            mainValue: `₱${((totalRevenue || 0) / 1000).toFixed(1)}K`, 
+            mainValue: `₱${((totalRevenue?.totalRevenue || 0) / 1000).toFixed(1)}K`, 
             subText: "Overall", 
             Icon: Banknote, 
             color: "text-emerald-500" 
         },
         { 
             title: "Pending Approvals", 
-            mainValue: (pendingApprovals || 0).toString(), 
+            mainValue: (pendingApprovals?.pendingApprovalsCount || 0).toString(), 
             subText: "Requests", 
             Icon: Clock, 
             color: "text-blue-500" 
         },
         { 
             title: "Pending Deliveries", 
-            mainValue: (upcomingDeliveries || 0).toString(), 
+            mainValue: (upcomingDeliveries?.upcomingDeliveriesCount || 0).toString(), 
             subText: "Deliveries", 
             Icon: Package, 
             color: "text-blue-500" 
         },
         { 
             title: "Total Transactions", 
-            mainValue: (totalTransactions || 0).toLocaleString(), 
+            mainValue: (totalTransactions?.totalTransactionsCount || 0).toLocaleString(), 
             subText: "Tracked Sales", 
             Icon: Receipt, 
             color: "text-blue-500" 
@@ -167,8 +163,13 @@ const DashboardHome = () => {
                                     actionText="View All Requests"
                                     onAction={() => navigate('/home/requests')}
                                 >
-                                    {pendingApprovals.pendingApprovalsList.slice(0, 4).map((req, i) => <RequestItem key={i} request={req} />)}
-                                    {pendingApprovals.pendingApprovalsCount.length === 0 && <p className="text-sm text-muted-foreground text-center mt-4">No pending requests.</p>}
+                                    {pendingApprovals?.pendingApprovalsList?.slice(0, 4).map((request, i) => (
+                                        <RequestItem key={request.approvalId || i} request={request} />
+                                    ))}
+                                    
+                                    {(!pendingApprovals?.pendingApprovalsCount === 0) && (
+                                        <p className="text-sm text-muted-foreground text-center mt-4">No pending requests.</p>
+                                    )}
                                 </DashboardPanel>
                                 
                                 <DashboardPanel 
@@ -176,14 +177,18 @@ const DashboardHome = () => {
                                     actionText="View All Deliveries"
                                     onAction={() => navigate('/home/deliveries')}
                                 >
-                                    {upcomingDeliveries.upcomingDeliveriesList.slice(0, 4).map((del, i) => <DeliveryItem key={i} delivery={del} />)}
-                                    {upcomingDeliveries.upcomingDeliveriesCount.length === 0 && <p className="text-sm text-muted-foreground text-center mt-4">No pending deliveries.</p>}
+                                    {upcomingDeliveries?.upcomingDeliveriesList?.slice(0, 4).map((delivery, i) => (
+                                        <DeliveryItem key={delivery.deliveryId || i} delivery={delivery} />
+                                    ))}
+
+                                    {(!upcomingDeliveries?.upcomingDeliveriesCount === 0) && (
+                                        <p className="text-sm text-muted-foreground text-center mt-4">No pending deliveries.</p>
+                                    )}
                                 </DashboardPanel>
                             </div>
 
                             {/* Right Column */}
                             <div className="flex flex-col gap-6">
-                                
 
                                 {/* Transactions Panel (Manager / Owner Only) */}
                                 {(userRole === "MANAGER" || userRole === "OWNER") && (
@@ -192,8 +197,13 @@ const DashboardHome = () => {
                                         actionText="View All Transactions"
                                         onAction={() => navigate('/home/transactions')} 
                                     >
-                                        {totalTransactions.totalTransactionsList.slice(0, 4).map((tx, i) => <TransactionItem key={i} tx={tx} />)}
-                                        {totalTransactions.totalTransactionsCount.length === 0 && <p className="text-sm text-muted-foreground text-center mt-4">No recent transactions.</p>}
+                                        {totalTransactions?.totalTransactionsList?.slice(0, 4).map((transaction, i) => (
+                                            <TransactionItem key={transaction.salesOrderId || i} transaction={transaction} />
+                                        ))}
+
+                                        {(!totalTransactions?.totalTransactionsCount === 0) && (
+                                            <p className="text-sm text-muted-foreground text-center mt-4">No recent transactions.</p>
+                                        )}
                                     </DashboardPanel>
                                 )}
                             </div>

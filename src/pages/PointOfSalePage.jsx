@@ -1,6 +1,6 @@
 import { CancelConfirmModal, CashPaymentModal, CheckoutModal, DiscountModal, GCashPaymentModal, PointOfSaleFilterBar, ProductCard, ProductModal } from '@/components/features/point_of_sale_components';
 import { ProfileDropdown } from '@/components/shared';
-import ConfirmDialog from "@/components/shared/ConfirmDialog"; 
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from '@/components/ui/button';
 import { Loader2, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -11,39 +11,60 @@ import { usePointOfSale } from '@/hooks/point_of_sale_hooks/usePointOfSale';
 import { useClock } from '@/hooks/useClock';
 
 const PointOfSalePage = () => {
-  // FIXED: Destructure fetchProducts from the hook
-  const { products, isLoading, filter, updateFilter, fetchProducts } = usePointOfSale();
+    const { 
+        products, 
+        isLoading, 
+        filter, 
+        updateFilter, 
+        fetchProducts 
+    } = usePointOfSale();
 
-  const [showDiscountModal, setShowDiscountModal] = useState(false);
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-  const [showCashModal, setShowCashModal] = useState(false);
-  const [showGCashModal, setShowGCashModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  
-  const [config, setConfig] = useState(null); 
+    const { 
+        cart, 
+        handleAddToCart, 
+        handleRemoveFromCart, 
+        handleClearCart, 
+        subtotal, 
+        discountAmount, 
+        grandTotal, 
+        appliedDiscountId, 
+        appliedDiscountRate, 
+        setAppliedDiscountId, 
+        setAppliedDiscountRate 
+    } = useCart();
 
-  const currentDateTime = useClock();
-  const { cart, handleAddToCart, handleRemoveFromCart, handleClearCart, subtotal, discountAmount, grandTotal, appliedDiscountId, appliedDiscountRate, setAppliedDiscountId, setAppliedDiscountRate } = useCart();
+    const { 
+        handleFinalCheckout, 
+        isProcessing 
+    } = useCheckout(cart, grandTotal, appliedDiscountId);    
 
-  const { handleFinalCheckout, isProcessing } = useCheckout(cart, grandTotal, appliedDiscountId);    
+    const [showDiscountModal, setShowDiscountModal] = useState(false);
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+    const [showCashModal, setShowCashModal] = useState(false);
+    const [showGCashModal, setShowGCashModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    
+    const [config, setConfig] = useState(null); 
 
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains('dark');
-    setIsDarkMode(isDark);
-  }, []);
+    const currentDateTime = useClock();
 
-  const toggleTheme = () => {
-    const root = document.documentElement;
-    if (isDarkMode) {
-      root.classList.remove('dark');
-      setIsDarkMode(false);
-    } else {
-      root.classList.add('dark');
-      setIsDarkMode(true);
-    }
-  };
+    useEffect(() => {
+        const isDark = document.documentElement.classList.contains('dark');
+        setIsDarkMode(isDark);
+    }, []);
+
+    const toggleTheme = () => {
+            const root = document.documentElement;
+        if (isDarkMode) {
+            root.classList.remove('dark');
+            setIsDarkMode(false);
+        } else {
+            root.classList.add('dark');
+            setIsDarkMode(true);
+        }
+    };
 
   const handlePaymentSelect = (method) => {
     setShowCheckoutModal(false);
@@ -60,12 +81,11 @@ const PointOfSalePage = () => {
         setShowCashModal(false);
         setShowGCashModal(false);
         setShowCheckoutModal(false);
-        
-        // FIXED: Force a network request to pull the newly deducted stock levels
+
         if (typeof fetchProducts === 'function') {
             await fetchProducts();
         }
-        
+    
         setConfig({
           isAlert: true,
           title: "Transaction Successful!",
@@ -83,7 +103,7 @@ const PointOfSalePage = () => {
       setConfig({
         isAlert: true,
         title: "Checkout Failed",
-        description: error.message || "An error occurred during checkout. Please verify inventory levels.",
+        description: `An error occurred during checkout.\n${error.response?.data}`,
         confirmVariant: "destructive",
         confirmText: "Acknowledge",
         onConfirm: () => setConfig(null)

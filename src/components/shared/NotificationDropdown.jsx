@@ -58,6 +58,7 @@ const NotificationDropdown = () => {
                 title: "Notification Error",
                 description: "An error occurred while opening the notification details.",
                 variant: "destructive",
+                duration: 5000
             });  
         }
     }

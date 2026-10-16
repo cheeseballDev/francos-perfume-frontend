@@ -1,4 +1,5 @@
-import { getAllProductsPOS } from "@/services/PointOfSaleService"; // FIXED: lowercase 'p' to match disk
+import { supabase } from "@/lib/SupabaseClient";
+import { getAllProductsPOS } from "@/services/PointOfSaleService";
 import { useCallback, useEffect, useState } from "react";
 
 export const usePointOfSale = () => {
@@ -25,7 +26,35 @@ export const usePointOfSale = () => {
     }, [filter]);
 
     useEffect(() => {
-        fetchProducts();
+        const timer = setTimeout(() => {
+            fetchProducts();
+        }, 300); 
+
+        return () => clearTimeout(timer);
+    }, [fetchProducts]);
+
+    useEffect(() => {
+        const channel = supabase
+            .channel("public:pos-inventory-updates")
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "inventory" }, 
+                () => {
+                    fetchProducts();
+                }
+            )
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "inventory_batch_items" }, 
+                () => {
+                    fetchProducts();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [fetchProducts]);
 
     const updateFilter = (key, value) =>  {
@@ -37,6 +66,12 @@ export const usePointOfSale = () => {
         });
     };
         
-    // FIXED: Exporting fetchProducts so the main page can call it
-    return { products, isLoading, error, filter, updateFilter, fetchProducts }; 
+    return { 
+        products, 
+        isLoading,
+        error, 
+        filter, 
+        updateFilter, 
+        fetchProducts 
+    }; 
 }

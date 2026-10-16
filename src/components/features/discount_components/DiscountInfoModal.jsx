@@ -50,8 +50,9 @@ const DiscountInfoModal = ({
                 } catch (error) {
                     toast({
                         title: "Deletion Failed",
-                        description: `An error occurred while deleting the discount.\n${error}`,
+                        description: `An error occurred while deleting the discount.\n${error.response?.data}`,
                         variant: "destructive",
+                        duration: 5000
                     });
                 } finally {
                     setIsSubmitting(false);
@@ -89,9 +90,10 @@ const DiscountInfoModal = ({
                     toast({
                         title: "Reset Password Failed",
                         description: isActive 
-                        ? `An error occurred while deactivating the discount.\n${error}`
-                        : `An error occurred while reactivating the discount.\n${error}`,
+                        ? `An error occurred while deactivating the discount.\n${error.response?.data}`
+                        : `An error occurred while reactivating the discount.\n${error.response?.data}`,
                         variant: "destructive",
+                        duration: 5000
                     });
 
                 } finally {

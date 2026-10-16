@@ -1,3 +1,4 @@
+
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/SupabaseClient";
 import { getAllNotifications, patchMarkAsAllRead, patchMarkNotificationAsRead } from "@/services/NotificationService";

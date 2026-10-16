@@ -1,3 +1,5 @@
+import { Toaster } from '@/components/ui/toaster';
+import { useToast } from '@/components/ui/use-toast';
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './auth/UseAuth';
@@ -7,19 +9,13 @@ import MobileBlocker from './components/features/point_of_sale_components/Mobile
 import CreateTransferRequestPage from './components/features/request_components/CreateTransferRequestPage';
 import RequestDetailsPage from './components/features/request_components/RequestDetailsPage';
 import DashboardLayout from './layouts/DashboardLayout';
+import FaqPage from './pages/dashboard/FaqPage';
 import { ArchivesPage, AuditLogPage, BarcodePage, DeliveriesPage, DiscountPage, ForecastPage, HomePage, InventoryPage, ProductsPage, RequestPage, TransactionsPage } from './pages/dashboard/index.js';
 import AccountsPage from './pages/dashboard/ManageAccountsPage';
-import UserSettingsPage from './pages/dashboard/UserSettingsPage'; 
-
-// ADDED: Direct import for the FAQ page
-import FaqPage from './pages/dashboard/FaqPage';
-
+import UserSettingsPage from './pages/dashboard/UserSettingsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import LoginPage from './pages/LoginPage';
 import PointOfSalePage from './pages/PointOfSalePage';
-
-import { Toaster } from '@/components/ui/toaster';
-import { useToast } from '@/components/ui/use-toast';
 
 const ProtectedRoute = ({ user, allowedRoles }) => {
   if (!user) return <Navigate to="/login" />;
@@ -30,79 +26,123 @@ const ProtectedRoute = ({ user, allowedRoles }) => {
 }
 
 const NavigationManager = ({ user }) => {
-  const navigate = useNavigate();
-  const path = useLocation().pathname;
+    const navigate = useNavigate();
+    const path = useLocation().pathname;
 
-  useEffect(() => {
-    if (user) {
-      const role = user.activeRole;
-      
-      if (role === 'CASHIER' && !path.startsWith('/pos')) {
-        navigate('/pos', { replace: true });
-      } 
-      else if (['MANAGER', 'OWNER', 'ADMIN', 'STAFF'].includes(role)) {
-        if (!path.startsWith('/home')) {
-          navigate('/home', { replace: true });
+    useEffect(() => {
+        if (user) {
+        const role = user.activeRole;
+        
+        if (role === 'CASHIER' && !path.startsWith('/pos')) {
+            navigate('/pos', { replace: true });
+        } 
+        else if (['MANAGER', 'OWNER', 'ADMIN', 'STAFF'].includes(role)) {
+            if (!path.startsWith('/home')) {
+            navigate('/home', { replace: true });
+            }
         }
-      }
-    }
-  }, [user, path, navigate]);
+        }
+    }, [user, path, navigate]);
 
-  return null;
+    return null;
+};
+
+const usePersistentSession = () => {
+    useEffect(() => {
+        const STORAGE_KEY = 'app_last_active';
+        const TIMEOUT_MS = 1000000;
+
+        const lastActive = localStorage.getItem(STORAGE_KEY);
+        const now = Date.now();
+
+        if (lastActive && now - Number(lastActive) > TIMEOUT_MS) {
+            localStorage.clear();
+        }
+
+        const updateTimestamp = () => {
+            localStorage.setItem(STORAGE_KEY, Date.now().toString());
+        };
+
+        updateTimestamp();
+        const interval = setInterval(updateTimestamp, 3000);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, []);
 };
 
 const App = () => {
-  const { user, logout, handleLogout } = useAuth();
-  const { toast } = useToast();
+    const { user, logout, handleLogout } = useAuth();
+    const { toast } = useToast();
 
-  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  
-  useEffect(() => {
-    const handleResize = () => setIsMobileView(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
-  useEffect(() => {
-    const handleOffline = () => setIsOffline(true);
-    const handleOnline = () => setIsOffline(false);
+    usePersistentSession();
+
+
+    const [theme, setTheme] = useState(() => () => {
+        const savedTheme = localStorage.getItem('theme');
+        return savedTheme ? savedTheme === 'dark' : false;
+    });
     
-    window.addEventListener('offline', handleOffline);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('server-connection-error', handleOffline);
+    useEffect(() => {
+        const root = document.documentElement;
+        if (theme === 'dark') {
+            root.classList.add('dark');
+        } else {
+            root.classList.remove('dark');
+        }
+        localStorage.setItem('theme', theme);
+    }, [theme]);
 
-    return () => {
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('server-connection-error', handleOffline);
-    };
-  }, []);
 
-  useEffect(() => {
-    const handleSessionExpired = () => {
-      toast({
-        variant: "destructive",
-        title: "Session Expired",
-        description: "Your session has expired. Please log in again.",
-        duration: 3000,
-      });
+    useEffect(() => {
+        const handleResize = () => setIsMobileView(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
-      const performLogout = logout || handleLogout;
-      if (performLogout) {
-        performLogout();
-      } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-      }
-    };
+    useEffect(() => {
+        const handleOffline = () => setIsOffline(true);
+        const handleOnline = () => setIsOffline(false);
+        
+        window.addEventListener('offline', handleOffline);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('server-connection-error', handleOffline);
 
-    window.addEventListener('session-expired', handleSessionExpired);
-    return () => window.removeEventListener('session-expired', handleSessionExpired);
-  }, [toast, logout, handleLogout]);
+        return () => {
+        window.removeEventListener('offline', handleOffline);
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('server-connection-error', handleOffline);
+        };
+    }, []);
 
-  if (isMobileView) { return <MobileBlocker />; }
+    useEffect(() => {
+        const handleSessionExpired = () => {
+        toast({
+            variant: "destructive",
+            title: "Session Expired",
+            description: "Your session has expired. Please log in again.",
+            duration: 3000,
+        });
+
+        const performLogout = logout || handleLogout;
+        if (performLogout) {
+            performLogout();
+        } else {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+        };
+
+        window.addEventListener('session-expired', handleSessionExpired);
+        return () => window.removeEventListener('session-expired', handleSessionExpired);
+    }, [toast, logout, handleLogout]);
+
+    if (isMobileView) { return <MobileBlocker />; }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">

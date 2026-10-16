@@ -33,7 +33,6 @@ export const useTransaction = () => {
         { key: "paymentMethods", label: "Filter: Payment Method", allLabel: "All Payment Methods" },
     ]
 
-
     const { filter, updateFilter, resetFilter } = useFilter({
         search: '',
         fromDate: '',
@@ -44,7 +43,6 @@ export const useTransaction = () => {
         pageCount: 1,
         pageSize: 10,
     })
-
 
 
     const fetchTransactions = useCallback(async () => {
@@ -72,6 +70,14 @@ export const useTransaction = () => {
             setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
         });
     }, [filter])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchTransactions();
+        }, 300);
+
+        return () => clearTimeout(timer); 
+    }, [filter, fetchTransactions]);
 
     useEffect(() => {
         const channel = supabase

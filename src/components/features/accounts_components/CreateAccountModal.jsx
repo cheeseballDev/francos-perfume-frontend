@@ -94,8 +94,9 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
             } catch (error) {
                 toast({
                     title: "Creation Failed",
-                    description:`An error occurred while creating the account.\n${error}`,
+                    description:`An error occurred while creating the account.\n${error.response?.data}`,
                     variant: "destructive",
+                    duration: 5000
                 });
 
             } finally {

@@ -1,3 +1,4 @@
+import { supabase } from "@/lib/SupabaseClient";
 import { getAllInventory, getInventoryBatches, getInventoryFilters, patchUpdateBatch } from "@/services/InventoryService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -72,8 +73,32 @@ export const useInventory = () => {
     useEffect(() => {
       const timer = setTimeout(() => {
         fetchInventory();
-      }, 0);
+      }, 300);
       return () => clearTimeout(timer);
+    }, [fetchInventory]);
+
+    useEffect(() => {
+        const channel = supabase
+            .channel("public:inventory")
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "inventory" }, 
+                () => {
+                    fetchInventory();
+                }
+            )
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "inventory_batch_items" }, 
+                () => {
+                    fetchInventory();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [fetchInventory]);
 
     const saveBatchEdit = async (batchId, dto) => {

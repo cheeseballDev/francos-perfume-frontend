@@ -123,8 +123,9 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
             } catch (error) {
                 toast({
                     title: "Update Failed",
-                    description: `An error occurred while updating the discount.\n${error}`,
+                    description: `An error occurred while updating the discount.\n${error.response?.data}`,
                     variant: "destructive",
+                    duration: 5000
                 });
             } finally {
                 setIsSubmitting(false);

@@ -1,3 +1,4 @@
+import { supabase } from "@/lib/SupabaseClient";
 import { getAllRequests, getRequestDetails, getRequestFilters } from "@/services/RequestService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -79,6 +80,23 @@ export const useRequest = () => {
         fetchRequests();
       }, 0);
       return () => clearTimeout(timer);
+    }, [fetchRequests]);
+
+    useEffect(() => {
+        const channel = supabase
+            .channel("public:request")
+            .on(
+                "postgres_changes",
+                { event: "INSERT", schema: "public", table: "request" }, 
+                () => {
+                    fetchRequests();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [fetchRequests]);
 
     const fetchRequestFilters = useCallback(async (branchId = null) => {

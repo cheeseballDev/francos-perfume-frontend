@@ -1,3 +1,4 @@
+import { useAuth } from "@/auth/UseAuth";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Eye, ShoppingCart, Truck, XCircle } from "lucide-react";
@@ -12,16 +13,18 @@ const DeliveryCard = ({
     onConfirmDelivery,
 }) => {
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const isInbound = delivery.direction === "INBOUND";
-    
-    const deliveryStatus = delivery.deliveryStatus;
 
+
+    const deliveryStatus = delivery.deliveryStatus;
     const deliveryId = delivery.deliveryDisplayId;
     const route = `From ${delivery.fromBranchName} To ${delivery.toBranchName}`;
     const productCount = delivery.itemCount || 0;
     const unitCount = delivery.totalUnits || 0;
-
+    const isSameDestination = user?.branchLocation === delivery.toBranchName;
+    
     const handleViewDetails = () => {
         navigate(`/home/deliveries/${delivery.deliveryId}`);
     };
@@ -66,7 +69,7 @@ const DeliveryCard = ({
                             </Button>
                         </>
                     )}
-                    {inTransit && (
+                    {inTransit && isSameDestination && (
                         <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => onConfirmDelivery(delivery.deliveryId)}>
                             <CheckCircle size={15} className="mr-2" /> Confirm Delivery
                         </Button>

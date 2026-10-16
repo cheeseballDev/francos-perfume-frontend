@@ -57,6 +57,7 @@ const AccountInfoModal = ({
                         title: "Reset Password Failed",
                         description: `An error occurred while resetting the password of the account.\n${error.response?.data}`,
                         variant: "destructive",
+                        duration: 5000
                     });   
 
                 } finally {
@@ -94,9 +95,10 @@ const AccountInfoModal = ({
                     toast({
                         title: "Reset Password Failed",
                         description: isActive 
-                        ? `An error occurred while deactivating the account.\n${error}`
-                        : `An error occurred while reactivating the account.\n${error}`,
+                        ? `An error occurred while deactivating the account.\n${error.response?.data}`
+                        : `An error occurred while reactivating the account.\n${error.response?.data}`,
                         variant: "destructive",
+                        duration: 5000
                     });
 
                 } finally {
@@ -128,8 +130,9 @@ const AccountInfoModal = ({
                 } catch (error) {
                     toast({
                         title: "Account Archiving Failed",
-                        description: `An error occurred while archiving the account.\n${error}`,
+                        description: `An error occurred while archiving the account.\n${error.response?.data}`,
                         variant: "destructive",
+                        duration: 5000
                     });
                     
                 } finally {
