@@ -9,6 +9,7 @@ import { useCart } from '@/hooks/point_of_sale_hooks/useCart';
 import { useCheckout } from '@/hooks/point_of_sale_hooks/useCheckout';
 import { usePointOfSale } from '@/hooks/point_of_sale_hooks/usePointOfSale';
 import { useClock } from '@/hooks/useClock';
+import { openReceiptTab } from '@/utils/receiptWindowUtil';
 
 const PointOfSalePage = () => {
     const { 
@@ -46,6 +47,8 @@ const PointOfSalePage = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isDarkMode, setIsDarkMode] = useState(false);
     
+    //const [latestReceipt, setLatestReceipt] = useState(null);
+    
     const [config, setConfig] = useState(null); 
 
     const currentDateTime = useClock();
@@ -74,7 +77,18 @@ const PointOfSalePage = () => {
 
     const onConfirmPayment = async (paymentDetails) => {
         try {
-        await handleFinalCheckout(paymentDetails, async (receiptData) => {
+        await handleFinalCheckout(paymentDetails, async (response) => {
+
+            const receiptData = response.receipt;
+            
+            console.log(receiptData);
+
+            /*
+            if (receiptData) {
+                setLatestReceipt(receiptData);
+            }
+            */
+
             handleClearCart();
             setAppliedDiscountValue(0);
             setAppliedDiscountId(0);
@@ -85,16 +99,10 @@ const PointOfSalePage = () => {
             if (typeof fetchProducts === 'function') {
                 await fetchProducts();
             }
-        
-            setConfig({
-                isAlert: true,
-                title: "Transaction Successful!",
-                description: `Receipt Number: ${receiptData?.receiptNumber || 'N/A'} \n VAT: ₱${receiptData?.vat || 0}`,
-                confirmVariant: "default",
-                confirmText: "Close",
-                onConfirm: () => setConfig(null)
-            });
 
+            if (receiptData) {
+                openReceiptTab(receiptData);
+            }
         });
         } catch (error) {
 
@@ -250,6 +258,8 @@ const PointOfSalePage = () => {
                 </Button>
             </div>
         </div>
+
+        {/* <Receipt receipt={latestReceipt} /> */}
 
         <ProductModal 
             isOpen={!!selectedProduct} 

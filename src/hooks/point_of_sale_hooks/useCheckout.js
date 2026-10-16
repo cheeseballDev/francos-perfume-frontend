@@ -22,14 +22,8 @@ export const useCheckout = (cart, appliedDiscountId) => {
             };
 
             const result = await postCheckout(payload);
-            console.log(result);
-
-
-            const receiptNumber = result?.salesOrderDisplayId || '';
-
-            const vat = result?.receipt?.vatAmount || 0;
-
-            onSuccess?.({ receiptNumber, vat });
+            
+            onSuccess?.(result);
 
         } catch (error) {
             toast({
