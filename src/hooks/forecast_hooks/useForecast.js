@@ -37,14 +37,16 @@ export const useForecast = () => {
     const [branchOptions, setBranchOptions] = useState([]);
     const [productOptions, setProductOptions] = useState([]);
 
-    // Fetch filters for dropdowns
     useEffect(() => {
         getRequestFilters().then(data => {
             if (data) {
-                setBranchOptions((data.branches || []).map(b => ({
-                    value: b.branchId,
-                    label: b.branchLocation
-                })));
+                setBranchOptions((data.branches || [])
+                        .filter(b => b.branchId !== 1)
+                        .map(b => ({
+                            value: b.branchId,
+                            label: b.branchLocation
+                        }))
+                );
                 setProductOptions((data.products || []).map(p => ({
                     value: p.productId,
                     label: p.productName
@@ -68,6 +70,7 @@ export const useForecast = () => {
                 dto.productId && dto.branchId ? postForecastStocksAI(buildStockRequest(dto)) : Promise.resolve(null),
             ]);
 
+            console.log(stocks, revenue, ai)
             isFirstLoad.current = false;
             setForecastData({ stocks, revenue, ai });
             return { stocks, revenue, ai };

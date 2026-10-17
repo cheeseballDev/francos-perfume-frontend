@@ -1,3 +1,9 @@
+import ForecastChart from "@/components/features/forecast_components/ForecastChart";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { useForecast } from "@/hooks/forecast_hooks/useForecast";
 import {
     AlertTriangle,
     BarChart2,
@@ -8,11 +14,6 @@ import {
     TrendingUp
 } from "lucide-react";
 import { useEffect, useState } from "react";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useForecast } from "@/hooks/forecast_hooks/useForecast";
 import StatusCard from "../../components/shared/StatusCard";
 
 const MONTHS = [
@@ -23,6 +24,7 @@ const MONTHS = [
   { value: 9, label: "September" }, { value: 10, label: "October" },
   { value: 11, label: "November" }, { value: 12, label: "December" }
 ];
+
 const currentYear = new Date().getFullYear();
 const YEARS = [currentYear, currentYear + 1, currentYear + 2];
 
@@ -31,124 +33,57 @@ const aiInsights = [
   { title: "Seasonal Pattern Detected",  description: "Revenue fluctuations align with standard retail holiday cycles",   Icon: Eye,          bg: "bg-blue-100 dark:bg-blue-500/10", border: "border-blue-200 dark:border-blue-500/20", iconColor: "text-blue-600 dark:text-blue-400"   },
 ];
 
-const ForecastChart = ({ data }) => {
-  const W  = 900; const H  = 300;
-  const PL = 70;  const PR = 20; const PT = 16; const PB = 36;
-  const cW = W - PL - PR;
-  const cH = H - PT - PB;
-
-  if (!data || data.length === 0) {
-      return (
-          <div className="w-full h-[300px] flex items-center justify-center text-muted-foreground border-2 border-dashed border-border rounded-lg">
-              No chart data available. Generate a forecast.
-          </div>
-      );
-  }
-
-  const maxVal  = Math.max(...data.map((d) => d.upper || 0), 1000);
-  const MAX_Y   = Math.ceil(maxVal / 10000) * 10000 || 60000;
-  const Y_TICKS = Array.from({ length: 5 }, (_, i) => Math.round((MAX_Y / 4) * i));
-
-  const n    = Math.max(data.length, 2);
-  const toY  = (val) => PT + (1 - val / MAX_Y) * cH;
-  const toX  = (i)   => PL + (i / (n - 1)) * cW;
-  const pts  = (acc) => data.map((d, i) => ({ x: toX(i), y: toY(acc(d)) }));
-
-  const catmullRomPath = (points) => {
-    if (points.length < 2) return "";
-    let d = `M ${points[0].x},${points[0].y}`;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[Math.max(0, i - 1)];
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const p3 = points[Math.min(points.length - 1, i + 2)];
-      const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
-      const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
-      d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
-    }
-    return d;
-  };
-
-  const upperPts = pts((d) => d.upper || 0);
-  const lowerPts = pts((d) => d.lower || 0);
-  const bandPath =
-    upperPts.length > 1 && lowerPts.length > 1
-      ? catmullRomPath(upperPts) +
-        " L " + lowerPts[lowerPts.length - 1].x + "," + lowerPts[lowerPts.length - 1].y +
-        " " + catmullRomPath([...lowerPts].reverse()).replace(/^M [^ ]+ /, "L ") +
-        " Z"
-      : "";
-
-  const linePath       = catmullRomPath(pts((d) => d.value || 0));
-  const lastActualIdx  = data.reduce((acc, d, i) => (d.isActual ? i : acc), -1);
-
-  const fmtY = (v) => v >= 1000 ? `₱${(v / 1000).toFixed(0)}k` : `₱${v}`;
-
-  return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[650px] h-auto" role="img">
-        {Y_TICKS.map((tick) => (
-          <g key={tick}>
-            <line x1={PL} y1={toY(tick)} x2={W - PR} y2={toY(tick)} stroke="currentColor" className="text-border" strokeWidth="1" />
-            <text x={PL - 8} y={toY(tick)} textAnchor="end" dominantBaseline="middle" fontSize="11" fill="currentColor" className="text-muted-foreground">
-              {fmtY(tick)}
-            </text>
-          </g>
-        ))}
-
-        {data.map((d, i) => (
-          <text key={d.month || i} x={toX(i)} y={H - 8} textAnchor="middle" fontSize="11" fill="currentColor" className="text-muted-foreground">
-            {d.month}
-          </text>
-        ))}
-
-        {bandPath && <path d={bandPath} className="fill-primary/20" />}
-        {linePath && <path d={linePath} fill="none" stroke="currentColor" className="text-primary" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />}
-
-        {data.map((d, idx) => {
-          const arrIdx = data.indexOf(d);
-          const cx = toX(arrIdx); const cy = toY(d.value || 0); const s = 5;
-          return <polygon key={idx} points={`${cx},${cy-s} ${cx+s},${cy} ${cx},${cy+s} ${cx-s},${cy}`} fill="currentColor" stroke="currentColor" strokeWidth="1.5" className="text-primary stroke-background" />;
-        })}
-      </svg>
-    </div>
-  );
-};
-
 const ForecastPage = () => {
-  const { forecastData, asyncState, fetchForecast, branchOptions, productOptions } = useForecast();
+    const { 
+        forecastData, 
+        asyncState, 
+        fetchForecast, 
+        branchOptions, 
+        productOptions 
+    } 
+    = useForecast();
 
-  const [chartData, setChartData] = useState([]);
-  const [perfumeForecasts, setPerfumeForecasts] = useState([]);
+    const {
+        toast
+    } = useToast();
+
+    const [chartData, setChartData] = useState([]);
+    const [perfumeForecasts, setPerfumeForecasts] = useState([]);
   
-  const [formData, setFormData] = useState({
-    branchId: "",
-    productId: "",
-    month: new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2,
-    year: new Date().getMonth() + 2 > 12 ? new Date().getFullYear() + 1 : new Date().getFullYear(),
-  });
-
-  const handleRefreshForecast = () => {
-    if (!formData.branchId || !formData.productId) return;
-    fetchForecast({
-      year: Number(formData.year),
-      month: Number(formData.month), 
-      productId: Number(formData.productId),
-      branchId: Number(formData.branchId),
-      discountPercent: 0,
-      discountAmount: 0,
-      hasDiscount: false,
-      isPercentageDiscount: false,
+    const [formData, setFormData] = useState({
+        branchId: "",
+        productId: "",
+        month: new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2,
+        year: new Date().getMonth() + 2 > 12 ? new Date().getFullYear() + 1 : new Date().getFullYear(),
     });
-  };
+
+    const handleRefreshForecast = () => {
+        if (!formData.branchId || !formData.productId) return;
+
+        try {
+            fetchForecast({
+                year: Number(formData.year),
+                month: Number(formData.month), 
+                productId: Number(formData.productId),
+                branchId: Number(formData.branchId),
+                discountPercent: 0,
+                discountAmount: 0,
+                hasDiscount: false,
+                isPercentageDiscount: false,
+            });
+        } catch (error ){
+            toast({
+                title: "Generating Forecast Failed",
+                description: `An error occurred while generating the forecast.\n${error.response?.data}`,
+                variant: "destructive",
+                duration: 5000
+            });
+        }
+    };
 
   // Wire raw API DTO data directly to the UI components with zero frontend calculations
   useEffect(() => {
     if (forecastData) {
-      
-      // 1. Pass raw revenue DTO to chart
       if (forecastData.revenue) {
         const rev = forecastData.revenue;
         const monthLabel = MONTHS.find(m => m.value === Number(formData.month))?.label.substring(0, 3);
@@ -183,42 +118,35 @@ const ForecastPage = () => {
   }, [forecastData, formData.month, formData.year]);
 
   // Display raw values in metric cards
-  const dynamicMetrics = [
-    { 
-      title: "Expected Revenue", 
-      mainValue: forecastData?.revenue ? `₱${forecastData.revenue.expectedRevenue.toLocaleString()}` : "---", 
-      subText: "For selected month", 
-      Icon: TrendingUp,  
-      color: "text-emerald-500"  
-    },
-    { 
-      title: "Predicted Demand", 
-      mainValue: forecastData?.stocks ? forecastData.stocks.predictedUnitsSold : "---", 
-      subText: "Units expected to sell", 
-      Icon: BarChart2,   
-      color: "text-blue-500" 
-    },
-    { 
-      title: "Current Inventory", 
-      mainValue: forecastData?.stocks ? forecastData.stocks.currentStock : "---", 
-      subText: "Units currently on hand", 
-      Icon: Package,  
-      color: "text-purple-500"   
-    },
-    { 
-      title: "Restock Recommendation", 
-      mainValue: forecastData?.stocks ? forecastData.stocks.recommendedOrderQuantity : "---", 
-      subText: forecastData?.stocks?.recommendedOrderQuantity > 0 ? "Order required" : "Stock sufficient", 
-      Icon: AlertTriangle, 
-      color: forecastData?.stocks?.recommendedOrderQuantity > 0 ? "text-amber-500" : "text-emerald-500" 
-    },
-  ];
+    const dynamicMetrics = [
+        { 
+            title: "Predicted Demand", 
+            mainValue: forecastData?.stocks ? forecastData.stocks.predictedUnitsSold : "---", 
+            subText: "Units expected to sell", 
+            Icon: BarChart2,   
+            color: "text-blue-500" 
+        },
+        { 
+            title: "Current Inventory", 
+            mainValue: forecastData?.stocks ? forecastData.stocks.currentStock : "---", 
+            subText: "Units currently on hand", 
+            Icon: Package,  
+            color: "text-purple-500"   
+        },
+        { 
+            title: "Restock Recommendation", 
+            mainValue: forecastData?.stocks ? forecastData.stocks.recommendedOrderQuantity : "---", 
+            subText: forecastData?.stocks?.recommendedOrderQuantity > 0 ? "Order required" : "Stock sufficient", 
+            Icon: AlertTriangle, 
+            color: forecastData?.stocks?.recommendedOrderQuantity > 0 ? "text-amber-500" : "text-emerald-500" 
+        },
+    ];
 
   return (
     <div className="flex flex-col h-full w-full overflow-y-auto pr-1 pb-16 font-montserrat animate-fade-in">
       <div className="mb-6 shrink-0">
         <h1 className="text-3xl font-bold text-foreground mb-1 leading-none tracking-tight">
-          Sales Forecast
+          Stock Forecast
         </h1>
         <p className="text-muted-foreground text-sm">
           Predictive analytics and trend analysis for inventory planning
@@ -240,7 +168,7 @@ const ForecastPage = () => {
       )}
 
       {/* Forecasting Parameter Card */}
-      <Card className="mb-6 border-border bg-card text-card-foreground shadow-sm shrink-0">
+      <Card className="mb-6 p-4 border-border bg-card text-card-foreground shadow-sm shrink-0">
         <CardHeader className="pb-3 border-b border-border">
           <div className="flex items-center gap-2">
             <Sparkles className="text-emerald-500" size={20} />
@@ -337,7 +265,7 @@ const ForecastPage = () => {
       </Card>
 
       {/* Dynamic Summary Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 shrink-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 shrink-0">
         {dynamicMetrics.map((card, i) => (
           <StatusCard
             key={i}
@@ -353,9 +281,9 @@ const ForecastPage = () => {
       {/* Revenue Forecast Chart */}
       <Card className="mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="p-4 flex items-center justify-between">
             <div>
-              <CardTitle className="text-base text-foreground">
+              <CardTitle className="mb-2 text-base text-foreground">
                 Revenue Forecast with Confidence Interval
               </CardTitle>
               <CardDescription>
@@ -371,7 +299,7 @@ const ForecastPage = () => {
         <CardContent>
           <ForecastChart data={chartData} />
 
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-4 text-xs text-muted-foreground">
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-4 text-xs text-muted-foreground">
             {[
               { color: "text-muted-foreground", dashed: true,  label: "Upper Bound"     },
               { color: "text-muted-foreground", dashed: true,  label: "Lower Bound"     },
@@ -389,7 +317,7 @@ const ForecastPage = () => {
       </Card>
 
       {/* ML.NET Perfume Level Breakdown */}
-      <Card className="mb-6 border-border bg-card shadow-sm shrink-0">
+      <Card className="p-6 mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div className="flex flex-col gap-1.5">
@@ -436,13 +364,13 @@ const ForecastPage = () => {
       </Card>
 
       {/* AI Insights Card */}
-      <Card className="mb-6 border-border bg-card shadow-sm shrink-0">
+      <Card className="p-6 mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
           <CardTitle className="text-base text-foreground">AI-Powered Insights</CardTitle>
-          <CardDescription>Automated recommendations based on predictive analysis</CardDescription>
+          <CardDescription className="mb-4">Automated recommendations based on predictive analysis</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mb-2 grid grid-cols-1 md:grid-cols-2 gap-4">
             {aiInsights.map((insight) => (
               <div key={insight.title} className={`${insight.bg} ${insight.border} border rounded-xl p-4`}>
                 <div className="flex items-center gap-2 mb-1">

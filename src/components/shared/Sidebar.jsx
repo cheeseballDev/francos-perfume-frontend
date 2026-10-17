@@ -83,7 +83,7 @@ const Sidebar = () => {
         {!isAdmin && !isStaff && (
           <Link to="/home/forecast" className={getTabClass("/home/forecast")}>
             <ChartNoAxesCombined size={24} />
-            <p className="text-base">Sales Forecast</p>
+            <p className="text-base">Stock Forecast</p>
           </Link>
         )}
 

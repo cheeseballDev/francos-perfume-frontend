@@ -107,15 +107,18 @@ const App = () => {
     useEffect(() => {
         const handleOffline = () => setIsOffline(true);
         const handleOnline = () => setIsOffline(false);
+        const handleServerSuccess = () => setIsOffline(false);
         
         window.addEventListener('offline', handleOffline);
         window.addEventListener('online', handleOnline);
         window.addEventListener('server-connection-error', handleOffline);
-
+        window.addEventListener('server-connection-success', handleServerSuccess);
+        
         return () => {
-        window.removeEventListener('offline', handleOffline);
-        window.removeEventListener('online', handleOnline);
-        window.removeEventListener('server-connection-error', handleOffline);
+            window.removeEventListener('offline', handleOffline);
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('server-connection-error', handleOffline);
+            window.removeEventListener('server-connection-success', handleServerSuccess);
         };
     }, []);
 

@@ -43,16 +43,19 @@ apiClient.interceptors.request.use(
 );
 
 apiClient.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        window.dispatchEvent(new CustomEvent('server-connection-success'));
+        return response;
+    },
     (error) => {
         if (!error.response || error.code === 'ERR_NETWORK') {
-        window.dispatchEvent(new CustomEvent('server-connection-error'));
-        return Promise.reject(error);
+            window.dispatchEvent(new CustomEvent('server-connection-error'));
+            return Promise.reject(error);
         }
 
         if (error.response?.status === 401) {
-        console.warn("Unauthorized access - token may be invalid or expired.");
-        window.dispatchEvent(new CustomEvent('session-expired'));
+            console.warn("Unauthorized access - token may be invalid or expired.");
+            window.dispatchEvent(new CustomEvent('session-expired'));
         }
 
         return Promise.reject(error);
