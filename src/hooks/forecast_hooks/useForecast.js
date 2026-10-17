@@ -70,7 +70,6 @@ export const useForecast = () => {
                 dto.productId && dto.branchId ? postForecastStocksAI(buildStockRequest(dto)) : Promise.resolve(null),
             ]);
 
-            console.log(stocks, revenue, ai)
             isFirstLoad.current = false;
             setForecastData({ stocks, revenue, ai });
             return { stocks, revenue, ai };
