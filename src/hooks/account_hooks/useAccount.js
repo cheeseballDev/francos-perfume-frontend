@@ -52,23 +52,19 @@ export const useAccount = () => {
             setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         }
 
-        getAllAccounts(filter)
-            .then(data => {
-                isFirstLoad.current = false;
-                setAccounts(data.data);
-                setPagination({
-                    totalPages: data.totalEmployeesPages || 0,
-                    totalEntries: data.totalEmployees || 0,
-                });
-            })
-            .catch((err) => {
-                setAsyncState((prev) => ({ ...prev, error: err }));
-                throw err;
-            })
-            .finally(() => {
-                setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
+        try {
+            const data = await getAllAccounts(filter);
+            isFirstLoad.current = false;
+            setAccounts(data.data);
+            setPagination({
+                totalPages: data.totalEmployeesPages || 0,
+                totalEntries: data.totalEmployees || 0,
             });
-
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, error: err }));
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
+        }
     }, [filter]);
 
     useEffect(() => {
@@ -128,11 +124,6 @@ export const useAccount = () => {
         }
     };
 
-    const updateAuth = (accountId) => {
-        // TO BE ADDED
-    };
-
-
     const resetPassword = useCallback(async (accountId) => {
         try {
             await patchResetAccountPassword(accountId);
@@ -172,7 +163,7 @@ export const useAccount = () => {
         }
     }, [fetchAllAccounts]);
 
-    // FIXED: Removed asyncState overrides to prevent the "No Records Found" flash
+    // FIXED: Stripped asyncState to prevent Skeleton removal
     const fetchAccountFilters = useCallback(async () => {
         try {
             const data = await getAccountFilters();

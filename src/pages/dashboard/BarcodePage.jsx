@@ -6,7 +6,7 @@ import { useState } from "react";
 export default function BarcodePage() {
     const { 
         products, 
-        isLoading, 
+        asyncState, // FIXED: Correctly extracting asyncState
         updateFilter, 
         fetchOneProductBarcode, 
         downloadOneProductBarcode, 
@@ -14,6 +14,9 @@ export default function BarcodePage() {
     } = useProduct();
     
     const [selectedProduct, setSelectedProduct] = useState(null);
+
+    // FIXED: Combines both loading and fetching states so it stays perfectly smooth
+    const isBusy = asyncState?.isLoading || asyncState?.isFetching;
 
     return (
         <div className="bg-background font-montserrat flex flex-col relative animate-fade-in h-full">
@@ -28,7 +31,7 @@ export default function BarcodePage() {
                         setSelectedProduct={setSelectedProduct} 
                         selectedProduct={selectedProduct}
                         products={products}
-                        isLoading={isLoading}
+                        isLoading={isBusy} // FIXED: Passed the correct loading boolean down
                         updateFilter={updateFilter}
                         fetchOneProductBarcode={fetchOneProductBarcode}
                         downloadAllProductBarcodes={downloadAllProductBarcodes}

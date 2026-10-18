@@ -22,10 +22,10 @@ const DataTable = ({
         onRowDoubleClick = null,
         emptyMessage = "No records found.",
     }) => {
-    const isBusy = asyncState?.isLoading || asyncState?.isFetching;
-    const hasData = Array.isArray(data) && data.length > 0;
+        const isBusy = asyncState?.isLoading || asyncState?.isFetching;
+        const hasData = Array.isArray(data) && data.length > 0;
 
-    return (
+  return (
     <div className="bg-card border border-border rounded-lg shadow-sm flex flex-col mb-4">
       <div className="overflow-x-auto">
         <Table>
@@ -58,7 +58,7 @@ const DataTable = ({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-10 text-muted-foreground font-medium"
+                  className="text-center py-10 text-muted-foreground font-medium animate-in fade-in duration-300"
                 >
                   {emptyMessage}
                 </TableCell>
@@ -71,7 +71,8 @@ const DataTable = ({
                       key={row[keyField]}
                       onClick={() => onRowClick && onRowClick(row)}
                       onDoubleClick={() => onRowDoubleClick && onRowDoubleClick(row)}
-                      className={`transition-colors ${
+                      // FIXED: Added animate-in slide-in-from-bottom-2 fade-in duration-300 for smooth transitions!
+                      className={`animate-in fade-in slide-in-from-bottom-2 duration-300 transition-colors ${
                         onRowClick || onRowDoubleClick ? "hover:cursor-pointer" : ""
                       } 
                       ${

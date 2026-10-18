@@ -49,25 +49,19 @@ export const useInventory = () => {
         setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
       }
 
-      getAllInventory(filter)
-        .then(data => {
-          isFirstLoad.current = false;
-
-          setInventory(data.data);
-
-          setPagination({
-              totalPages: data.totalInventoriesPages || 0,
-              totalEntries: data.totalInventories || 0,
-          });
-        })
-        .catch((err) => {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-            throw err;
-        })
-        .finally(() => {
-            setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
+      try {
+        const data = await getAllInventory(filter);
+        isFirstLoad.current = false;
+        setInventory(data.data);
+        setPagination({
+            totalPages: data.totalInventoriesPages || 0,
+            totalEntries: data.totalInventories || 0,
         });
-
+      } catch (err) {
+        setAsyncState((prev) => ({ ...prev, error: err }));
+      } finally {
+        setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
+      }
     }, [filter]);
 
     useEffect(() => {
@@ -122,7 +116,7 @@ export const useInventory = () => {
       }
     };
 
-    // FIXED: Removed asyncState overrides to prevent the "No Records Found" flash
+    // FIXED: Stripped asyncState to prevent Skeleton removal
     const fetchFilters = useCallback(async () => {
         try {
             const data = await getInventoryFilters();
