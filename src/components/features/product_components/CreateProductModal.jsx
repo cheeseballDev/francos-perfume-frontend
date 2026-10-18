@@ -26,7 +26,6 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Image Simulation State
     const [imagePreview, setImagePreview] = useState(null);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
 
@@ -60,7 +59,10 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
         }
     };
     
-    const handleSave = async () => {
+    // Changed to standard form submission
+    const handleSave = async (e) => {
+        if (e) e.preventDefault();
+        
         const validationErrors = validateForm(data, productValidationSchema);
 
         if (Object.keys(validationErrors).length > 0) {
@@ -92,9 +94,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
         }
     }
 
-    const handleTriggerImageUpload = () => {
-        fileInputRef.current?.click();
-    };
+    const handleTriggerImageUpload = () => fileInputRef.current?.click();
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -133,117 +133,122 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
     <>
             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <DialogContent 
-                    className="sm:max-w-xl max-h-[90vh] overflow-y-auto"
+                    className="sm:max-w-xl max-h-[90vh] p-0 flex flex-col overflow-hidden"
                     onInteractOutside={(e) => e.preventDefault()}
                     onPointerDownOutside={(e) => e.preventDefault()}
                 >
-                    <DialogHeader>
+                    <DialogHeader className="p-6 pb-2 shrink-0">
                         <DialogTitle className="text-xl font-bold">Create New Perfume</DialogTitle>
                     </DialogHeader>
 
-                    {/* Image Upload Section */}
-                    <div className="flex items-center gap-6 py-4 border-b border-border">
-                        <div className="h-24 w-24 rounded-xl border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0 relative">
-                            {isUploadingImage ? (
-                                <Loader2 className="animate-spin text-muted-foreground" size={32} />
-                            ) : imagePreview ? (
-                                <img src={imagePreview} alt="Product Preview" className="h-full w-full object-cover" />
-                            ) : (
-                                <ImageIcon size={40} className="text-muted-foreground stroke-[1.5]" />
-                            )}
-                        </div>
+                    {/* Form wrapper ensures Enter key works */}
+                    <form onSubmit={handleSave} className="flex flex-col overflow-hidden">
                         
-                        <div className="flex-grow">
-                            <h3 className="text-[16px] font-bold text-foreground">Product Image</h3>
-                            <p className="text-xs text-muted-foreground mt-0.5 mb-3">PNG, JPEG under 15 MB</p>
-                            <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/png, image/jpeg" className="hidden" />
-                            
-                            <div className="flex gap-2">
-                                <Button size="sm" onClick={handleTriggerImageUpload} variant="outline" disabled={isUploadingImage}>
-                                    {isUploadingImage ? "Uploading..." : "Upload Image"}
-                                </Button>
-                                <Button size="sm" variant="destructive" onClick={handleRemoveImage} disabled={isUploadingImage || !imagePreview}>
-                                    Remove
-                                </Button>
+                        <div className="flex-1 overflow-y-auto px-6 pb-4">
+                            <div className="flex items-center gap-6 py-4 border-b border-border">
+                                <div className="h-24 w-24 rounded-xl border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0 relative">
+                                    {isUploadingImage ? (
+                                        <Loader2 className="animate-spin text-muted-foreground" size={32} />
+                                    ) : imagePreview ? (
+                                        <img src={imagePreview} alt="Product Preview" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <ImageIcon size={40} className="text-muted-foreground stroke-[1.5]" />
+                                    )}
+                                </div>
+                                
+                                <div className="flex-grow">
+                                    <h3 className="text-[16px] font-bold text-foreground">Product Image</h3>
+                                    <p className="text-xs text-muted-foreground mt-0.5 mb-3">PNG, JPEG under 15 MB</p>
+                                    <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/png, image/jpeg" className="hidden" />
+                                    
+                                    <div className="flex gap-2">
+                                        <Button type="button" size="sm" onClick={handleTriggerImageUpload} variant="outline" disabled={isUploadingImage}>
+                                            {isUploadingImage ? "Uploading..." : "Upload Image"}
+                                        </Button>
+                                        <Button type="button" size="sm" variant="destructive" onClick={handleRemoveImage} disabled={isUploadingImage || !imagePreview}>
+                                            Remove
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className='grid grid-cols-2 gap-4 py-4'>
+                                <FormField 
+                                    label="Perfume Name:"
+                                    onChange={e => handleChange('productName', e.target.value)}
+                                    placeholder="Enter New Perfume Name"
+                                    maxLength={25}
+                                    error={errors.productName}
+                                />
+
+                                <FormSelect
+                                    label="Perfume Type:"
+                                    onChange={(value) => handleChange('productType', value)}
+                                    options={typeOptions}
+                                    placeholder="Select perfume type"
+                                    error={errors.productType}
+                                />
+
+                                <FormSelect
+                                    label="Gender:"
+                                    onChange={(value) => handleChange('productGender', value)}
+                                    options={genderOptions}
+                                    placeholder="Select gender"
+                                    error={errors.gender}
+                                />
+
+                                <FormField 
+                                    label="Price (₱):"
+                                    type="number"
+                                    max={9999}
+                                    value={data.productPrice || ''}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        if (val === "") {
+                                            handleChange('productPrice', "");
+                                            return;
+                                        }
+                                        const clampedValue = Math.min(9999, Math.max(0, Number(val)));
+                                        handleChange('productPrice', clampedValue);
+                                    }}
+                                    placeholder="Enter Price"
+                                    error={errors.productPrice}
+                                />
+                            </div>
+
+                            <div className="mt-2 flex flex-col gap-1.5">
+                                <label className="text-sm font-medium text-foreground">Description:</label>
+                                <Textarea
+                                    placeholder="Enter description..."
+                                    className="resize-none h-20 bg-background"
+                                    onChange={(e) => handleChange('productDescription', e.target.value)}
+                                    aria-invalid={!!errors.productDescription} 
+                                />
+                                {errors.productDescription && (
+                                    <span className="text-xs text-destructive">{errors.productDescription}</span>
+                                )}
                             </div>
                         </div>
-                    </div>
+                    
+                        {/* FIXED: STICKY FOOTER */}
+                        <div className="grid grid-cols-2 gap-6 p-6 border-t border-border bg-card shrink-0">
+                            <Button 
+                                type="button"
+                                variant="outline"
+                                onClick={onClose}
+                            >
+                                Cancel
+                            </Button>
 
-                    <div className='grid grid-cols-2 gap-4 py-4'>
-                        <FormField 
-                            label="Perfume Name:"
-                            onChange={e => handleChange('productName', e.target.value)}
-                            placeholder="Enter New Perfume Name"
-                            maxLength={25}
-                            error={errors.productName}
-                        />
-
-                        <FormSelect
-                            label="Perfume Type:"
-                            onChange={(value) => handleChange('productType', value)}
-                            options={typeOptions}
-                            placeholder="Select perfume type"
-                            error={errors.productType}
-                        />
-
-                        <FormSelect
-                            label="Gender:"
-                            onChange={(value) => handleChange('productGender', value)}
-                            options={genderOptions}
-                            placeholder="Select gender"
-                            error={errors.gender}
-                        />
-
-                        <FormField 
-                            label="Price (₱):"
-                            type="number"
-                            max={9999}
-                            value={data.productPrice || ''}
-                            onChange={e => {
-                                const val = e.target.value;
-                                if (val === "") {
-                                    handleChange('productPrice', "");
-                                    return;
-                                }
-                                const clampedValue = Math.min(9999, Math.max(0, Number(val)));
-                                handleChange('productPrice', clampedValue);
-                            }}
-                            placeholder="Enter Price"
-                            error={errors.productPrice}
-                        />
-
-                    </div>
-
-                   <div className="mt-2 flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-gray-700">Description:</label>
-                            <Textarea
-                                placeholder="Enter description..."
-                                className="resize-none h-20"
-                                onChange={(e) => handleChange('productDescription', e.target.value)}
-                                aria-invalid={!!errors.productDescription} 
-                            />
-
-                            {errors.productDescription && (
-                                <span className="text-xs text-destructive">{errors.productDescription}</span>
-                            )}
-                    </div>
-                   
-                    <div className="grid grid-cols-2 gap-6 mt-4 mb-2">
-                        <Button 
-                            variant="outline"
-                            onClick={onClose}
-                        >
-                            Cancel
-                        </Button>
-
-                        <Button
-                            onClick={handleSave}
-                            disabled={isSubmitting}
-                        >
-                            <Check className="w-4 h-4 mr-2" />
-                            {isSubmitting ? "Saving..." : "Save as New Perfume"}
-                        </Button>
-                    </div>
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                            >
+                                <Check className="w-4 h-4 mr-2" />
+                                {isSubmitting ? "Saving..." : "Save as New Perfume"}
+                            </Button>
+                        </div>
+                    </form>
                 </DialogContent>
             </Dialog>
 

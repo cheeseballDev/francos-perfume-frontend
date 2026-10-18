@@ -30,6 +30,18 @@ const DashboardHome = () => {
         auditLogs
     } = useAuditLog();
 
+    // FIXED: Smart revenue formatter for K and M
+    const formatRevenue = (amount) => {
+        if (!amount) return "₱0";
+        if (amount >= 1000000) {
+            return `₱${(amount / 1000000).toFixed(1)}M`;
+        }
+        if (amount >= 1000) {
+            return `₱${(amount / 1000).toFixed(1)}K`;
+        }
+        return `₱${amount.toFixed(2)}`;
+    };
+
     const topCards = [
         { 
             title: "Total Inventory", 
@@ -44,15 +56,15 @@ const DashboardHome = () => {
             ),
             Icon: Boxes, 
             color: "text-emerald-500",
-            route: "/home/inventory"
+            route: "/home/inventory" 
         },
         { 
             title: "Total Revenue", 
-            mainValue: `₱${((totalRevenue?.totalRevenue || 0) / 1000).toFixed(1)}K`, 
+            mainValue: formatRevenue(totalRevenue?.totalRevenue || 0), // APPLIED HERE
             subText: "Overall", 
             Icon: Banknote, 
             color: "text-emerald-500",
-            route: "/home/transactions"
+            route: "/home/transactions" 
         },
         { 
             title: "Pending Approvals", 
@@ -60,7 +72,7 @@ const DashboardHome = () => {
             subText: "Requests", 
             Icon: Clock, 
             color: "text-blue-500",
-            route: "/home/requests"
+            route: "/home/requests" 
         },
         { 
             title: "Pending Deliveries", 
@@ -68,7 +80,7 @@ const DashboardHome = () => {
             subText: "Deliveries", 
             Icon: Package, 
             color: "text-blue-500",
-            route: "/home/deliveries"
+            route: "/home/deliveries" 
         },
         { 
             title: "Total Transactions", 
@@ -76,7 +88,7 @@ const DashboardHome = () => {
             subText: "Tracked Sales", 
             Icon: Receipt, 
             color: "text-blue-500",
-            route: "/home/transactions"
+            route: "/home/transactions" 
         }
     ];
 
@@ -137,7 +149,7 @@ const DashboardHome = () => {
                                     subText={card.subText}
                                     Icon={card.Icon}
                                     color={card.color}
-                                    onClick={() => navigate(card.route)} // DIRECTLY WIRED
+                                    onClick={() => navigate(card.route)} 
                                 />
                             ))}
                         </div>

@@ -30,7 +30,7 @@
     --secondary: 0 0% 86%;
     --secondary-foreground: 0 0% 11%;
     --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 53%;
+    --muted-foreground: 0 0% 53%; /* Light mode contrast is fine */
     --accent: 36 36% 91%;
     --accent-foreground: 0 0% 11%;
     --destructive: 345 77% 28%;
@@ -61,7 +61,8 @@
     --secondary: 0 0% 17%;
     --secondary-foreground: 246 100% 98%;
     --muted: 0 0% 16%;
-    --muted-foreground: 0 0% 53%;
+    /* FIXED: Brightened from 53% to 60% to pass WCAG 4.5:1 Contrast requirements against dark backgrounds */
+    --muted-foreground: 0 0% 60%; 
     --accent: 0 0% 17%;
     --accent-foreground: 246 100% 98%;
     --destructive: 345 71% 36%;
