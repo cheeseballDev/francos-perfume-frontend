@@ -6,8 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from '@/utils/validationUtils';
-import { Check } from 'lucide-react';
-import { useState } from 'react';
+import { Check, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const productValidationSchema = {
     productName: [isValid.required],
@@ -19,11 +19,25 @@ const productValidationSchema = {
 
 const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) => {
     const { toast } = useToast();
+    const fileInputRef = useRef(null);
 
     const [config, setConfig] = useState(null);
     const [data, setData] = useState({});
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Image Simulation State
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setData({});
+            setErrors({});
+            setImagePreview(null);
+            setIsUploadingImage(false);
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -46,7 +60,6 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
         }
     };
     
-
     const handleSave = async () => {
         const validationErrors = validateForm(data, productValidationSchema);
 
@@ -79,23 +92,82 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
         }
     }
 
-    /*
-    const handleImageChange = (event) => {
+    const handleTriggerImageUpload = () => {
+        fileInputRef.current?.click();
+    };
 
-    }
-    */
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const validTypes = ['image/jpeg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+            toast({ title: "Invalid file type", description: "Please upload a PNG or JPEG image.", variant: "destructive" });
+            return;
+        }
+
+        if (file.size > 15 * 1024 * 1024) {
+            toast({ title: "File too large", description: "Please upload an image smaller than 15 MB.", variant: "destructive" });
+            return;
+        }
+
+        setIsUploadingImage(true);
+        setTimeout(() => {
+            setImagePreview(URL.createObjectURL(file));
+            setIsUploadingImage(false);
+            toast({ title: "Upload Successful", description: "Product image attached (Simulated).", className: "bg-emerald-600 text-white border-emerald-700" });
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }, 1000);
+    };
+
+    const handleRemoveImage = () => {
+        setIsUploadingImage(true);
+        setTimeout(() => {
+            setImagePreview(null);
+            setIsUploadingImage(false);
+            toast({ title: "Picture Removed", description: "Product image removed (Simulated)." });
+        }, 800);
+    };
 
     return (
     <>
             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <DialogContent 
-                    className="sm:max-w-xl"
+                    className="sm:max-w-xl max-h-[90vh] overflow-y-auto"
                     onInteractOutside={(e) => e.preventDefault()}
                     onPointerDownOutside={(e) => e.preventDefault()}
                 >
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold">Create New Perfume</DialogTitle>
                     </DialogHeader>
+
+                    {/* Image Upload Section */}
+                    <div className="flex items-center gap-6 py-4 border-b border-border">
+                        <div className="h-24 w-24 rounded-xl border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0 relative">
+                            {isUploadingImage ? (
+                                <Loader2 className="animate-spin text-muted-foreground" size={32} />
+                            ) : imagePreview ? (
+                                <img src={imagePreview} alt="Product Preview" className="h-full w-full object-cover" />
+                            ) : (
+                                <ImageIcon size={40} className="text-muted-foreground stroke-[1.5]" />
+                            )}
+                        </div>
+                        
+                        <div className="flex-grow">
+                            <h3 className="text-[16px] font-bold text-foreground">Product Image</h3>
+                            <p className="text-xs text-muted-foreground mt-0.5 mb-3">PNG, JPEG under 15 MB</p>
+                            <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/png, image/jpeg" className="hidden" />
+                            
+                            <div className="flex gap-2">
+                                <Button size="sm" onClick={handleTriggerImageUpload} variant="outline" disabled={isUploadingImage}>
+                                    {isUploadingImage ? "Uploading..." : "Upload Image"}
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={handleRemoveImage} disabled={isUploadingImage || !imagePreview}>
+                                    Remove
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
 
                     <div className='grid grid-cols-2 gap-4 py-4'>
                         <FormField 
@@ -126,7 +198,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                             label="Price (₱):"
                             type="number"
                             max={9999}
-                            value={data.productPrice}
+                            value={data.productPrice || ''}
                             onChange={e => {
                                 const val = e.target.value;
                                 if (val === "") {
@@ -142,7 +214,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
 
                     </div>
 
-                   <div className="mt-4 flex flex-col gap-1.5">
+                   <div className="mt-2 flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-gray-700">Description:</label>
                             <Textarea
                                 placeholder="Enter description..."
@@ -156,7 +228,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                             )}
                     </div>
                    
-                    <div className="grid grid-cols-2 gap-6 mb-8">
+                    <div className="grid grid-cols-2 gap-6 mt-4 mb-2">
                         <Button 
                             variant="outline"
                             onClick={onClose}
@@ -168,7 +240,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                             onClick={handleSave}
                             disabled={isSubmitting}
                         >
-                            <Check className="w-4 h-4" />
+                            <Check className="w-4 h-4 mr-2" />
                             {isSubmitting ? "Saving..." : "Save as New Perfume"}
                         </Button>
                     </div>
@@ -184,5 +256,4 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
     );
 };
 
-
-  export default CreateProductModal;
+export default CreateProductModal;
