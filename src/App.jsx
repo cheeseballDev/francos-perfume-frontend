@@ -64,7 +64,7 @@ const usePersistentSession = () => {
 };
 
 const App = () => {
-    const { user, logout, handleLogout } = useAuth();
+    const { user, logout } = useAuth();
     const { toast } = useToast();
 
     const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
