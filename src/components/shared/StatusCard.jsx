@@ -7,10 +7,16 @@ const StatusCard = ({
     secondValue,
     thirdValue,
     secondSubText,
+    onClick
 }) => {
 
     return (
-    <div className="bg-card text-card-foreground border border-border rounded-2xl p-6 h-full flex flex-col justify-between shadow-sm transition duration-300 hover:scale-105">
+    <div 
+        onClick={onClick}
+        className={`bg-card text-card-foreground border border-border rounded-2xl p-6 h-full flex flex-col justify-between shadow-sm transition-all duration-300 ${
+            onClick ? "cursor-pointer hover:scale-105 hover:shadow-md" : "hover:scale-105"
+        }`}
+    >
         <div>
             <div className="flex justify-between items-start mb-2 min-h-[3.5rem]">
                 <h3 className="text-foreground text-xl leading-snug">{title}</h3>

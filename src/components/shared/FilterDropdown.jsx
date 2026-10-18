@@ -6,13 +6,13 @@ const FilterDropdown = ({ filter, updateFilter, filterOptions }) => {
     }
     
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap items-center gap-3 sm:gap-4 w-full">
+      <div className="flex flex-wrap items-center gap-3">
         {filterOptions?.map((option) => (
           <Select
             key={option.key}
             value={filter[option.key] || '__all__'}
             onValueChange={(val) => updateFilter(option.key, val === '__all__' ? '' : val)}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40 bg-background">
                 <SelectValue placeholder={option.label} />
             </SelectTrigger>
             <SelectContent>
