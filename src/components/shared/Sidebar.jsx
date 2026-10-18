@@ -37,7 +37,6 @@ const Sidebar = () => {
     ? location.pathname === "/home" 
     : isActive;
 
-    // FIXED: Replaced custom colors with semantic background, foreground, and primary variables
     return `flex items-center w-full gap-2 cursor-pointer p-5 transition-colors duration-300
     ${isActuallyActive
       ? "bg-primary/20 text-foreground border-r-4 border-primary"
@@ -46,18 +45,15 @@ const Sidebar = () => {
   };
 
   return (
-    // FIXED: Replaced bg-custom-black with bg-sidebar/bg-card, added border-r to separate from main content
-    <div className="w-64 bg-card border-r border-border text-card-foreground flex flex-col z-20 shrink-0 h-full">
+    // FIXED: Removed z-20. The sidebar now naturally sits underneath fixed overlays.
+    <div className="w-64 bg-card border-r border-border text-card-foreground flex flex-col shrink-0 h-full relative z-10">
       
-      {/* FIXED: Replaced border-white/10 with standard border-border */}
       <div className="py-6 px-6 border-b border-border flex flex-col items-center justify-center">
-        {/* FIXED: Added max-w-[160px] to physically stop the logo from blowing up the layout */}
         <img
           src={logo}
           alt={companyPictureAlt}
           className="h-24 w-auto max-w-[160px] object-contain mb-6"
         />
-        {/* FIXED: Replaced text-custom-gray with text-muted-foreground */}
         <span className="text-sm tracking-widest text-muted-foreground font-semibold uppercase">
           Main Menu
         </span>
