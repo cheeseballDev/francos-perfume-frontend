@@ -13,7 +13,7 @@ const DataTable = ({
         columns = [],
         data = [],
         keyField = "id",
-        asyncState = { isLoading: false, error: null },
+        asyncState = { isLoading: false, isFetching: false, error: null },
         pagination = null,
         filter = null, 
         updateFilter = null,
@@ -22,7 +22,8 @@ const DataTable = ({
         onRowDoubleClick = null,
         emptyMessage = "No records found.",
     }) => {
-        const isLoading = asyncState?.isLoading;
+        // FIXED: Checks both isLoading AND isFetching to prevent the "No records found" flash
+        const isBusy = asyncState?.isLoading || asyncState?.isFetching;
         const hasData = Array.isArray(data) && data.length > 0;
 
   return (
@@ -42,7 +43,7 @@ const DataTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isBusy ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
@@ -96,7 +97,7 @@ const DataTable = ({
         </Table>
       </div>
       
-      {hasData && !isLoading && pagination && filter && updateFilter && (
+      {hasData && !isBusy && pagination && filter && updateFilter && (
         <PaginationBar
           pageCount={filter.pageCount}
           pageSize={filter.pageSize}
