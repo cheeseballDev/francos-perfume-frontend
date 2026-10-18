@@ -4,7 +4,6 @@ import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
-
 export const useTransaction = () => {
     const isFirstLoad = useRef(true);
 
@@ -43,7 +42,6 @@ export const useTransaction = () => {
         pageCount: 1,
         pageSize: 10,
     })
-
 
     const fetchTransactions = useCallback(async () => {
         if (isFirstLoad.current) {
@@ -106,16 +104,13 @@ export const useTransaction = () => {
         }
     }, []) 
 
+    // FIXED: Removed asyncState overrides
     const fetchTransactionFilters = useCallback(async () => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const data = await getTransactionFilters();
             setFilterOptions(buildFilterOptions(data, TRANSACTION_FILTER_SCHEMA));
         } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-            throw err;
-        } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            console.error("Filter load error:", err);
         }
     }, []);
 

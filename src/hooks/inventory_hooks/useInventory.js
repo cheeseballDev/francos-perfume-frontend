@@ -122,24 +122,19 @@ export const useInventory = () => {
       }
     };
 
+    // FIXED: Removed asyncState overrides to prevent the "No Records Found" flash
     const fetchFilters = useCallback(async () => {
-      setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const data = await getInventoryFilters();
             setFilterOptions(buildFilterOptions(data, INVENTORY_FILTER_SCHEMA));
         } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-            throw err;
-        } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            console.error("Filter load error:", err);
         }
     }, []);
 
     useEffect(() => {
         fetchFilters();
     }, [fetchFilters]);
-
-
 
     return { 
       inventory, 

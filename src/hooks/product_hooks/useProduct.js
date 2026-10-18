@@ -104,16 +104,13 @@ export const useProduct = () => {
         }
     }
 
+    // FIXED: Removed asyncState overrides to prevent the "No Records Found" flash
     const fetchProductFilters = useCallback(async () => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const data = await getProductFilters();
             setFilterOptions(buildFilterOptions(data, PRODUCT_FILTER_SCHEMA));
         } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-            throw err;
-        } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            console.error("Filter load error:", err);
         }
     }, []);
 
@@ -121,8 +118,9 @@ export const useProduct = () => {
         fetchProductFilters();
     }, [fetchProductFilters]);
 
+    // FIXED: Changed isLoading to isFetching so downloads don't trigger the full skeleton loader
     const fetchOneProductBarcode = useCallback(async (productId) => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         try {
             const data = await getOneProductBarcode(productId);
             return data;
@@ -130,12 +128,12 @@ export const useProduct = () => {
             setAsyncState((prev) => ({ ...prev, error: err }));
             throw err;
         } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            setAsyncState((prev) => ({ ...prev, isFetching: false }));
         }
     }, [])
 
     const downloadOneProductBarcode = async (productId) => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         try {
             const blob = await getOneProductBarcodeDownload(productId);
             const url = window.URL.createObjectURL(new Blob([blob]));
@@ -149,12 +147,12 @@ export const useProduct = () => {
             setAsyncState((prev) => ({ ...prev, error: err }));
             throw err;
         } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            setAsyncState((prev) => ({ ...prev, isFetching: false }));
         }
     };
 
     const downloadAllProductBarcodes = async () => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
+        setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         try {
             const blob = await getAllProductBarcodeDownload();
             const url = window.URL.createObjectURL(new Blob([blob]));
@@ -168,7 +166,7 @@ export const useProduct = () => {
             setAsyncState((prev) => ({ ...prev, error: err }));
             throw err;
         } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            setAsyncState((prev) => ({ ...prev, isFetching: false }));
         }
     };
     

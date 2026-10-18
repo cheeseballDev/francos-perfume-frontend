@@ -172,16 +172,13 @@ export const useAccount = () => {
         }
     }, [fetchAllAccounts]);
 
+    // FIXED: Removed asyncState overrides to prevent the "No Records Found" flash
     const fetchAccountFilters = useCallback(async () => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const data = await getAccountFilters();
             setFilterOptions(buildFilterOptions(data, ACCOUNT_FILTER_SCHEMA));
         } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-            throw err;
-        } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            console.error("Filter load error:", err);
         }
     }, []);
 

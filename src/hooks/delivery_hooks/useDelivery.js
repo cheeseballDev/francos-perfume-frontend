@@ -85,17 +85,14 @@ export const useDelivery = () => {
         }
     }, []);
 
+    // FIXED: Removed asyncState overrides
     const fetchDeliveryFilters = useCallback(async () => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const data = await getDeliveryFilters();
             setFilterOptions(buildFilterOptions(data, DELIVERY_FILTER_SCHEMA));
             return data;
         } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-            throw err;
-        } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            console.error("Filter load error:", err);
         }
     }, []);
 
