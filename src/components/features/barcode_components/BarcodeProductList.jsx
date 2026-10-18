@@ -1,11 +1,20 @@
 import { SearchBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
-import { Printer } from 'lucide-react';
+import { Loader2, Printer } from 'lucide-react';
 import { useState } from "react";
 import { getBarcodeColumns } from "./BarcodeColumns";
 
-const BarcodeProductList = ({ setSelectedProduct, selectedProduct, products, isLoading,  updateFilter, fetchOneProductBarcode, downloadAllProductBarcodes, downloadOneProductBarcode}) => {
+const BarcodeProductList = ({ 
+    setSelectedProduct, 
+    selectedProduct, 
+    products, 
+    isLoading,  
+    updateFilter, 
+    fetchOneProductBarcode, 
+    downloadAllProductBarcodes, 
+    downloadOneProductBarcode
+}) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [isDownloading, setIsDownloading] = useState(false);
     const [downloadId, setDownloadId] = useState(null);
@@ -57,7 +66,7 @@ const BarcodeProductList = ({ setSelectedProduct, selectedProduct, products, isL
                     onClick={handleDownloadAll}
                     disabled={isDownloading}
                 >
-                    <Printer size={16} /> 
+                    {isDownloading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Printer size={16} className="mr-2" />} 
                     {isDownloading ? "Downloading..." : "Download All"}
                 </Button>
             </div>
@@ -66,10 +75,11 @@ const BarcodeProductList = ({ setSelectedProduct, selectedProduct, products, isL
                 columns={barcodeColumns}
                 data={products}
                 keyField="productId"
-                asyncState={{ isLoading }}
+                // FIXED: Explicitly mapping the boolean into the asyncState object DataTable expects
+                asyncState={{ isLoading: isLoading, isFetching: false }} 
                 selectedItem={selectedProduct}
                 onRowClick={handleRowClick}
-                emptyMessage="No products with barcodes found."
+                emptyMessage="No products found."
             />
         </div>
     );

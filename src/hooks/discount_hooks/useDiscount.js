@@ -45,21 +45,19 @@ export const useDiscounts = () => {;
         setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
       }
 
-      getAllDiscounts(filter)
-        .then(data => {
-            isFirstLoad.current = false;
-            setDiscounts(data.data);
-            setPagination({
-                totalPages: data.totalDiscountPages || 0,
-                totalEntries: data.totalDiscounts || 0,
-            });
-        })
-        .catch((err) => {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-        })
-        .finally(() => {
-            setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
+      try {
+        const data = await getAllDiscounts(filter);
+        isFirstLoad.current = false;
+        setDiscounts(data.data);
+        setPagination({
+            totalPages: data.totalDiscountPages || 0,
+            totalEntries: data.totalDiscounts || 0,
         });
+      } catch (err) {
+        setAsyncState((prev) => ({ ...prev, error: err }));
+      } finally {
+        setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
+      }
 
     }, [filter]);
 
@@ -119,15 +117,13 @@ export const useDiscounts = () => {;
         }
     }, [fetchAllDiscounts]);
 
+    // FIXED: Stripped asyncState to prevent Skeleton removal
     const fetchDiscountFilters = useCallback(async () => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const data = await getDiscountFilters();
             setFilterOptions(buildFilterOptions(data, DISCOUNT_FILTER_SCHEMA));
         } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-        } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            console.error("Filter load error:", err);
         }
     }, []);
 

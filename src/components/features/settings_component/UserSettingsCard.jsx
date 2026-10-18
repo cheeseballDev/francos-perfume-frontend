@@ -4,7 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAccount } from "@/hooks/account_hooks/useAccount";
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { Loader2, User } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import EditAccountPasswordModal from './EditAccountPasswordModal';
 
 const INITIAL_FORM_STATE = {
@@ -29,6 +29,8 @@ const UserSettingsCard = ({ accountId }) => {
     const { fetchAccountDetails, updateAccount, updatePassword } = useAccount();
     const { toast } = useToast();
     
+    const fileInputRef = useRef(null);
+
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [profileData, setProfileData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -36,6 +38,9 @@ const UserSettingsCard = ({ accountId }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState(INITIAL_FORM_STATE);
+
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -118,27 +123,86 @@ const UserSettingsCard = ({ accountId }) => {
         }
     };
 
-    const handleToBeAdded = () => {
-        toast({
-            title: "Feature to be added.",
-            description: `Do not report this as a bug.`,
-            variant: "destructive",
-            duration: 5000
-        });
+    const handleTriggerImageUpload = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const validTypes = ['image/jpeg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+            toast({
+                title: "Invalid file type",
+                description: "Please upload a PNG or JPEG image.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        const maxSize = 15 * 1024 * 1024;
+        if (file.size > maxSize) {
+            toast({
+                title: "File too large",
+                description: "Please upload an image smaller than 15 MB.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setIsUploadingImage(true);
+
+        setTimeout(() => {
+            const previewUrl = URL.createObjectURL(file);
+            setImagePreview(previewUrl);
+            setIsUploadingImage(false);
+            
+            toast({
+                title: "Upload Successful",
+                description: "Your profile picture has been updated (Simulated).",
+                className: "bg-emerald-600 text-white border-emerald-700",
+            });
+            
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }, 1000);
+    };
+
+    const handleRemoveImage = () => {
+        setIsUploadingImage(true);
+
+        setTimeout(() => {
+            setImagePreview(null);
+            setProfileData(prev => ({ ...prev, employeeImageUrl: null }));
+            setIsUploadingImage(false);
+
+            toast({
+                title: "Picture Removed",
+                description: "Your profile picture has been removed (Simulated).",
+            });
+        }, 800);
     };
 
     if (isLoading) {
-        return <div className="p-8 font-montserrat text-muted-foreground flex items-center gap-2"><Loader2 className="animate-spin" /> Loading profile data...</div>;
+        return (
+            <div className="p-8 font-montserrat text-muted-foreground flex items-center gap-2">
+                <Loader2 className="animate-spin" /> Loading profile data...
+            </div>
+        );
     }
+
+    const displayImage = imagePreview || profileData?.employeeImageUrl;
 
     return (
         <>
             <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-8 font-montserrat max-w-3xl">
                 
                 <div className="flex items-center gap-6 mb-10 pb-6 border-b border-border">
-                    <div className="h-24 w-24 rounded-full border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0">
-                        {profileData?.employeeImageUrl ? (
-                            <img src={profileData.employeeImageUrl} alt="Profile" className="h-full w-full object-cover" />
+                    <div className="h-24 w-24 rounded-full border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0 relative group">
+                        {isUploadingImage ? (
+                            <Loader2 className="animate-spin text-muted-foreground" size={32} />
+                        ) : displayImage ? (
+                            <img src={displayImage} alt="Profile" className="h-full w-full object-cover" />
                         ) : (
                             <User size={48} className="text-muted-foreground stroke-[1.5]" />
                         )}
@@ -149,16 +213,27 @@ const UserSettingsCard = ({ accountId }) => {
                         <p className="text-sm text-muted-foreground mt-0.5">PNG, JPEG under 15 MB</p>
                     </div>
 
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleImageChange} 
+                        accept="image/png, image/jpeg" 
+                        className="hidden" 
+                    />
+                    
                     <div className="flex flex-col gap-3 shrink-0">
                         <Button 
-                        onClick={handleToBeAdded} 
-                        variant="outline" 
+                            onClick={handleTriggerImageUpload} 
+                            variant="outline" 
+                            disabled={isUploadingImage}
                         >
-                            Upload new picture
+                            {isUploadingImage ? "Uploading..." : "Upload new picture"}
                         </Button>
                         <Button 
-                        variant="destructive"
-                        onClick={handleToBeAdded}>
+                            variant="destructive"
+                            onClick={handleRemoveImage}
+                            disabled={isUploadingImage || !displayImage}
+                        >
                             Remove picture
                         </Button>
                     </div>

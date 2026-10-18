@@ -83,16 +83,17 @@ export const renderBadgeForRequestTimeline = (status) => {
 };
 
 export const renderTimelineIcon = (status) => {
+    // FIXED: Replaced bg-white with bg-card to match the dark/light mode background
     switch (status?.toUpperCase()) {
         case "APPROVED":
         case "COMPLETED":
         case "RECEIVED":
-            return <CheckCircle2 className="w-6 h-6 text-emerald-600 bg-white rounded-full" />;
+            return <CheckCircle2 className="w-6 h-6 text-emerald-600 bg-card rounded-full" />;
         case "DISPATCHED":
-            return <Truck className="w-6 h-6 text-blue-600 bg-white rounded-full" />;
+            return <Truck className="w-6 h-6 text-blue-600 bg-card rounded-full" />;
         case "REJECTED":
-            return <XCircle className="w-6 h-6 text-red-600 bg-white rounded-full" />;
+            return <XCircle className="w-6 h-6 text-red-600 bg-card rounded-full" />;
         default:
-            return <Clock className="w-6 h-6 text-amber-500 bg-white rounded-full" />;
+            return <Clock className="w-6 h-6 text-amber-500 bg-card rounded-full" />;
     }
 };

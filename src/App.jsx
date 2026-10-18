@@ -26,6 +26,8 @@ const ProtectedRoute = ({ user, allowedRoles }) => {
 }
 
 const NavigationManager = ({ user }) => {
+    const { toast } = useToast();
+
     const navigate = useNavigate();
     const path = useLocation().pathname;
 
@@ -49,38 +51,26 @@ const NavigationManager = ({ user }) => {
 
 const usePersistentSession = () => {
     useEffect(() => {
-        const STORAGE_KEY = 'app_last_active';
-        const TIMEOUT_MS = 1000000;
+        const LOGIN_TIME_KEY = 'login_timestamp';
+        const TOKEN_LIFETIME_MS = 86400000; 
 
-        const lastActive = localStorage.getItem(STORAGE_KEY);
+        const loginTime = localStorage.getItem(LOGIN_TIME_KEY);
         const now = Date.now();
 
-        if (lastActive && now - Number(lastActive) > TIMEOUT_MS) {
-            localStorage.clear();
+        if (loginTime && now - Number(loginTime) > TOKEN_LIFETIME_MS) {
+            window.dispatchEvent(new CustomEvent('session-expired'));
         }
-
-        const updateTimestamp = () => {
-            localStorage.setItem(STORAGE_KEY, Date.now().toString());
-        };
-
-        updateTimestamp();
-        const interval = setInterval(updateTimestamp, 3000);
-
-        return () => {
-            clearInterval(interval);
-        };
     }, []);
 };
 
 const App = () => {
-    const { user, logout, handleLogout } = useAuth();
+    const { user, logout } = useAuth();
     const { toast } = useToast();
 
     const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
     usePersistentSession();
-
 
     const [theme, setTheme] = useState(() => () => {
         const savedTheme = localStorage.getItem('theme');
@@ -128,22 +118,15 @@ const App = () => {
             variant: "destructive",
             title: "Session Expired",
             description: "Your session has expired. Please log in again.",
-            duration: 3000,
+            duration: 5000,
         });
 
-        const performLogout = logout || handleLogout;
-        if (performLogout) {
-            performLogout();
-        } else {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/login';
-        }
+        logout();
         };
 
         window.addEventListener('session-expired', handleSessionExpired);
         return () => window.removeEventListener('session-expired', handleSessionExpired);
-    }, [toast, logout, handleLogout]);
+    }, [toast, logout]);
 
     if (isMobileView) { return <MobileBlocker />; }
 

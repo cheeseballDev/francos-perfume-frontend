@@ -6,7 +6,8 @@ const FormSelect = ({ label, value, onChange, options = [], placeholder, disable
         <div className="flex flex-col gap-2">
       {label && <Label>{label}</Label>}
       <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger className="w-full bg-white">
+        {/* FIXED: Removed hardcoded bg-white, replaced with bg-background for dark mode support */}
+        <SelectTrigger className="w-full bg-background transition-colors">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent
@@ -19,7 +20,7 @@ const FormSelect = ({ label, value, onChange, options = [], placeholder, disable
             const optLabel = typeof option === "object" ? option.label : option;
             return (
               <SelectItem 
-                className="hover:cursor-pointer"
+                className="hover:cursor-pointer transition-colors"
                 key={optValue} 
                 value={optValue}
               >
@@ -33,5 +34,4 @@ const FormSelect = ({ label, value, onChange, options = [], placeholder, disable
     )
 }
     
-
 export default FormSelect;

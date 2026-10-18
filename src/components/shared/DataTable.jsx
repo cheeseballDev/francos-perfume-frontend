@@ -7,13 +7,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Loader2 } from "lucide-react";
+import { Loader2, PackageOpen } from "lucide-react"; // Added PackageOpen
 
 const DataTable = ({
         columns = [],
         data = [],
         keyField = "id",
-        asyncState = { isLoading: false, error: null },
+        asyncState = { isLoading: false, isFetching: false, error: null },
         pagination = null,
         filter = null, 
         updateFilter = null,
@@ -22,19 +22,20 @@ const DataTable = ({
         onRowDoubleClick = null,
         emptyMessage = "No records found.",
     }) => {
-        const isLoading = asyncState?.isLoading;
+        const isBusy = asyncState?.isLoading || asyncState?.isFetching;
         const hasData = Array.isArray(data) && data.length > 0;
 
   return (
-    <div className="bg-card border border-border rounded-lg shadow-sm flex flex-col mb-4">
+    <div className="bg-card border border-border rounded-lg shadow-sm flex flex-col mb-4 overflow-hidden">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="">
+            <TableRow>
               {columns.map((col, idx) => (
                 <TableHead
                   key={col.key || col.accessorKey || idx}
-                  className={`font-semibold ${col.headerClassName || ""}`}
+                  // Inherits column-hiding classes like 'hidden md:table-cell'
+                  className={`font-semibold ${col.className || ""}`}
                 >
                   {col.header}
                 </TableHead>
@@ -42,15 +43,15 @@ const DataTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isBusy ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-10 text-muted-foreground"
+                  className="text-center py-16 text-muted-foreground"
                 >
                   <div className="flex flex-col items-center justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary mb-2" />
-                    <span>Loading data...</span>
+                    <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+                    <span className="text-sm font-medium tracking-wide">Loading data...</span>
                   </div>
                 </TableCell>
               </TableRow>
@@ -58,9 +59,22 @@ const DataTable = ({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-10 text-muted-foreground font-medium"
+                  className="text-center py-16 text-muted-foreground font-medium animate-in fade-in duration-300"
                 >
-                  {emptyMessage}
+                  {/* ACTIONABLE EMPTY STATE */}
+                  <div className="flex flex-col items-center justify-center">
+                      <PackageOpen className="h-12 w-12 text-muted-foreground/30 mb-3 stroke-[1.5]" />
+                      <p className="text-base text-foreground mb-1">No items found</p>
+                      <p className="text-sm font-normal text-muted-foreground mb-4">{emptyMessage}</p>
+                      {updateFilter && (
+                         <button 
+                            onClick={() => updateFilter('search', '')} 
+                            className="text-primary hover:underline text-sm font-bold"
+                         >
+                            Clear search filters
+                         </button>
+                      )}
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
@@ -71,7 +85,7 @@ const DataTable = ({
                       key={row[keyField]}
                       onClick={() => onRowClick && onRowClick(row)}
                       onDoubleClick={() => onRowDoubleClick && onRowDoubleClick(row)}
-                      className={`transition-colors ${
+                      className={`animate-in fade-in slide-in-from-bottom-2 duration-300 transition-colors ${
                         onRowClick || onRowDoubleClick ? "hover:cursor-pointer" : ""
                       } 
                       ${
@@ -96,7 +110,7 @@ const DataTable = ({
         </Table>
       </div>
       
-      {hasData && !isLoading && pagination && filter && updateFilter && (
+      {hasData && !isBusy && pagination && filter && updateFilter && (
         <PaginationBar
           pageCount={filter.pageCount}
           pageSize={filter.pageSize}

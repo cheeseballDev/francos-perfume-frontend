@@ -99,17 +99,14 @@ export const useRequest = () => {
         };
     }, [fetchRequests]);
 
+    // FIXED: Removed asyncState overrides
     const fetchRequestFilters = useCallback(async (branchId = null) => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const data = await getRequestFilters(branchId);
             setFilterOptions(buildFilterOptions(data, REQUEST_FILTER_SCHEMA));
             return data;
         } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-            throw err;
-        } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            console.error("Filter load error:", err);
         }
     }, []);
 

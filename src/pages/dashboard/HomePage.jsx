@@ -7,7 +7,7 @@ import TransactionItem from "@/components/features/home_components/home_items/Tr
 import DashboardSkeleton from "@/components/loaders/DashboardSkeleton";
 import { useAuditLog } from "@/hooks/audit_hooks/useAuditLog";
 import { useKPI } from "@/hooks/kpi_hooks/useKPI";
-import { Banknote, BarChart3, Boxes, Clock, Package, Receipt, ShieldAlert } from "lucide-react";
+import { Banknote, Boxes, Clock, Package, Receipt, ShieldAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StatusCard from "../../components/shared/StatusCard";
 
@@ -30,6 +30,18 @@ const DashboardHome = () => {
         auditLogs
     } = useAuditLog();
 
+    // FIXED: Smart revenue formatter for K and M
+    const formatRevenue = (amount) => {
+        if (!amount) return "₱0";
+        if (amount >= 1000000) {
+            return `₱${(amount / 1000000).toFixed(1)}M`;
+        }
+        if (amount >= 1000) {
+            return `₱${(amount / 1000).toFixed(1)}K`;
+        }
+        return `₱${amount.toFixed(2)}`;
+    };
+
     const topCards = [
         { 
             title: "Total Inventory", 
@@ -39,39 +51,44 @@ const DashboardHome = () => {
                     <span className="text-destructive font-semibold ">
                         {lowStock?.lowStockProductCount ?? 0} items
                     </span>
-                    in low stock.
+                    {" "}in low stock.
                 </>
             ),
             Icon: Boxes, 
-            color: "text-emerald-500" 
+            color: "text-emerald-500",
+            route: "/home/inventory" 
         },
         { 
             title: "Total Revenue", 
-            mainValue: `₱${((totalRevenue?.totalRevenue || 0) / 1000).toFixed(1)}K`, 
+            mainValue: formatRevenue(totalRevenue?.totalRevenue || 0), // APPLIED HERE
             subText: "Overall", 
             Icon: Banknote, 
-            color: "text-emerald-500" 
+            color: "text-emerald-500",
+            route: "/home/transactions" 
         },
         { 
             title: "Pending Approvals", 
             mainValue: (pendingApprovals?.pendingApprovalsCount || 0).toString(), 
             subText: "Requests", 
             Icon: Clock, 
-            color: "text-blue-500" 
+            color: "text-blue-500",
+            route: "/home/requests" 
         },
         { 
             title: "Pending Deliveries", 
             mainValue: (upcomingDeliveries?.upcomingDeliveriesCount || 0).toString(), 
             subText: "Deliveries", 
             Icon: Package, 
-            color: "text-blue-500" 
+            color: "text-blue-500",
+            route: "/home/deliveries" 
         },
         { 
             title: "Total Transactions", 
             mainValue: (totalTransactions?.totalTransactionsCount || 0).toLocaleString(), 
             subText: "Tracked Sales", 
             Icon: Receipt, 
-            color: "text-blue-500" 
+            color: "text-blue-500",
+            route: "/home/transactions" 
         }
     ];
 
@@ -132,23 +149,9 @@ const DashboardHome = () => {
                                     subText={card.subText}
                                     Icon={card.Icon}
                                     color={card.color}
+                                    onClick={() => navigate(card.route)} 
                                 />
                             ))}
-                        </div>
-                    )}
-
-                    {/* MANAGER / OWNER ONLY (Sales Chart) */}
-                    {(userRole === "MANAGER" || userRole === "OWNER") && (
-                        <div className="bg-card border border-border rounded-xl p-6 shadow-sm w-full h-[350px] flex flex-col items-center justify-center text-muted-foreground">
-                            <div className="w-full flex justify-between items-center mb-6 self-start">
-                                <h3 className="font-bold text-foreground text-lg">Sales Forecast and Predictive Analysis</h3>
-                                <select className="border border-input rounded-md px-3 py-1 text-sm bg-background">
-                                    <option>Weekly</option>
-                                    <option>Monthly</option>
-                                </select>
-                            </div>
-                            <BarChart3 className="w-16 h-16 mb-2 opacity-50" />
-                            <p>Line Chart Component Placeholder</p>
                         </div>
                     )}
 
