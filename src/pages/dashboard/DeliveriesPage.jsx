@@ -16,6 +16,15 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 const DeliveriesPage = () => {
     const {
         deliveries,
+        pendingDispatchCount,
+        pendingDispatchInboundCount,
+        pendingDispatchOutboundCount,
+        incompleteOutboundDeliveriesCount,
+        incompleteInboundDeliveriesCount,
+        inboundDeliveriesCount,
+        outboundDeliveriesCount,
+        completedInboundDeliveriesCount,
+        completedOutboundDeliveriesCount,
         asyncState,
         pagination,
         filter,
@@ -215,20 +224,20 @@ const DeliveriesPage = () => {
                 <StatusCard
                     title="Pending Dispatches"
                     Icon={Clock}
-                    subText=" inbound, "
-                    secondSubText=" outbound"
+                    mainValue={pendingDispatchCount}
+                    subText={`${pendingDispatchInboundCount} inbound, ${pendingDispatchOutboundCount} outbound`}
                 />
                 <StatusCard
                     title="Outbound Deliveries"
                     Icon={Clock}
-                    subText=" in-transit "
-                    secondSubText=" completed"
+                    mainValue={outboundDeliveriesCount}
+                    subText={`${incompleteOutboundDeliveriesCount} incomplete, ${completedOutboundDeliveriesCount} completed`}
                 />
                 <StatusCard
                     title="Inbound Deliveries"
                     Icon={Clock}
-                    subText=" in-transit "
-                    secondSubText=" completed"
+                    mainValue={inboundDeliveriesCount}
+                    subText={`${incompleteInboundDeliveriesCount} incomplete, ${completedInboundDeliveriesCount} completed`}
                 />
             </div>
 

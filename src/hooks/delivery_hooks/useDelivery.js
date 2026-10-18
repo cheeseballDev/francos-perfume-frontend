@@ -11,6 +11,16 @@ const DELIVERY_FILTER_SCHEMA = [
 
 export const useDelivery = () => {
     const [deliveries, setDeliveries] = useState([]);
+    const [pendingDispatchCount, setPendingDispatchCount] = useState(0);
+    const [pendingDispatchInboundCount, setPendingDispatchInboundCount] = useState(0);
+    const [pendingDispatchOutboundCount, setPendingDispatchOutboundCount] = useState(0);
+    const [incompleteOutboundDeliveriesCount, setIncompleteOutboundDeliveriesCount] = useState(0);
+    const [incompleteInboundDeliveriesCount, setIncompleteInboundDeliveriesCount] = useState(0);
+    const [inboundDeliveriesCount, setInboundDeliveriesCount] = useState(0);
+    const [outboundDeliveriesCount, setOutboundDeliveriesCount] = useState(0);
+    const [completedInboundDeliveriesCount, setCompletedInboundDeliveriesCount] = useState(0);
+    const [completedOutboundDeliveriesCount, setCompletedOutboundDeliveriesCount] = useState(0);
+
     const isFirstLoad = useRef(true);
 
     const [asyncState, setAsyncState] = useState({
@@ -57,6 +67,17 @@ export const useDelivery = () => {
                     totalPages: data.totalDeliveryPages || 0,
                     totalEntries: data.totalDeliveries || 0,
                 });
+
+                setPendingDispatchCount(data.pendingDispatchCount || 0);
+                setPendingDispatchInboundCount(data.pendingDispatchInboundCount || 0);
+                setPendingDispatchOutboundCount(data.pendingDispatchOutboundCount || 0);
+                setIncompleteOutboundDeliveriesCount(data.incompleteOutboundDeliveriesCount || 0);
+                setIncompleteInboundDeliveriesCount(data.incompleteInboundDeliveriesCount || 0);
+                setInboundDeliveriesCount(data.inboundDeliveriesCount || 0);
+                setOutboundDeliveriesCount(data.outboundDeliveriesCount || 0);
+                setCompletedInboundDeliveriesCount(data.completedInboundDeliveriesCount || 0);
+                setCompletedOutboundDeliveriesCount(data.completedOutboundDeliveriesCount || 0);
+
             })
             .catch((err) => {
                 setAsyncState((prev) => ({ ...prev, error: err }));
@@ -102,6 +123,15 @@ export const useDelivery = () => {
 
     return {
         deliveries,
+        pendingDispatchCount,
+        pendingDispatchInboundCount,
+        pendingDispatchOutboundCount,
+        incompleteOutboundDeliveriesCount,
+        incompleteInboundDeliveriesCount,
+        inboundDeliveriesCount,
+        outboundDeliveriesCount,
+        completedInboundDeliveriesCount,
+        completedOutboundDeliveriesCount,
         asyncState,
         pagination,
         filter,
