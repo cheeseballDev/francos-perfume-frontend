@@ -90,7 +90,12 @@ const DashboardHome = () => {
             color: "text-blue-500",
             route: "/home/transactions" 
         }
-    ];
+    ].filter(card => {
+        if (userRole === "STAFF" || userRole === "ADMIN") {
+            return card.title !== "Total Revenue" && card.title !== "Total Transactions";
+        }
+        return true;
+    });
 
     if (userRole === "CASHIER") {
         return (

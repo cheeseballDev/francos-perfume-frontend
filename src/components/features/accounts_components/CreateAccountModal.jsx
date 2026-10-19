@@ -12,6 +12,7 @@ const accountValidationSchema = {
     firstName: [isValid.required],
     lastName: [isValid.required],
     email: [isValid.required, isValid.email],
+    address: [isValid.minLength(3)],
     contactNumber: [isValid.required, isValid.phone],
     branchLocation: [isValid.required],
     employeeRole: [isValid.required],
@@ -73,6 +74,14 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
         (option) => option.value !== "" && option.value !== "__all__"
     );
 
+    const handleNameChange = (field, value) => {
+        const validPattern = /^[a-zA-ZñÑàáâãäåæçèéêëìíîïðòóôõöùúûüýÿ\s'-]*$/;
+
+        if (value === '' || validPattern.test(value)) {
+            handleChange(field, value);
+        }
+    };
+
     const handleChange = (field, value) => {
         setData((prev) => ({ ...prev, [field]: value }));
         
@@ -80,7 +89,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
         setErrors((prev) => ({ ...prev, [field]: null }));
         }
     };
-
+    
     const handleSave = () => {
         const validationErrors = validateForm(data, accountValidationSchema);
 
@@ -196,24 +205,27 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
           <div className='grid grid-cols-3 gap-4 py-4'>
             <FormField 
                 label="First Name"
+                value={data.firstName || ''}
                 maxLength={25}
-                onChange={e => handleChange('firstName', e.target.value)}
+                onChange={e => handleNameChange('firstName', e.target.value)}
                 placeholder="Enter first name here..."
                 error={errors.firstName}
             />
 
             <FormField 
                 label="Middle Name"
+                value={data.middleName || ''}
                 maxLength={25}
-                onChange={e => handleChange('middleName', e.target.value)}
+                onChange={e => handleNameChange('middleName', e.target.value)}
                 placeholder="Enter middle name here..."
                 error={errors.middleName}
             />
 
             <FormField 
                 label="Last Name"
+                value={data.lastName || ''}
                 maxLength={25}
-                onChange={e => handleChange('lastName', e.target.value)}
+                onChange={e => handleNameChange('lastName', e.target.value)}
                 placeholder="Enter last name here..."
                 error={errors.lastName}
             />
@@ -222,6 +234,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
           <div className='mb-6'>
             <FormField 
                 label="Address"
+                value={data.address || ''}
                 maxLength={50}
                 onChange={e => handleChange('address', e.target.value)}
                 placeholder="Enter address here..."
@@ -232,6 +245,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
           <div className="grid grid-cols-2 gap-6 mb-6">
             <FormField 
                 label="Email"
+                value={data.email || ''}
                 maxLength={30}
                 onChange={e => handleChange('email', e.target.value)}
                 placeholder="Enter email here..."
