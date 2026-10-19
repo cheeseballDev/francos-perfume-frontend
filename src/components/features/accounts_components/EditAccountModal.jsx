@@ -24,6 +24,7 @@ const getAccountFormData = (account) => ({
 const accountValidationSchema = {
     firstName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
     lastName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
+    address: [isValid.minLength(3)],
     email: [isValid.required, isValid.email],
     contactNumber: [isValid.phone],
     branchLocation: [isValid.required],
@@ -88,6 +89,15 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
     const employeeShiftOptions = employeeShiftOptionData.filter(
         (option) => option.value !== "" && option.value !== "__all__"
     );
+
+    const handleNameChange = (field, value) => {
+        const validPattern = /^[a-zA-ZñÑàáâãäåæçèéêëìíîïðòóôõöùúûüýÿ\s'-]*$/;
+
+        if (value === '' || validPattern.test(value)) {
+            handleChange(field, value);
+        }
+    };
+
 
     const handleChange = (field, value) => {
         setData((prev) => ({ ...prev, [field]: value }));
@@ -211,11 +221,12 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
           </div>
 
           <div className='grid grid-cols-3 gap-4 py-4'>
+
             <FormField 
                 label="First Name"
                 value={data.firstName}
                 maxLength={25}
-                onChange={e => handleChange('firstName', e.target.value)}
+                onChange={e => handleNameChange('firstName', e.target.value)}
                 placeholder="Enter first name here..."
                 error={errors.firstName}
             />
@@ -224,7 +235,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
                 label="Middle Name"
                 value={data.middleName}
                 maxLength={25}
-                onChange={e => handleChange('middleName', e.target.value)}
+                onChange={e => handleNameChange('middleName', e.target.value)}
                 placeholder="Enter middle name here..."
                 error={errors.middleName}
             />
@@ -233,7 +244,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
                 label="Last Name"
                 value={data.lastName}
                 maxLength={25}
-                onChange={e => handleChange('lastName', e.target.value)}
+                onChange={e => handleNameChange('lastName', e.target.value)}
                 placeholder="Enter last name here..."
                 error={errors.lastName}
             />
