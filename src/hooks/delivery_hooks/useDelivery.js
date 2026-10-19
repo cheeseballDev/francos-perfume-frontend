@@ -1,3 +1,4 @@
+import { supabase } from "@/lib/SupabaseClient";
 import { getAllDeliveries, getDeliveryDetails, getDeliveryFilters } from "@/services/DeliveryService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -95,6 +96,23 @@ export const useDelivery = () => {
         }, 0);
         return () => clearTimeout(timer);
     }, [fetchDeliveries])
+
+    useEffect(() => {
+        const channel = supabase
+            .channel("public:delivery")
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "delivery" }, 
+                () => {
+                    fetchDeliveries();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [fetchDeliveries]);
 
     const fetchDeliveryDetails = useCallback(async (deliveryId) => {
         try {

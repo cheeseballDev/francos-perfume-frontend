@@ -80,8 +80,6 @@ const PointOfSalePage = () => {
         await handleFinalCheckout(paymentDetails, async (response) => {
 
             const receiptData = response.receipt;
-            
-            console.log(receiptData);
 
             /*
             if (receiptData) {
