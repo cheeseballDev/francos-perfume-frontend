@@ -17,6 +17,11 @@ export const postCheckout = async (checkoutData) => {
 };
 
 export const getPOSFilters = async () => {
-    const response = await apiClient(`${PATH}/filters`);
+    const response = await apiClient.get(`${PATH}/filters`);
+    return response.data;
+}
+
+export const getScanBarcode = async (barcode) => {
+    const response = await apiClient.post(`${PATH}/scan`, { barcode });
     return response.data;
 }

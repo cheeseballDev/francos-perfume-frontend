@@ -1,6 +1,6 @@
 import logo from '../../../assets/FrancoPerfumeLogo.png';
 
-const ProductCard = ({ name, type, gender, imageUrl, price, onAddToCart }) => {
+const ProductCard = ({ name, type, gender, imageUrl, onAddToCart }) => {
   return (
     <div 
       onClick={onAddToCart} 

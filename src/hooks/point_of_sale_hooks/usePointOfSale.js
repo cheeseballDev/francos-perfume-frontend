@@ -100,7 +100,6 @@ export const usePointOfSale = () => {
     }, [fetchAllPOSProducts]);
 
     const fetchProductFilters = useCallback(async () => {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         try {
             const data = await getPOSFilters();
             setFilterOptions(buildFilterOptions(data, PRODUCT_FILTER_SCHEMA));
