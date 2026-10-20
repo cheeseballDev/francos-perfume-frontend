@@ -1,3 +1,4 @@
+import { ImageUpload } from '@/components/shared';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import FormField from '@/components/shared/FormField';
 import FormSelect from '@/components/shared/FormSelect';
@@ -5,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from "@/utils/validationUtils";
-import { Loader2, User } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const accountValidationSchema = {
     firstName: [isValid.required],
@@ -28,23 +28,16 @@ const ROLE_RANKS = {
 
 const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount }) => {
     const { toast } = useToast();
-    const fileInputRef = useRef(null);
 
     const [config, setConfig] = useState(null);
     const [data, setData] = useState({});
     const [errors,setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Image Simulation State
-    const [imagePreview, setImagePreview] = useState(null);
-    const [isUploadingImage, setIsUploadingImage] = useState(false);
-
     useEffect(() => {
         if (isOpen) {
             setData({});
             setErrors({});
-            setImagePreview(null);
-            setIsUploadingImage(false);
         }
     }, [isOpen]);
 
@@ -131,41 +124,6 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
         })
     }
 
-    const handleTriggerImageUpload = () => fileInputRef.current?.click();
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const validTypes = ['image/jpeg', 'image/png'];
-        if (!validTypes.includes(file.type)) {
-            toast({ title: "Invalid file type", description: "Please upload a PNG or JPEG image.", variant: "destructive" });
-            return;
-        }
-
-        if (file.size > 15 * 1024 * 1024) {
-            toast({ title: "File too large", description: "Please upload an image smaller than 15 MB.", variant: "destructive" });
-            return;
-        }
-
-        setIsUploadingImage(true);
-        setTimeout(() => {
-            setImagePreview(URL.createObjectURL(file));
-            setIsUploadingImage(false);
-            toast({ title: "Upload Successful", description: "Profile picture attached (Simulated).", className: "bg-emerald-600 text-white border-emerald-700" });
-            if (fileInputRef.current) fileInputRef.current.value = "";
-        }, 1000);
-    };
-
-    const handleRemoveImage = () => {
-        setIsUploadingImage(true);
-        setTimeout(() => {
-            setImagePreview(null);
-            setIsUploadingImage(false);
-            toast({ title: "Picture Removed", description: "Profile picture removed (Simulated)." });
-        }, 800);
-    };
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -174,33 +132,14 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
             <DialogTitle>Create Account</DialogTitle>
           </DialogHeader>
 
-          {/* Image Upload Section */}
-          <div className="flex items-center gap-6 py-4 border-b border-border">
-              <div className="h-24 w-24 rounded-full border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0 relative">
-                  {isUploadingImage ? (
-                      <Loader2 className="animate-spin text-muted-foreground" size={32} />
-                  ) : imagePreview ? (
-                      <img src={imagePreview} alt="Profile Preview" className="h-full w-full object-cover" />
-                  ) : (
-                      <User size={40} className="text-muted-foreground stroke-[1.5]" />
-                  )}
-              </div>
-              
-              <div className="flex-grow">
-                  <h3 className="text-[16px] font-bold text-foreground">Profile Picture</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5 mb-3">PNG, JPEG under 15 MB</p>
-                  <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/png, image/jpeg" className="hidden" />
-                  
-                  <div className="flex gap-2">
-                      <Button size="sm" onClick={handleTriggerImageUpload} variant="outline" disabled={isUploadingImage}>
-                          {isUploadingImage ? "Uploading..." : "Upload Image"}
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={handleRemoveImage} disabled={isUploadingImage || !imagePreview}>
-                          Remove
-                      </Button>
-                  </div>
-              </div>
-          </div>
+            <div className="py-4 border-b border-border">
+                <ImageUpload
+                    value={data.employeeImageUrl}
+                    onChange={(url) => handleChange('employeeImageUrl', url)}
+                    bucket="account-profile-pictures"
+                    //className=""
+                />
+            </div>
 
           <div className='grid grid-cols-3 gap-4 py-4'>
             <FormField 

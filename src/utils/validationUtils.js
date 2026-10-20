@@ -78,3 +78,34 @@ export const validateForm = (data, schema) => {
     }
     return errors;
 }; 
+
+const ALLOWED_TYPES = [
+    'image/jpeg',
+    'image/jpg', 
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/avif',
+    'image/svg+xml',
+];
+
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif', '.svg'];
+const MAX_SIZE_MB = 5;
+
+export const validateImageFile = (file) => {
+    if (!file) return 'No file selected';
+
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    const isValidType = ALLOWED_TYPES.includes(file.type);
+    const isValidExt = ALLOWED_EXTENSIONS.includes(ext);
+
+    if (!isValidType || !isValidExt) {
+        return `Unsupported file type. Allowed: JPG, JPEG, PNG, WEBP, GIF, AVIF, SVG`;
+    }
+
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        return `File too large. Maximum size is ${MAX_SIZE_MB}MB`;
+    }
+
+    return null;
+};

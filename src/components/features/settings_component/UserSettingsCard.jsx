@@ -1,10 +1,12 @@
+import { ImageUpload } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useAccount } from "@/hooks/account_hooks/useAccount";
+import { deleteImage } from "@/services/ImageService";
 import { isValid, validateForm } from "@/utils/validationUtils";
-import { Loader2, User } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import EditAccountPasswordModal from './EditAccountPasswordModal';
 
 const INITIAL_FORM_STATE = {
@@ -16,6 +18,7 @@ const INITIAL_FORM_STATE = {
     contactNumber: '',
     branchLocation: '',
     employeeRole: '',
+    employeeImageUrl: '',
 };
 
 const userValidationSchema = {
@@ -28,8 +31,6 @@ const userValidationSchema = {
 const UserSettingsCard = ({ accountId }) => {
     const { fetchAccountDetails, updateAccount, updatePassword } = useAccount();
     const { toast } = useToast();
-    
-    const fileInputRef = useRef(null);
 
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [profileData, setProfileData] = useState(null);
@@ -37,10 +38,9 @@ const UserSettingsCard = ({ accountId }) => {
     const [errors, setErrors] = useState({});
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [formData, setFormData] = useState(INITIAL_FORM_STATE);
-
-    const [imagePreview, setImagePreview] = useState(null);
-    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [data, setData] = useState(INITIAL_FORM_STATE);
+    const [originalImageUrl, setOriginalImageUrl] = useState(null);
+    const [isRemovingImage, setIsRemovingImage] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -48,7 +48,7 @@ const UserSettingsCard = ({ accountId }) => {
                 setIsLoading(true);
                 const data = await fetchAccountDetails(accountId);
                 setProfileData(data);
-                setFormData({
+                setData({
                     firstName: data?.firstName || '',
                     middleName: data?.middleName || '',
                     lastName: data?.lastName || '',
@@ -56,8 +56,11 @@ const UserSettingsCard = ({ accountId }) => {
                     email: data?.email || '',
                     contactNumber: data?.contactNumber || '',
                     branchLocation: data?.branchLocation || '',
-                    employeeRole: data?.employeeRole || ''
+                    employeeRole: data?.employeeRole || '',
+                    employeeImageUrl: data?.employeeImageUrl || '',
                 });
+
+                setOriginalImageUrl(data.employeeImageUrl || null);
             } catch (error) {
                 toast({
                     title: "Failed to get user profile",
@@ -71,17 +74,25 @@ const UserSettingsCard = ({ accountId }) => {
         fetchProfile();
     }, [accountId, fetchAccountDetails, toast]);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const handleNameChange = (field, value) => {
+        const validPattern = /^[a-zA-ZñÑàáâãäåæçèéêëìíîïðòóôõöùúûüýÿ\s'-]*$/;
+
+        if (value === '' || validPattern.test(value)) {
+            handleChange(field, value);
+        }
+    };
+
+
+    const handleChange = (field, value) => {
+        setData((prev) => ({ ...prev, [field]: value }));
         
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: null }));
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: null }));
         }
     };
 
     const handleCancelEdit = () => {
-        setFormData({
+        setData({
             firstName: profileData?.firstName || '',
             middleName: profileData?.middleName || '',
             lastName: profileData?.lastName || '',
@@ -90,12 +101,13 @@ const UserSettingsCard = ({ accountId }) => {
             contactNumber: profileData?.contactNumber || '',
             branchLocation: profileData?.branchLocation || '',
             employeeRole: profileData?.employeeRole || '',
+            employeeImageUrl: profileData?.employeeImageUrl || '',
         });
         setIsEditing(false);
     };
 
     const handleSaveEdit = async () => {
-        const validationErrors = validateForm(formData, userValidationSchema);
+        const validationErrors = validateForm(data, userValidationSchema);
         
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -104,8 +116,13 @@ const UserSettingsCard = ({ accountId }) => {
 
         try {
             setIsSaving(true);
-            await updateAccount(accountId, formData);
-            setProfileData(prev => ({ ...prev, ...formData }));
+
+            if (isRemovingImage && originalImageUrl) {
+                await deleteImage(originalImageUrl, "account-profile-pictures");
+            }
+
+            await updateAccount(accountId, data);
+            setProfileData(prev => ({ ...prev, ...data }));
             
             toast({
                 title: "Success",
@@ -123,65 +140,16 @@ const UserSettingsCard = ({ accountId }) => {
         }
     };
 
-    const handleTriggerImageUpload = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const validTypes = ['image/jpeg', 'image/png'];
-        if (!validTypes.includes(file.type)) {
-            toast({
-                title: "Invalid file type",
-                description: "Please upload a PNG or JPEG image.",
-                variant: "destructive"
-            });
-            return;
+    const handleImageChange = (url) => {
+        console.log(url);
+        if (!url && originalImageUrl) {
+            setIsRemovingImage(true);
+        } else if (url) {
+            setIsRemovingImage(false);
         }
-
-        const maxSize = 15 * 1024 * 1024;
-        if (file.size > maxSize) {
-            toast({
-                title: "File too large",
-                description: "Please upload an image smaller than 15 MB.",
-                variant: "destructive"
-            });
-            return;
-        }
-
-        setIsUploadingImage(true);
-
-        setTimeout(() => {
-            const previewUrl = URL.createObjectURL(file);
-            setImagePreview(previewUrl);
-            setIsUploadingImage(false);
-            
-            toast({
-                title: "Upload Successful",
-                description: "Your profile picture has been updated (Simulated).",
-                className: "bg-emerald-600 text-white border-emerald-700",
-            });
-            
-            if (fileInputRef.current) fileInputRef.current.value = "";
-        }, 1000);
+        handleChange('employeeImageUrl', url);
     };
 
-    const handleRemoveImage = () => {
-        setIsUploadingImage(true);
-
-        setTimeout(() => {
-            setImagePreview(null);
-            setProfileData(prev => ({ ...prev, employeeImageUrl: null }));
-            setIsUploadingImage(false);
-
-            toast({
-                title: "Picture Removed",
-                description: "Your profile picture has been removed (Simulated).",
-            });
-        }, 800);
-    };
 
     if (isLoading) {
         return (
@@ -191,52 +159,20 @@ const UserSettingsCard = ({ accountId }) => {
         );
     }
 
-    const displayImage = imagePreview || profileData?.employeeImageUrl;
-
     return (
         <>
             <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-8 font-montserrat max-w-3xl">
                 
-                <div className="flex items-center gap-6 mb-10 pb-6 border-b border-border">
-                    <div className="h-24 w-24 rounded-full border-2 border-border flex items-center justify-center overflow-hidden bg-muted shrink-0 relative group">
-                        {isUploadingImage ? (
-                            <Loader2 className="animate-spin text-muted-foreground" size={32} />
-                        ) : displayImage ? (
-                            <img src={displayImage} alt="Profile" className="h-full w-full object-cover" />
-                        ) : (
-                            <User size={48} className="text-muted-foreground stroke-[1.5]" />
-                        )}
-                    </div>
-                    
-                    <div className="flex-grow">
-                        <h3 className="text-[22px] font-bold text-foreground tracking-tight">Profile picture</h3>
-                        <p className="text-sm text-muted-foreground mt-0.5">PNG, JPEG under 15 MB</p>
-                    </div>
-
-                    <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        onChange={handleImageChange} 
-                        accept="image/png, image/jpeg" 
-                        className="hidden" 
+                <div className="py-4 border-b border-border">
+                    <ImageUpload
+                        value={data.employeeImageUrl}
+                        onChange={handleImageChange}
+                        bucket="account-profile-pictures"
+                        imageText='User Image'
+                        isEditing={isEditing}
+                        aspect={1}
+                        //className=""
                     />
-                    
-                    <div className="flex flex-col gap-3 shrink-0">
-                        <Button 
-                            onClick={handleTriggerImageUpload} 
-                            variant="outline" 
-                            disabled={isUploadingImage}
-                        >
-                            {isUploadingImage ? "Uploading..." : "Upload new picture"}
-                        </Button>
-                        <Button 
-                            variant="destructive"
-                            onClick={handleRemoveImage}
-                            disabled={isUploadingImage || !displayImage}
-                        >
-                            Remove picture
-                        </Button>
-                    </div>
                 </div>
 
                 <div className="space-y-6 mb-10">
@@ -247,8 +183,8 @@ const UserSettingsCard = ({ accountId }) => {
                                 <Input 
                                     name="firstName"
                                     maxLength={25}
-                                    value={formData.firstName} 
-                                    onChange={handleInputChange} 
+                                    value={data.firstName || ''} 
+                                    onChange={handleNameChange} 
                                 />
                             ) : (
                                 <p className="font-bold text-foreground py-2">{profileData?.firstName || 'N/A'}</p>
@@ -260,8 +196,8 @@ const UserSettingsCard = ({ accountId }) => {
                                 <Input 
                                     name="middleName" 
                                     maxLength={25}
-                                    value={formData.middleName} 
-                                    onChange={handleInputChange} 
+                                    value={data.middleName || ''} 
+                                    onChange={handleNameChange} 
                                 />
                             ) : (
                                 <p className="font-bold text-foreground py-2">{profileData?.middleName || 'N/A'}</p>
@@ -273,8 +209,8 @@ const UserSettingsCard = ({ accountId }) => {
                                 <Input 
                                     name="lastName" 
                                     maxLength={25}
-                                    value={formData.lastName} 
-                                    onChange={handleInputChange} 
+                                    value={data.lastName || ''} 
+                                    onChange={handleNameChange} 
                                 />
                             ) : (
                                 <p className="font-bold text-foreground py-2">{profileData?.lastName || 'N/A'}</p>
@@ -288,8 +224,9 @@ const UserSettingsCard = ({ accountId }) => {
                             <Input 
                                 name="address" 
                                 maxLength={50}
-                                value={formData.address} 
-                                onChange={handleInputChange} 
+                                value={data.address} 
+                                onChange={handleChange} 
+                                error={errors.address}
                             />
                         ) : (
                             <p className="font-bold text-foreground uppercase py-2">{profileData?.address || 'N/A'}</p>
@@ -303,8 +240,9 @@ const UserSettingsCard = ({ accountId }) => {
                                 <Input 
                                     name="email" 
                                     maxLength={30}
-                                    value={formData.email} 
-                                    onChange={handleInputChange} 
+                                    value={data.email} 
+                                    onChange={handleChange} 
+                                    error={errors.email}
                                 />
                             ) : (
                                 <p className="font-bold text-foreground py-2">{profileData?.email || 'N/A'}</p>
@@ -316,8 +254,13 @@ const UserSettingsCard = ({ accountId }) => {
                                 <Input 
                                     name="contactNumber" 
                                     maxLength={30}
-                                    value={formData.contactNumber} 
-                                    onChange={handleInputChange} 
+                                    value={data.contactNumber} 
+                                    onChange={e => {
+                                            const numericString = e.target.value.replace(/[^\d+]/g, '');
+                                            handleChange('contactNumber', numericString);
+                                        }}
+                                    placeholder="E.g 09123456789"
+                                    error={errors.contactNumber}
                                 />
                             ) : (
                                 <p className="font-bold text-foreground py-2">{profileData?.contactNumber || 'N/A'}</p>
@@ -341,7 +284,6 @@ const UserSettingsCard = ({ accountId }) => {
                     {isEditing ? (
                         <>
                             <Button 
-                                variant="outline" 
                                 onClick={handleCancelEdit} 
                                 disabled={isSaving}
                             >
@@ -360,13 +302,11 @@ const UserSettingsCard = ({ accountId }) => {
                         <>
                             <Button 
                                 onClick={() => setIsEditing(true)}
-                                className="w-40 font-bold"
                             >
                                 Edit details
                             </Button>
                             <Button 
-                                variant="outline"
-                                className="border-destructive text-destructive hover:bg-destructive/10"
+                                variant="destructive"
                                 onClick={() => setIsPasswordModalOpen(true)}
                             >
                                 Update Password
@@ -379,7 +319,7 @@ const UserSettingsCard = ({ accountId }) => {
             <EditAccountPasswordModal 
                 isOpen={isPasswordModalOpen} 
                 onClose={() => setIsPasswordModalOpen(false)}
-                user={formData}
+                user={data}
                 accountId={accountId}
                 updatePassword={updatePassword}
             />

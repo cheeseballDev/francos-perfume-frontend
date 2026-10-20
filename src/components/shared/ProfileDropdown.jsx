@@ -1,4 +1,5 @@
 import { useAuth } from '@/auth/UseAuth';
+import { useAccount } from '@/hooks/account_hooks/useAccount';
 import { ArrowRightLeft, HelpCircle, LogOut, Settings, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +8,19 @@ import LogoutModal from './LogoutModal';
 const ProfileDropdown = () => {
     const { user, handleSwitchAccess } = useAuth();
     const navigate = useNavigate();
+    const { 
+        fetchAccountDetails 
+    } = useAccount();
     
+    const [profile, setProfile] = useState([]);
+
+    useEffect(() => {
+        async function fetchCurrentUserData() {
+            setProfile(await fetchAccountDetails(user.employeeId));
+        }
+        fetchCurrentUserData();
+    }, [fetchAccountDetails, profile, user.employeeId]); 
+
     const canSwitchAccess = 
         user?.trueRole?.toLowerCase() === 'manager' || 
         user?.role?.toLowerCase() === 'manager';
@@ -16,8 +29,6 @@ const ProfileDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
-    const displayUsername = user?.email ? user.email.split('@')[0] : 'Employee Name';
-        
     useEffect(() => {
         const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -29,13 +40,21 @@ const ProfileDropdown = () => {
     }, []);
 
     return (
-        <div className="relative z-50 pt-2" ref={dropdownRef}>
+        <div className="relative" ref={dropdownRef}>
         <div
             onClick={() => setIsOpen(!isOpen)}
             className="flex items-center gap-2 cursor-pointer transition-colors text-muted-foreground hover:text-foreground"
         >
-            <User size={20} />
-            <span className="font-medium text-[15px]">{displayUsername}</span>
+            {profile?.employeeImageUrl 
+            ? <img 
+                src={profile.employeeImageUrl}
+                alt={"user picture"}
+                className="w-10 h-10 rounded-full"
+                />
+            : <User size={24} />
+            }
+
+            <span className="font-medium text-[15px]">{profile.lastName}</span>
             <span className="text-xs">▼</span>
         </div>
         
