@@ -19,7 +19,7 @@ const ProfileDropdown = () => {
             setProfile(await fetchAccountDetails(user.employeeId));
         }
         fetchCurrentUserData();
-    }, [fetchAccountDetails, profile, user.employeeId]); 
+    }, [user.employeeId]); 
 
     const canSwitchAccess = 
         user?.trueRole?.toLowerCase() === 'manager' || 

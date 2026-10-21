@@ -126,6 +126,8 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
                             onChange={handleImageChange}
                             bucket="product-pictures"
                             isEditing={true}
+                            imageText='Product Image'
+                            aspect={1}
                             //className=""
                         />
                     </div>

@@ -113,7 +113,8 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                                     onChange={(url) => handleChange('profileImageUrl', url)}
                                     bucket="product-pictures"
                                     isEditing={true}
-                                    //className=""
+                                    imageText='Product Image'
+                                    aspect={1}
                                 />
                             </div>
 

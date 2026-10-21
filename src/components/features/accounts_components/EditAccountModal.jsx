@@ -173,6 +173,8 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
                     value={data.employeeImageUrl}
                     onChange={handleImageChange}
                     bucket="account-profile-pictures"
+                    imageText='User Image'
+                    aspect={1}
                     //className=""
                 />
             </div>

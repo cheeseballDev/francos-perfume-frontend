@@ -1,4 +1,4 @@
-import FormSelect from '@/components/shared/FormSelect';
+import SearchableProductSelect from '@/components/shared/SearchableProductSelect';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus } from 'lucide-react';
 
@@ -29,9 +29,10 @@ const ProductSelector = ({
             
             <div className="flex items-end gap-4 mb-4">
                 <div className="flex-1">
-                    <FormSelect
-                        onChange={setSelectedProduct}
+                    <SearchableProductSelect
                         options={productOptions}
+                        value={selectedProduct}
+                        onChange={setSelectedProduct}
                         placeholder="Select product..."
                     />
                 </div>

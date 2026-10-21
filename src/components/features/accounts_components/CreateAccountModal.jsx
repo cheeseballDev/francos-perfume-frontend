@@ -137,6 +137,8 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
                     value={data.employeeImageUrl}
                     onChange={(url) => handleChange('employeeImageUrl', url)}
                     bucket="account-profile-pictures"
+                    imageText='User Image'
+                    aspect={1}
                     //className=""
                 />
             </div>
