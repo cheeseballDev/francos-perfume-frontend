@@ -2,18 +2,18 @@ import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const SearchableProductSelect = ({ 
-    options = [], 
-    value,
-    onChange,
+    productOptions = [], 
+    selectedProduct,
+    setSelectedProduct,
     placeholder = "Select product..."
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const dropdownRef = useRef(null);
 
-    const selectedOption = options.find(opt => opt.value === value);
+    const selectedOption = productOptions.find(opt => opt.value === selectedProduct);
 
-    const filteredOptions = [...options]
+    const filteredOptions = [...productOptions]
         .sort((a, b) => (a.label || "").localeCompare(b.label || ""))
         .filter(option => 
             (option.label || "").toLowerCase().includes(searchQuery.toLowerCase())
@@ -60,7 +60,7 @@ const SearchableProductSelect = ({
                                 key={option.value}
                                 className="px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
                                 onClick={() => {
-                                    onChange(option.value);
+                                    setSelectedProduct(option.value);
                                     setSearchQuery("");
                                     setIsOpen(false);
                                 }}

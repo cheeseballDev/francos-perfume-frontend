@@ -1,5 +1,4 @@
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
-import SearchableProductSelect from "@/components/shared/SearchableProductSelect";
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast";
 import { useRequest } from '@/hooks/request_hooks/useRequest';
@@ -216,11 +215,6 @@ const CreateTransferRequestPage = () => {
                         branchOptions={branchOptions}
                     />
 
-                    <SearchableProductSelect 
-                        selectedProduct={selectedProduct}
-                        setSelectedProduct={setSelectedProduct}
-                        
-                    />
                     <ProductSelector
                         quantity={quantity}
                         setQuantity={setQuantity}
