@@ -25,7 +25,7 @@ const RequestTimeline = ({
                                     <div className="absolute left-[11px] top-6 bottom-0 w-0.5 border-l-2 border-dashed border-border" />
                                 )}
 
-                                <div className="relative z-10 shrink-0">
+                                <div className="relative flex items-center justify-center shrink-0">
                                     {renderTimelineIcon(item.status)}
                                 </div>
 

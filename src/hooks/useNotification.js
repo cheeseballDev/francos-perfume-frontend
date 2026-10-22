@@ -2,6 +2,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/SupabaseClient";
 import { getAllNotifications, patchMarkAsAllRead, patchMarkNotificationAsRead } from "@/services/NotificationService";
+import { formatDateTimeForTable } from "@/utils/formattingUtils";
 
 import { useCallback, useEffect, useState } from "react";
 
@@ -19,9 +20,11 @@ export const useNotifications = () => {
 
             const notificationList = Array.isArray(data) 
                 ? data 
-                : data?.notifications || data?.items || [];
+                : data?.notifications;
 
             setNotifications(notificationList);
+            const unread = notificationList.filter(n => !n.isRead).length;
+            setUnreadCount(unread);
         } catch (error) {
             console.error("Failed to load notifications:", error);
         } finally {
@@ -43,25 +46,25 @@ export const useNotifications = () => {
                 (payload) => {
                     const newRow = payload.new;
 
-                    // Ensure the notification belongs to the logged-in employee 
-                    // (Note: Database column name is usually employee_id)
-                    if (employeeId && Number(newRow.employee_id) === Number(employeeId)) {
+                    if (employeeId && (newRow.employee_id === employeeId)) {
                         
-                        // Map database snake_case to match your frontend component keys if needed
                         const formattedNotification = {
-                            notificationId: newRow.notification_id || newRow.id,
+                            notificationId: newRow.notification_id,
                             title: newRow.title,
                             message: newRow.message,
                             type: newRow.type,
                             referenceId: newRow.reference_id,
-                            isRead: newRow.is_read || false,
-                            createdAt: newRow.created_at || new Date().toISOString()
+                            isRead: newRow.is_read,
+                            createdAt: formatDateTimeForTable(newRow.created_at)
                         };
 
-                        setNotifications((prev) => [formattedNotification, ...prev]);
-                        setUnreadCount((prev) => prev + 1);
+                       setNotifications((prev) => {
+                            const updated = [formattedNotification, ...prev];
+                            const unread = updated.filter(n => !n.isRead).length;
+                            setUnreadCount(unread);
+                            return updated;
+                        });
 
-                        // Optional: trigger a subtle toast pop-up when a new notification arrives in real-time
                         toast({
                             title: formattedNotification.title || "New Notification",
                             description: formattedNotification.message,
@@ -80,6 +83,7 @@ export const useNotifications = () => {
         setNotifications((prev) =>
             prev.map((n) => (n.notificationId === id ? { ...n, isRead: true } : n))
         );
+        setUnreadCount((prev) => Math.max(0, prev - 1))
 
         try {
             await patchMarkNotificationAsRead(id);
@@ -95,12 +99,15 @@ export const useNotifications = () => {
 
     const markAllAsRead = async () => {
         const previousState = [...notifications];
-        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+        const previousCount = unreadCount;
 
+        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+        setUnreadCount(0);
         try {
             await patchMarkAsAllRead();
         } catch (error) {
             setNotifications(previousState);
+            setUnreadCount(previousCount);
             toast({
                 title: "Error",
                 description: `Failed to mark all notifications as read.\n${error}`,

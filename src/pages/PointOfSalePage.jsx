@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Moon, ShoppingCart, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import { useBarcodeScanner } from '@/hooks/point_of_sale_hooks/useBarcodeScanner';
 import { useCart } from '@/hooks/point_of_sale_hooks/useCart';
 import { useCheckout } from '@/hooks/point_of_sale_hooks/useCheckout';
 import { usePointOfSale } from '@/hooks/point_of_sale_hooks/usePointOfSale';
 import { useClock } from '@/hooks/useClock';
+import { getScanBarcode } from '@/services/PointOfSaleService';
 import { openReceiptTab } from '@/utils/receiptWindowUtil';
 
 const PointOfSalePage = () => {
@@ -46,13 +48,13 @@ const PointOfSalePage = () => {
     const [showGCashModal, setShowGCashModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isDarkMode, setIsDarkMode] = useState(false);
-    
+
     //const [latestReceipt, setLatestReceipt] = useState(null);
     
     const [config, setConfig] = useState(null); 
 
     const currentDateTime = useClock();
-
+    
     useEffect(() => {
         const isDark = document.documentElement.classList.contains('dark');
         setIsDarkMode(isDark);
@@ -80,8 +82,6 @@ const PointOfSalePage = () => {
         await handleFinalCheckout(paymentDetails, async (response) => {
 
             const receiptData = response.receipt;
-            
-            console.log(receiptData);
 
             /*
             if (receiptData) {
@@ -120,6 +120,24 @@ const PointOfSalePage = () => {
         }
     };
 
+    useBarcodeScanner({
+        onScanSuccess: async (barcode) => {
+            const data = await getScanBarcode(barcode);
+
+            handleAddToCart(data, 1);
+        },
+        onScanError: (error, barcode) => {
+            setConfig({
+                isAlert: true,
+                title: "Scan Failed",
+                description: `Product with barcode "${barcode}" not found or invalid.`,
+                confirmVariant: "destructive",
+                confirmText: "OK",
+                onConfirm: () => setConfig(null)
+            });
+        }
+    });
+
     return (
         <div className="flex h-screen bg-background font-montserrat overflow-hidden relative text-foreground">
             <div className="flex-1 flex flex-col h-full pl-6 py-6 pr-4">
@@ -145,7 +163,6 @@ const PointOfSalePage = () => {
                     filterOptions={filterOptions} 
                     updateFilter={updateFilter} 
                 />
-                
                 <div className="flex-1 overflow-y-auto pr-2 pb-20 custom-scrollbar">
                 {isLoading ? (
                     <div className="flex flex-col gap-4 h-full items-center justify-center text-muted-foreground">
@@ -162,7 +179,6 @@ const PointOfSalePage = () => {
                             type={product.productType}
                             gender={product.productGender}
                             imageUrl={product.productImageUrl}
-                            price={product.productPrice}
                         
                         onAddToCart={() => setSelectedProduct({
                             ...product, 

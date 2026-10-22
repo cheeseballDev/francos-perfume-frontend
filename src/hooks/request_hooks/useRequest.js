@@ -11,7 +11,7 @@ export const useRequest = () => {
     const [requests, setRequest] = useState([]);
     const [branchOptions, setBranchOptions] = useState([]);
     const [productOptions, setProductOptions] = useState([]);
-
+   
     const [asyncState, setAsyncState] = useState({
         isLoading: true,
         isFetching: false,
@@ -87,7 +87,7 @@ export const useRequest = () => {
             .channel("public:request")
             .on(
                 "postgres_changes",
-                { event: "INSERT", schema: "public", table: "request" }, 
+                { event: "*", schema: "public", table: "request" }, 
                 () => {
                     fetchRequests();
                 }

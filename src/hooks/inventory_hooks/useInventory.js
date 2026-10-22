@@ -88,6 +88,13 @@ export const useInventory = () => {
                     fetchInventory();
                 }
             )
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "products" }, 
+                () => {
+                    fetchInventory();
+                }
+            )
             .subscribe();
 
         return () => {

@@ -16,26 +16,38 @@ export const RequestApprovalActions = ({ user, allProductsApproved, remarks, set
     const requestStatus = selectedRequest.requestStatus;
     const requestId = selectedRequest.requestId;
 
+    if (requestStatus === "REJECTED") {
+        return (
+            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
+                <h2 className="text-base font-bold text-foreground">No Action Required</h2>
+                <p className="text-sm text-muted-foreground">
+                    This request is <span className="font-bold text-custom-red">{requestStatus}</span>. 
+                    <br />
+                </p>
+            </div>
+        );
+    }
+
+    if (requestStatus === "RECEIVED" || requestStatus === "APPROVED" || requestStatus === "COMPLETED") {
+        return (
+            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
+                <h2 className="text-base font-bold text-foreground">No Action Required</h2>
+                <p className="text-sm text-muted-foreground">
+                    This request has already been <span className="font-bold text-custom-green">{requestStatus}</span>. No further approval or rejection actions are required.
+                </p>
+            </div>
+        );
+    }
+
 
     if (requestStage === "DISPATCH" || requestStage === "TRANSIT") {
         return (
             <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
                 <h2 className="text-base font-bold text-foreground">No Action Required</h2>
                 <p className="text-sm text-muted-foreground">
-                    This request is currently in the <span className="font-bold text-foreground">{requestStage}</span> stage. No approval or rejection actions are required at this time. 
+                    This request is currently in the <span className="font-bold text-custom-blue">{requestStage}</span> stage. No approval or rejection actions are required at this time. 
                     <br />
                     Please wait for the delivery and go to the <span className="font-bold text-foreground">DELIVERY PAGE</span> to confirm the delivery.
-                </p>
-            </div>
-        );
-    }
-
-    if (requestStatus === "RECEIVED" || requestStatus === "APPROVED") {
-        return (
-            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
-                <h2 className="text-base font-bold text-foreground">No Action Required</h2>
-                <p className="text-sm text-muted-foreground">
-                    This request has already been <span className="font-bold text-foreground">{requestStatus}</span>. No further approval or rejection actions are required.
                 </p>
             </div>
         );

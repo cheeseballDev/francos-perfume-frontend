@@ -8,5 +8,5 @@ export const login = async (email, password, newPassword = null) => {
         password, 
         newPassword 
     });
-    return response.data;
+    return response.data.data;
 };

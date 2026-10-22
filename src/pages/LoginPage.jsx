@@ -9,7 +9,6 @@ import logo from '../assets/FrancoPerfumeLogo.png';
 const LoginPage = () => {
     const {
         isLoading,
-        displayName, 
         handleLogin, 
         handleModuleSelect,
         view, 
@@ -22,7 +21,8 @@ const LoginPage = () => {
         setShowPasswordModal,
         handlePasswordUpdate,
         firstName,
-        lastName
+        lastName,
+        error
     } = useLogin();
 
     const [isDark, setIsDark] = useState(() => {
@@ -52,7 +52,13 @@ const LoginPage = () => {
             root.classList.remove('dark');
         }
     }, [isDark]);
-        
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await handleLogin(); 
+    };
+                
   
     if (view === 'module') {
         return (
@@ -66,7 +72,7 @@ const LoginPage = () => {
             </div>
 
             <h2 className="text-2xl font-bold text-foreground mb-1 tracking-tight">Select A Module</h2>
-            <p className="text-muted-foreground mb-10 text-sm">Welcome back {displayName}.</p>
+            <p className="text-muted-foreground mb-10 text-sm">Welcome back {firstName + " " + lastName}.</p>
             
             <div className="w-full max-w-sm flex flex-col gap-4">
             <Button 
@@ -102,14 +108,13 @@ const LoginPage = () => {
             <h1 className="text-3xl font-bold text-foreground mb-1 tracking-tight">OneFrancoScentHub</h1>
             <p className="text-muted-foreground mb-8 text-sm">Welcome back!</p>
 
-            <form onSubmit={handleLogin} className="w-full flex flex-col gap-4 text-left">
+            <form onSubmit={onSubmit} noValidate className="w-full flex flex-col gap-4 text-left">
                 <FormField
                     label="Email"
                     type="email"
                     placeholder="Enter email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    required
                 />
 
                 <FormField
@@ -118,8 +123,11 @@ const LoginPage = () => {
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
                 />
+
+                {error && (
+                    <p className="text-sm text-destructive text-center -mt-1">{error}</p>
+                )}
 
                 <Button 
                     type="submit" 

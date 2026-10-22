@@ -1,5 +1,6 @@
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from '@/components/ui/button';
+import { useToast } from "@/components/ui/use-toast";
 import { useRequest } from '@/hooks/request_hooks/useRequest';
 import { postCreateRequest } from '@/services/RequestService';
 import { isValid, validateForm } from '@/utils/validationUtils';
@@ -28,8 +29,9 @@ const requestValidationSchema = {
 const CreateTransferRequestPage = () => {
     const navigate = useNavigate();
 
+    const { toast } = useToast();
+
     const { 
-        fetchRequestFilters,
         branchOptions,
         productOptions,
         fetchBranches,
@@ -118,8 +120,8 @@ const CreateTransferRequestPage = () => {
     const executeSubmission = async () => {
         setIsSubmitting(true);
         try {
-            const fromBranchStr = branchOptions.find(b => b.value === data.fromBranch)?.label || "";
-            const toBranchStr = branchOptions.find(b => b.value === data.toBranch)?.label || "";
+            const fromBranchStr = branchOptions.find(b => b.value === data.fromBranch).label;
+            const toBranchStr = branchOptions.find(b => b.value === data.toBranch).label;
 
             const payload = {
                 fromBranch: fromBranchStr,
@@ -135,6 +137,12 @@ const CreateTransferRequestPage = () => {
             setConfig(null);
             navigate('/home/requests');
 
+            toast({
+                title: "Request Sent",
+                description: "Request created successfully.",
+                duration: 5000,
+            })
+
         } catch (error) {
             console.error("Submission failed:", error);
             setConfig({
@@ -144,8 +152,8 @@ const CreateTransferRequestPage = () => {
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null)
-
             });
+
         } finally {
             setIsSubmitting(false);
         }
@@ -182,7 +190,6 @@ const CreateTransferRequestPage = () => {
             isAlert: false,
             title: "Submit Transfer Request?",
             description: `You are requesting ${totalUnits} units of ${data.items.length} products. This action will place the request in a pending state for approval.`,
-            confirmVariant: "success",
             confirmText: "Submit Request",
             onConfirm: executeSubmission
         });
@@ -207,9 +214,8 @@ const CreateTransferRequestPage = () => {
                         onClear={() => setData(prev => ({ ...prev, fromBranch: null, toBranch: null }))}
                         branchOptions={branchOptions}
                     />
+
                     <ProductSelector
-                        selectedProduct={selectedProduct}
-                        setSelectedProduct={setSelectedProduct}
                         quantity={quantity}
                         setQuantity={setQuantity}
                         productOptions={productOptions}

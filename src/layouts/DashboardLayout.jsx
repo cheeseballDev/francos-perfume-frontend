@@ -12,7 +12,7 @@ const DashboardLayout = () => {
         <div className="flex-1 flex flex-col overflow-hidden relative">
             <Header/>
             <main className="flex-1 p-8 overflow-auto bg-background">
-            <Outlet context={{ activeRole, userEmail }} />
+                <Outlet context={{ activeRole, userEmail }} />
             </main>
         </div>
         </div>

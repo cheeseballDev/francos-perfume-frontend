@@ -24,7 +24,11 @@ export default function RequestDetailsPage() {
     
     const [config, setConfig] = useState(null);
 
-    const { selectedRequest, itemApprovals, setItemApprovals } = useRequestDetails(requestId);
+    const { 
+        selectedRequest, 
+        itemApprovals, 
+        setItemApprovals 
+    } = useRequestDetails(requestId);
 
     const data = selectedRequest?.data || {};
 

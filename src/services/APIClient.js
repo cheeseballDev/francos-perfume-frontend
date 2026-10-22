@@ -54,12 +54,14 @@ apiClient.interceptors.response.use(
         }
 
         if (error.response?.status === 401) {
-            console.warn("Unauthorized access - token may be invalid or expired.");
-            window.dispatchEvent(new CustomEvent('session-expired'));
+            const isAuthCall = error.config?.url?.toLowerCase().startsWith("/auth/");
+            const hadToken = Boolean(error.config?.headers?.Authorization);
+            if (!isAuthCall && hadToken) {
+                window.dispatchEvent(new CustomEvent("session-expired"));
+            }
         }
-
+        
         return Promise.reject(error);
     }
 );
-
 export default apiClient;

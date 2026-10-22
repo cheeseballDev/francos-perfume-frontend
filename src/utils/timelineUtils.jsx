@@ -83,7 +83,6 @@ export const renderBadgeForRequestTimeline = (status) => {
 };
 
 export const renderTimelineIcon = (status) => {
-    // FIXED: Replaced bg-white with bg-card to match the dark/light mode background
     switch (status?.toUpperCase()) {
         case "APPROVED":
         case "COMPLETED":

@@ -1,12 +1,10 @@
 import { useAuth } from "@/auth/UseAuth";
-import { useToast } from "@/components/ui/use-toast";
-import { login as loginApi } from "@/services/LoginService";
+import { login, login as loginApi } from "@/services/LoginService";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const useLogin = () => {
     const { login: setAuthUser } = useAuth();
-    const { toast } = useToast();
 
     const navigate = useNavigate();
     const [view, setView] = useState('login');
@@ -18,8 +16,6 @@ export const useLogin = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
-
-    const displayName = email ? email.split('@')[0] : 'User';
 
     const navigateByRole = (role) => {
         if (role === 'CASHIER') navigate('/pos');
@@ -40,6 +36,8 @@ export const useLogin = () => {
             branchLocation: result.branchLocation
         };
 
+        if (result.accessToken == null) return;
+
         if (result.role === 'MANAGER') {
             setPendingAuthData(userData);
             setView('module');
@@ -49,28 +47,31 @@ export const useLogin = () => {
         }
     };
 
-    const handleLogin = async (e) => {
-        e?.preventDefault();
+    const handleLogin = async () => {
         setIsLoading(true);
         setError(null);
 
-        try {
-            const result = await loginApi(email, password);
-            setFirstName(result.firstName);
-            setLastName(result.lastName);
-        if (result.requiresPasswordChange) {
-            setShowPasswordModal(true);
+        if (!email.trim() || !password.trim()) {
+            setError('Email and password are required');
+            setIsLoading(false);
             return;
         }
 
-        processSuccessfulLogin(result);
+        try {
+            const result = await login(email, password);
+            setFirstName(result.firstName);
+            setLastName(result.lastName);
+
+            if (result.requiresPasswordChange) {
+                setShowPasswordModal(true);
+                return;
+            }
+
+            processSuccessfulLogin(result);
+
         } catch (error) {
-            toast({
-                title: "Login Failed",
-                description: `An error occurred while logging in.${error.response?.data}`,
-                variant: "destructive",
-                duration: 5000
-            })
+            setError(error.response?.data);
+            console.log(error.response?.data);
         } finally {
             setIsLoading(false);
         }
@@ -85,11 +86,7 @@ export const useLogin = () => {
             setShowPasswordModal(false);
             processSuccessfulLogin(result);
         } catch (error) {
-            toast({
-                title: "Update Password Failed",
-                description: `An error occurred while updating the password.${error}`,
-                variant: "destructive",
-            })
+            setError(error.response?.data);
         } finally {
             setIsLoading(false);
         }
@@ -99,8 +96,8 @@ export const useLogin = () => {
         if (!pendingAuthData) return;
 
         const finalUserData = {
-        ...pendingAuthData,
-        activeRole: selectedModule,
+            ...pendingAuthData,
+            activeRole: selectedModule,
         };
 
         setAuthUser(finalUserData);
@@ -110,7 +107,6 @@ export const useLogin = () => {
     return {
         error,
         isLoading,
-        displayName,
         handleLogin,
         handleModuleSelect,
         view,
@@ -123,6 +119,6 @@ export const useLogin = () => {
         setShowPasswordModal,
         handlePasswordUpdate,
         firstName,
-        lastName
+        lastName,
     };
 };
