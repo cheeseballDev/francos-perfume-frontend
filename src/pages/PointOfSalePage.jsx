@@ -3,7 +3,7 @@ import { ProfileDropdown } from '@/components/shared';
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from '@/components/ui/button';
 import { Loader2, Moon, ShoppingCart, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { useBarcodeScanner } from '@/hooks/point_of_sale_hooks/useBarcodeScanner';
 import { useCart } from '@/hooks/point_of_sale_hooks/useCart';
@@ -11,6 +11,7 @@ import { useCheckout } from '@/hooks/point_of_sale_hooks/useCheckout';
 import { usePointOfSale } from '@/hooks/point_of_sale_hooks/usePointOfSale';
 import { useClock } from '@/hooks/useClock';
 import { getScanBarcode } from '@/services/PointOfSaleService';
+import { useTheme } from '@/theme/useTheme';
 import { openReceiptTab } from '@/utils/receiptWindowUtil';
 
 const PointOfSalePage = () => {
@@ -47,30 +48,15 @@ const PointOfSalePage = () => {
     const [showCashModal, setShowCashModal] = useState(false);
     const [showGCashModal, setShowGCashModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [isDarkMode, setIsDarkMode] = useState(false);
 
     //const [latestReceipt, setLatestReceipt] = useState(null);
     
     const [config, setConfig] = useState(null); 
 
     const currentDateTime = useClock();
+
+    const { isDark: isDarkMode, toggleTheme } = useTheme();
     
-    useEffect(() => {
-        const isDark = document.documentElement.classList.contains('dark');
-        setIsDarkMode(isDark);
-    }, []);
-
-    const toggleTheme = () => {
-            const root = document.documentElement;
-        if (isDarkMode) {
-            root.classList.remove('dark');
-            setIsDarkMode(false);
-        } else {
-            root.classList.add('dark');
-            setIsDarkMode(true);
-        }
-    };
-
     const handlePaymentSelect = (method) => {
         setShowCheckoutModal(false);
         if (method === 'CASH') setShowCashModal(true);

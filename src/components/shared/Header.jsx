@@ -1,4 +1,5 @@
 import { useAuth } from '@/auth/UseAuth';
+import { useTheme } from '@/theme/useTheme';
 import { formatDateForTable } from '@/utils/formattingUtils';
 import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -10,33 +11,7 @@ const Header = () => {
 
     const [currentDate, setCurrentDate] = useState("");
     const [userLocation, setUserLocation] = useState("Loading...");
-    const [isDark, setIsDark] = useState(() => {
-        const savedTheme = localStorage.getItem('theme');
-        return savedTheme ? savedTheme === 'dark' : false;
-    });
-
-    const toggleTheme = () => {
-        const root = document.documentElement;
-        const newThemeState = !isDark;
-        
-        if (newThemeState) {
-            root.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            root.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-        setIsDark(newThemeState);
-    };
-
-    useEffect(() => {
-        const root = document.documentElement;
-        if (isDark) {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-    }, [isDark]);
+    const { isDark, toggleTheme } = useTheme();
         
   useEffect(() => {
         try {

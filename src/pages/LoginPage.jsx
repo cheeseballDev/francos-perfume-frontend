@@ -2,8 +2,8 @@ import ForcePasswordChangeModal from '@/components/features/settings_component/F
 import FormField from '@/components/shared/FormField';
 import { Button } from '@/components/ui/button';
 import { useLogin } from '@/hooks/useLogin';
+import { useTheme } from '@/theme/useTheme';
 import { ChevronLeft, Loader2, Moon, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import logo from '../assets/FrancoPerfumeLogo.png';
 
 const LoginPage = () => {
@@ -25,33 +25,7 @@ const LoginPage = () => {
         error
     } = useLogin();
 
-    const [isDark, setIsDark] = useState(() => {
-        const savedTheme = localStorage.getItem('theme');
-        return savedTheme ? savedTheme === 'dark' : false;
-    });
-
-    const toggleTheme = () => {
-        const root = document.documentElement;
-        const newThemeState = !isDark;
-        
-        if (newThemeState) {
-            root.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            root.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-        setIsDark(newThemeState);
-    };
-
-    useEffect(() => {
-        const root = document.documentElement;
-        if (isDark) {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-    }, [isDark]);
+    const { isDark, toggleTheme } = useTheme();
 
     const onSubmit = async (e) => {
         e.preventDefault();

@@ -26,8 +26,6 @@ const ProtectedRoute = ({ user, allowedRoles }) => {
 }
 
 const NavigationManager = ({ user }) => {
-    const { toast } = useToast();
-
     const navigate = useNavigate();
     const path = useLocation().pathname;
 
@@ -71,22 +69,6 @@ const App = () => {
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
     usePersistentSession();
-
-    const [theme, setTheme] = useState(() => () => {
-        const savedTheme = localStorage.getItem('theme');
-        return savedTheme ? savedTheme === 'dark' : false;
-    });
-    
-    useEffect(() => {
-        const root = document.documentElement;
-        if (theme === 'dark') {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-        localStorage.setItem('theme', theme);
-    }, [theme]);
-
 
     useEffect(() => {
         const handleResize = () => setIsMobileView(window.innerWidth < 768);
