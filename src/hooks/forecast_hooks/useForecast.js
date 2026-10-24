@@ -63,7 +63,6 @@ export const useForecast = () => {
         }
 
         try {
-            // Prevent AI API crash by only calling endpoints if required parameters exist
             const [stocks, revenue, ai] = await Promise.all([
                 dto.productId && dto.branchId ? postForecastStocks(buildStockRequest(dto)) : Promise.resolve(null),
                 dto.branchId ? postForecastRevenue(buildRevenueRequest(dto)) : Promise.resolve(null),

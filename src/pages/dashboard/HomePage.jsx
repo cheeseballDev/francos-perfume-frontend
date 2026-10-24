@@ -26,9 +26,6 @@ const DashboardHome = () => {
         asyncState
     } = useKPI();
 
-    console.log(totalTransactions);
-
-
     const {
         auditLogs
     } = useAuditLog();
@@ -204,11 +201,11 @@ const DashboardHome = () => {
                                 {/* Transactions Panel (Manager / Owner Only) */}
                                 {(userRole === "MANAGER" || userRole === "OWNER") && (
                                     <DashboardPanel 
-                                        title="Recent Transactions" 
+                                        title="Recent Transactions (Last 30 days)" 
                                         actionText="View All Transactions"
                                         onAction={() => navigate('/home/transactions')} 
                                     >
-                                        {totalTransactions?.recentTransactionsList?.slice(0, 4).map((transaction, i) => (
+                                        {totalTransactions?.recentTransactionsList?.slice(0, 10).map((transaction, i) => (
                                             <TransactionItem key={transaction.salesOrderId || i} transaction={transaction} />
                                         ))}
 

@@ -30,9 +30,9 @@ const ProductSelector = ({
             <div className="flex items-end gap-4 mb-4">
                 <div className="flex-1">
                     <SearchableProductSelect
-                        options={productOptions}
-                        value={selectedProduct}
-                        onChange={setSelectedProduct}
+                        productOptions={productOptions}
+                        selectedProduct={selectedProduct}
+                        setSelectedProduct={setSelectedProduct}
                         placeholder="Select product..."
                     />
                 </div>

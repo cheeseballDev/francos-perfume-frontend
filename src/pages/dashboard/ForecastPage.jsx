@@ -1,4 +1,5 @@
 import ForecastChart from "@/components/features/forecast_components/ForecastChart";
+import SearchableProductSelect from "@/components/shared/SearchableProductSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +25,11 @@ const MONTHS = [
   { value: 9, label: "September" }, { value: 10, label: "October" },
   { value: 11, label: "November" }, { value: 12, label: "December" }
 ];
+
+const ENGINES = [
+    { value: "ML", label: "Standard (ML.NET)"},
+    { value: "AI", label: "Third-party (Gemini AI)"}
+]
 
 const currentYear = new Date().getFullYear();
 const YEARS = [currentYear, currentYear + 1, currentYear + 2];
@@ -117,7 +123,6 @@ const ForecastPage = () => {
     }
   }, [forecastData, formData.month, formData.year]);
 
-  // Display raw values in metric cards
     const dynamicMetrics = [
         { 
             title: "Predicted Demand", 
@@ -178,7 +183,7 @@ const ForecastPage = () => {
         </CardHeader>
         
         <CardContent className="pt-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 items-end mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 items-end mb-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-muted-foreground">Branch</label>
               <select 
@@ -195,16 +200,12 @@ const ForecastPage = () => {
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-muted-foreground">Product</label>
-              <select 
-                className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary"
-                value={formData.productId}
-                onChange={(e) => setFormData(prev => ({ ...prev, productId: e.target.value }))}
-              >
-                <option value="">Select Product</option>
-                {productOptions?.map(p => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
-                ))}
-              </select>
+                <SearchableProductSelect
+                    productOptions={productOptions}
+                    selectedProduct={formData.productId}
+                    setSelectedProduct={(value) => setFormData(prev => ({ ...prev, productId: value }))}
+                    placeholder="Select product..."
+                />
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -232,6 +233,18 @@ const ForecastPage = () => {
                 ))}
               </select>
             </div>
+
+            <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-muted-foreground">Forecast engine</label>
+                <select
+                    className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary"
+                    value={formData.engine}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, engine: e.target.value }))}
+                >
+                    {ENGINES.map((en) => <option key={en.value} value={en.value}>{en.label}</option>)}
+                </select>
+            </div>
+
 
             <Button
               variant="default"

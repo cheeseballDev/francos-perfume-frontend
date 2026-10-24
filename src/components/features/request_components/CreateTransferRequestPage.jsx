@@ -214,7 +214,6 @@ const CreateTransferRequestPage = () => {
                         onClear={() => setData(prev => ({ ...prev, fromBranch: null, toBranch: null }))}
                         branchOptions={branchOptions}
                     />
-
                     <ProductSelector
                         quantity={quantity}
                         setQuantity={setQuantity}
