@@ -30,7 +30,6 @@ const DashboardHome = () => {
         auditLogs
     } = useAuditLog();
 
-    // FIXED: Smart revenue formatter for K and M
     const formatRevenue = (amount) => {
         if (!amount) return "₱0";
         if (amount >= 1000000) {
@@ -175,7 +174,7 @@ const DashboardHome = () => {
                                         <RequestItem key={request.approvalId || i} request={request} />
                                     ))}
                                     
-                                    {(!pendingApprovals?.pendingApprovalsCount === 0) && (
+                                    {(pendingApprovals?.pendingApprovalsCount ?? 0) === 0 && (
                                         <p className="text-sm text-muted-foreground text-center mt-4">No pending requests.</p>
                                     )}
                                 </DashboardPanel>
@@ -189,7 +188,7 @@ const DashboardHome = () => {
                                         <DeliveryItem key={delivery.deliveryId || i} delivery={delivery} />
                                     ))}
 
-                                    {(!upcomingDeliveries?.upcomingDeliveriesCount === 0) && (
+                                    {(upcomingDeliveries?.upcomingDeliveriesCount ?? 0) === 0 && (
                                         <p className="text-sm text-muted-foreground text-center mt-4">No pending deliveries.</p>
                                     )}
                                 </DashboardPanel>
