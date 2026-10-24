@@ -31,7 +31,7 @@ export const getTotalRevenue = async () => {
     return response.data;
 }
 
-export const getTotalTransactions = async () => {
-    const response = await apiClient.get(`${PATH}/transaction/total`);
+export const getRecentTransactions = async () => {
+    const response = await apiClient.get(`${PATH}/transaction/recent`);
     return response.data;
 }

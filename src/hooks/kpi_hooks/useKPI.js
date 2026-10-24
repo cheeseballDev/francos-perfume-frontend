@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/SupabaseClient";
-import { getInventoryStockCount, getLowStockKPI, getPendingApprovals, getTotalRevenue, getTotalTransactions, getUpcomingDeliveries } from "@/services/KPIService";
+import { getInventoryStockCount, getLowStockKPI, getPendingApprovals, getRecentTransactions, getTotalRevenue, getUpcomingDeliveries } from "@/services/KPIService";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export const useKPI = () => {
@@ -43,7 +43,7 @@ export const useKPI = () => {
                 getPendingApprovals(),
                 getUpcomingDeliveries(),
                 getTotalRevenue(),
-                getTotalTransactions(),
+                getRecentTransactions(),
             ]);
 
             setKpiData({

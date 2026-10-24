@@ -26,6 +26,9 @@ const DashboardHome = () => {
         asyncState
     } = useKPI();
 
+    console.log(totalTransactions);
+
+
     const {
         auditLogs
     } = useAuditLog();
@@ -59,7 +62,7 @@ const DashboardHome = () => {
         },
         { 
             title: "Total Revenue", 
-            mainValue: formatRevenue(totalRevenue?.totalRevenue || 0), // APPLIED HERE
+            mainValue: formatRevenue(totalRevenue?.totalRevenue || 0),
             subText: "Overall", 
             Icon: Banknote, 
             color: "text-emerald-500",
@@ -96,6 +99,7 @@ const DashboardHome = () => {
         return true;
     });
 
+    // todo: remove cashier
     if (userRole === "CASHIER") {
         return (
             <div className="flex flex-col items-center justify-center h-[80vh] text-center animate-fade-in font-montserrat">
@@ -112,10 +116,10 @@ const DashboardHome = () => {
         <div className="animate-fade-in font-montserrat flex flex-col h-full pb-8">
             <header className="mb-8">
                 <h1 className="text-[32px] font-bold text-foreground mb-2 leading-none tracking-tight">
-                    {userRole === "admin" ? "Admin Dashboard" : "Dashboard"}
+                    {userRole === "ADMIN" ? "Admin Dashboard" : "Dashboard"}
                 </h1>
                 <p className="text-muted-foreground text-sm">
-                    {userRole === "admin" ? "System-wide audit trail and management." : "An overview for your branch"}
+                    {userRole === "ADMIN" ? "System-wide audit trail and management." : "An overview for your branch"}
                 </p>
             </header>
 
@@ -204,11 +208,11 @@ const DashboardHome = () => {
                                         actionText="View All Transactions"
                                         onAction={() => navigate('/home/transactions')} 
                                     >
-                                        {totalTransactions?.totalTransactionsList?.slice(0, 4).map((transaction, i) => (
+                                        {totalTransactions?.recentTransactionsList?.slice(0, 4).map((transaction, i) => (
                                             <TransactionItem key={transaction.salesOrderId || i} transaction={transaction} />
                                         ))}
 
-                                        {(!totalTransactions?.totalTransactionsCount === 0) && (
+                                        {(totalTransactions?.totalTransactionsCount ?? 0) === 0 && (
                                             <p className="text-sm text-muted-foreground text-center mt-4">No recent transactions.</p>
                                         )}
                                     </DashboardPanel>
