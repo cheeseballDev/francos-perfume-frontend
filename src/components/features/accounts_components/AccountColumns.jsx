@@ -1,10 +1,11 @@
+import StatusBadge from "@/components/shared/StatusBadge";
 import { formatLabel } from "@/utils/formattingUtils";
 
 export const accountColumns = [
     {
         header: "Employee ID",
         accessorKey: "employeeDisplayId",
-        className: "text-foreground font-medium"
+        cellClassName: "font-medium"
     },
     {
         header: "Name",
@@ -18,7 +19,7 @@ export const accountColumns = [
     {
         header: "Status",
         accessorKey: "status",
-        render: (row) => formatLabel(row.status) || "N/A"
+        render: (row) => <StatusBadge status={row.status || "N/A"} />
     },
     // HIDDEN ON MOBILE (Below 'md' screens)
     {

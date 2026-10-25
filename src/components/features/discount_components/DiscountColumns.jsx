@@ -1,3 +1,6 @@
+import StatusBadge from "@/components/shared/StatusBadge";
+import { formatLabel } from "@/utils/formattingUtils";
+
 export const discountColumns = [
     {
         header: 'Prefix',
@@ -9,11 +12,13 @@ export const discountColumns = [
     },
     {
         header: 'Type',
-        accessorKey: 'discountType'
+        accessorKey: 'discountType',
+        render: (row) => formatLabel(row.discountType) || 'N/A'
     },
     {
         id: 'discountValue',
         header: 'Value',
+        cellClassName: 'font-medium tabular-nums',
         render: (row) => {
             const { discountPercent, discountAmount, discountType } = row || {};
             if (discountType?.toUpperCase() === 'PERCENTAGE') {
@@ -25,6 +30,7 @@ export const discountColumns = [
     },
     {
         header: 'Status',
-        accessorKey: 'discountStatus'
+        accessorKey: 'discountStatus',
+        render: (row) => <StatusBadge status={row.discountStatus || 'N/A'} />
     }
 ]

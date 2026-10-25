@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useEffect, useState } from 'react';
+import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 
 const accountValidationSchema = {
     firstName: [isValid.required],
@@ -42,6 +43,18 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
     }, [isOpen]);
 
     if (!isOpen) return null;
+
+    const isDirty = Object.values(data || {}).some((value) => value !== "" && value !== null && value !== undefined);
+    const discardAndClose = () => {
+        setData({});
+        setErrors({});
+        onClose();
+    };
+    const dismissGuard = guardDismiss({
+        isBusy: isSubmitting,
+        isDirty,
+        onDirty: () => setConfig(discardChangesConfig(discardAndClose)),
+    });
 
     const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
     const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
@@ -127,7 +140,11 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent
+            className="sm:max-w-3xl max-h-[90vh] overflow-y-auto"
+            onPointerDownOutside={dismissGuard}
+            onEscapeKeyDown={dismissGuard}
+        >
           <DialogHeader>
             <DialogTitle>Create Account</DialogTitle>
           </DialogHeader>

@@ -1,0 +1,1308 @@
+diff --git a/src/components/features/accounts_components/AccountColumns.jsx b/src/components/features/accounts_components/AccountColumns.jsx
+index 37c93fd..339b2ac 100644
+--- a/src/components/features/accounts_components/AccountColumns.jsx
++++ b/src/components/features/accounts_components/AccountColumns.jsx
+@@ -1,10 +1,11 @@
++import StatusBadge from "@/components/shared/StatusBadge";
+ import { formatLabel } from "@/utils/formattingUtils";
+ 
+ export const accountColumns = [
+     {
+         header: "Employee ID",
+         accessorKey: "employeeDisplayId",
+-        className: "text-foreground font-medium"
++        cellClassName: "font-medium"
+     },
+     {
+         header: "Name",
+@@ -18,7 +19,7 @@ export const accountColumns = [
+     {
+         header: "Status",
+         accessorKey: "status",
+-        render: (row) => formatLabel(row.status) || "N/A"
++        render: (row) => <StatusBadge status={row.status || "N/A"} />
+     },
+     // HIDDEN ON MOBILE (Below 'md' screens)
+     {
+diff --git a/src/components/features/accounts_components/CreateAccountModal.jsx b/src/components/features/accounts_components/CreateAccountModal.jsx
+index 83a7b24..f3c70d5 100644
+--- a/src/components/features/accounts_components/CreateAccountModal.jsx
++++ b/src/components/features/accounts_components/CreateAccountModal.jsx
+@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
+ import { useToast } from '@/components/ui/use-toast';
+ import { isValid, validateForm } from "@/utils/validationUtils";
+ import { useEffect, useState } from 'react';
++import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
+ 
+ const accountValidationSchema = {
+     firstName: [isValid.required],
+@@ -43,6 +44,18 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
+ 
+     if (!isOpen) return null;
+ 
++    const isDirty = Object.values(data || {}).some((value) => value !== "" && value !== null && value !== undefined);
++    const discardAndClose = () => {
++        setData({});
++        setErrors({});
++        onClose();
++    };
++    const dismissGuard = guardDismiss({
++        isBusy: isSubmitting,
++        isDirty,
++        onDirty: () => setConfig(discardChangesConfig(discardAndClose)),
++    });
++
+     const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
+     const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
+     const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
+@@ -127,7 +140,11 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
+   return (
+     <>
+       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
++        <DialogContent
++            className="sm:max-w-3xl max-h-[90vh] overflow-y-auto"
++            onPointerDownOutside={dismissGuard}
++            onEscapeKeyDown={dismissGuard}
++        >
+           <DialogHeader>
+             <DialogTitle>Create Account</DialogTitle>
+           </DialogHeader>
+diff --git a/src/components/features/accounts_components/EditAccountModal.jsx b/src/components/features/accounts_components/EditAccountModal.jsx
+index 941475c..323887a 100644
+--- a/src/components/features/accounts_components/EditAccountModal.jsx
++++ b/src/components/features/accounts_components/EditAccountModal.jsx
+@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
+ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+ import { useToast } from '@/components/ui/use-toast';
+ import { deleteImage } from '@/services/ImageService';
++import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
+ import { isValid, validateForm } from "@/utils/validationUtils";
+ import { useEffect, useState } from 'react';
+ import { useAuth } from "../../../auth/UseAuth";
+@@ -62,6 +63,13 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
+ 
+     if (!isOpen) return null;
+ 
++    const isDirty = !!data && JSON.stringify(data) !== JSON.stringify(getAccountFormData(selectedAccount));
++    const dismissGuard = guardDismiss({
++        isBusy: isSubmitting,
++        isDirty,
++        onDirty: () => setConfig(discardChangesConfig(onClose)),
++    });
++
+     const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
+     const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
+     const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
+@@ -161,8 +169,8 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
+       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+         <DialogContent
+             className="sm:max-w-3xl max-h-[90vh] overflow-y-auto"
+-            onInteractOutside={(e) => e.preventDefault()}
+-            onPointerDownOutside={(e) => e.preventDefault()}
++            onPointerDownOutside={dismissGuard}
++            onEscapeKeyDown={dismissGuard}
+          >
+           <DialogHeader>
+             <DialogTitle>Edit Account</DialogTitle>
+diff --git a/src/components/features/delivery_components/DeliveryConfirmationPage.jsx b/src/components/features/delivery_components/DeliveryConfirmationPage.jsx
+index 8ef570a..fdecf86 100644
+--- a/src/components/features/delivery_components/DeliveryConfirmationPage.jsx
++++ b/src/components/features/delivery_components/DeliveryConfirmationPage.jsx
+@@ -182,7 +182,7 @@ const DeliveryConfirmationPage = () => {
+                                 
+                                 return (
+                                     <tr key={item.productId} className="border-b border-border last:border-0">
+-                                        <td className="py-4 text-muted-foreground">{item.productDisplayId || item.productId}</td>
++                                        <td className="py-4 text-foreground">{item.productDisplayId || item.productId}</td>
+                                         <td className="py-4 font-medium text-foreground">{item.productName}</td>
+                                         <td className="py-4 text-center font-bold text-foreground">{item.quantity}</td>
+                                         <td className="py-4 text-center">
+diff --git a/src/components/features/delivery_components/DeliveryDetailsPage.jsx b/src/components/features/delivery_components/DeliveryDetailsPage.jsx
+index 0c14c04..ce1d912 100644
+--- a/src/components/features/delivery_components/DeliveryDetailsPage.jsx
++++ b/src/components/features/delivery_components/DeliveryDetailsPage.jsx
+@@ -231,7 +231,7 @@ export default function DeliveryDetailsPage() {
+                                 <tbody>
+                                     {(selectedDelivery.items || []).map((item, index) => (
+                                         <tr key={item.deliveryItemId || index} className="border-b border-border last:border-0">
+-                                            <td className="py-4 text-muted-foreground">{item.productDisplayId}</td>
++                                            <td className="py-4 text-foreground">{item.productDisplayId}</td>
+                                             <td className="py-4 font-medium text-foreground">{item.productName}</td>
+                                             <td className="py-4 text-center font-bold text-foreground">{item.quantity}</td>
+                                         </tr>
+diff --git a/src/components/features/discount_components/CreateDiscountModal.jsx b/src/components/features/discount_components/CreateDiscountModal.jsx
+index 187f20f..b60eb28 100644
+--- a/src/components/features/discount_components/CreateDiscountModal.jsx
++++ b/src/components/features/discount_components/CreateDiscountModal.jsx
+@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
+ import { toast } from '@/components/ui/use-toast';
+ import { isValid, validateForm } from "@/utils/validationUtils";
+ import { useState } from 'react';
++import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
+ 
+ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscount }) => {
+     const [config, setConfig] = useState(null);
+@@ -15,6 +16,18 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
+ 
+     if (!isOpen) return null;
+ 
++    const isDirty = Object.values(data || {}).some((value) => value !== "" && value !== null && value !== undefined);
++    const discardAndClose = () => {
++        setData({});
++        setErrors({});
++        onClose();
++    };
++    const dismissGuard = guardDismiss({
++        isBusy: isSubmitting,
++        isDirty,
++        onDirty: () => setConfig(discardChangesConfig(discardAndClose)),
++    });
++
+     const isPercent = data.discountType === 'PERCENTAGE';
+ 
+     const discountTypeOptionData = filterOptions.find(option => option.key === "discountType")?.options || [];
+@@ -106,7 +119,11 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
+     return (
+         <>
+             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+-                <DialogContent className="sm:max-w-3xl">
++                <DialogContent
++            className="sm:max-w-3xl"
++            onPointerDownOutside={dismissGuard}
++            onEscapeKeyDown={dismissGuard}
++        >
+                     <DialogHeader>
+                         <DialogTitle>Create Discount</DialogTitle>
+                     </DialogHeader>
+diff --git a/src/components/features/discount_components/DiscountColumns.jsx b/src/components/features/discount_components/DiscountColumns.jsx
+index c6ffa2c..997dc41 100644
+--- a/src/components/features/discount_components/DiscountColumns.jsx
++++ b/src/components/features/discount_components/DiscountColumns.jsx
+@@ -1,3 +1,6 @@
++import StatusBadge from "@/components/shared/StatusBadge";
++import { formatLabel } from "@/utils/formattingUtils";
++
+ export const discountColumns = [
+     {
+         header: 'Prefix',
+@@ -9,11 +12,13 @@ export const discountColumns = [
+     },
+     {
+         header: 'Type',
+-        accessorKey: 'discountType'
++        accessorKey: 'discountType',
++        render: (row) => formatLabel(row.discountType) || 'N/A'
+     },
+     {
+         id: 'discountValue',
+         header: 'Value',
++        cellClassName: 'font-medium tabular-nums',
+         render: (row) => {
+             const { discountPercent, discountAmount, discountType } = row || {};
+             if (discountType?.toUpperCase() === 'PERCENTAGE') {
+@@ -25,6 +30,7 @@ export const discountColumns = [
+     },
+     {
+         header: 'Status',
+-        accessorKey: 'discountStatus'
++        accessorKey: 'discountStatus',
++        render: (row) => <StatusBadge status={row.discountStatus || 'N/A'} />
+     }
+ ]
+\ No newline at end of file
+diff --git a/src/components/features/discount_components/EditDiscountModal.jsx b/src/components/features/discount_components/EditDiscountModal.jsx
+index f8f1ebc..752e9a0 100644
+--- a/src/components/features/discount_components/EditDiscountModal.jsx
++++ b/src/components/features/discount_components/EditDiscountModal.jsx
+@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
+ import { useToast } from '@/components/ui/use-toast';
+ import { isValid, validateForm } from "@/utils/validationUtils";
+ import { useEffect, useState } from 'react';
++import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
+ 
+ const getDiscountFormData = (discount) => {
+   if (!discount) {
+@@ -50,6 +51,13 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions =
+ 
+     if (!isOpen) return null;
+ 
++    const isDirty = !!data && JSON.stringify(data) !== JSON.stringify(getDiscountFormData(selectedDiscount));
++    const dismissGuard = guardDismiss({
++        isBusy: isSubmitting,
++        isDirty,
++        onDirty: () => setConfig(discardChangesConfig(onClose)),
++    });
++
+     const isPercent = data.discountType === 'PERCENTAGE';
+ 
+     const discountTypeOptionData = filterOptions.find(option => option.key === "discountType")?.options || [];
+@@ -138,7 +146,11 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions =
+   return (
+     <>
+       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+-        <DialogContent className="sm:max-w-3xl">
++        <DialogContent
++            className="sm:max-w-3xl"
++            onPointerDownOutside={dismissGuard}
++            onEscapeKeyDown={dismissGuard}
++        >
+           <DialogHeader>
+             <DialogTitle>Edit Discount</DialogTitle>
+           </DialogHeader>
+diff --git a/src/components/features/inventory_components/EditBatchModal.jsx b/src/components/features/inventory_components/EditBatchModal.jsx
+index 9db9ceb..89c85fd 100644
+--- a/src/components/features/inventory_components/EditBatchModal.jsx
++++ b/src/components/features/inventory_components/EditBatchModal.jsx
+@@ -1,9 +1,11 @@
++import ConfirmDialog from "@/components/shared/ConfirmDialog";
+ import { Button } from "@/components/ui/button";
+ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+ import { Input } from "@/components/ui/input";
+ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+ import { useToast } from "@/components/ui/use-toast";
+ import { Check, Minus, Plus, X } from "lucide-react";
++import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
+ import { useState } from "react";
+ 
+ const getBatchFormData = (batch) => ({
+@@ -24,6 +26,7 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
+     const [data, setData] = useState(() => getBatchFormData(selectedBatch))
+     const [errors, setErrors] = useState({});
+     const [isSubmitting, setIsSubmitting] = useState(false);
++    const [config, setConfig] = useState(null);
+     const minDate = selectedBatch?.dateReceived ? selectedBatch.dateReceived.split('T')[0] : "";
+ 
+     const handleChange = (field, value) => {
+@@ -68,13 +71,21 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
+     }
+ 
+ 
++    const isDirty = JSON.stringify(data) !== JSON.stringify(getBatchFormData(selectedBatch));
++    const dismissGuard = guardDismiss({
++        isBusy: isSubmitting,
++        isDirty,
++        onDirty: () => setConfig(discardChangesConfig(onClose)),
++    });
++
+     return (
++        <>
+         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+         <DialogContent 
+             className="max-w-md font-montserrat p-8" 
+             showCloseButton={true}
+-            onInteractOutside={(e) => e.preventDefault()}
+-            onPointerDownOutside={(e) => e.preventDefault()}
++            onPointerDownOutside={dismissGuard}
++            onEscapeKeyDown={dismissGuard}
+         >
+             <DialogHeader>
+             <DialogTitle className="text-2xl font-bold text-foreground">
+@@ -170,6 +181,13 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
+             </DialogFooter>
+         </DialogContent>
+         </Dialog>
++
++        <ConfirmDialog
++            isOpen={!!config}
++            onClose={() => setConfig(null)}
++            config={config}
++        />
++        </>
+     );
+ };
+ 
+diff --git a/src/components/features/inventory_components/InventoryTable.jsx b/src/components/features/inventory_components/InventoryTable.jsx
+index d384cd2..7fb4cf0 100644
+--- a/src/components/features/inventory_components/InventoryTable.jsx
++++ b/src/components/features/inventory_components/InventoryTable.jsx
+@@ -11,6 +11,7 @@ import PaginationBar from "@/components/shared/PaginationBar";
+ import { Badge } from "@/components/ui/badge";
+ import { Button } from "@/components/ui/button";
+ import { formatDateForInput, formatDateForTable } from '@/utils/formattingUtils';
++import { stockLevel } from '@/utils/statusUtils';
+ import { ChevronDown, ChevronUp, Edit, Loader2 } from "lucide-react";
+ import { useState } from "react";
+ import perfumePlaceholder from "../../../assets/FrancoPerfumeLogo.png";
+@@ -56,7 +57,7 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
+             const isExpanded = expandedRows[rowKey];
+             const displayUnits = product.productQuantity || 0;
+             const totalBatches = product.productBatchCount || 0;
+-            const isLowStock = displayUnits > 0 && displayUnits < 10;
++            const stock = stockLevel(displayUnits);
+ 
+             return (
+               <div key={rowKey} className="bg-card border border-border rounded-lg shadow-sm overflow-hidden transition-all shrink-0">
+@@ -75,7 +76,11 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
+                     <div className="flex flex-col gap-1">
+                       <div className="flex items-center gap-3">
+                         <h3 className="font-bold text-lg text-foreground leading-none">{product.productName || "Unknown Product"}</h3>
+-                        {isLowStock && <Badge variant="destructive" className="h-5 text-[10px] uppercase font-bold tracking-wider">⚠️ Low Stock</Badge>}
++                        {stock.label && (
++                          <Badge variant="outline" className={`h-5 border text-[10px] uppercase font-bold tracking-wider ${stock.badgeClass}`}>
++                            {stock.label}
++                          </Badge>
++                        )}
+                       </div>
+                       <div className="flex items-center gap-2 mt-1">
+                         <Badge variant="outline" className={`h-5 border text-xs ${product.branchName?.toUpperCase() === 'WAREHOUSE' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'}`}>
+@@ -88,8 +93,8 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
+                   </div>
+ 
+                   <div className="text-right pr-4">
+-                    <p className="font-bold text-foreground text-lg">{displayUnits} units</p>
+-                    <p className="text-xs text-muted-foreground">{totalBatches} batches</p>
++                    <p className={`font-bold text-lg tabular-nums ${stock.textClass}`}>{displayUnits} units</p>
++                    <p className="text-xs text-foreground">{totalBatches} {totalBatches === 1 ? "batch" : "batches"}</p>
+                   </div>
+                 </div>
+ 
+@@ -117,7 +122,7 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
+                                 <TableCell className="font-medium text-foreground">{batch.batchId || 0}</TableCell>
+                                 <TableCell className="text-foreground">{formatDateForTable(batch.dateReceived) || 0}</TableCell>
+                                 <TableCell className="text-foreground">{batch.expiryDate || 0}</TableCell>
+-                                <TableCell className="text-center text-foreground">{batch.quantity || 0}</TableCell>
++                                <TableCell className="text-center text-foreground tabular-nums">{batch.quantity || 0}</TableCell>
+                                 <TableCell className="text-right pr-4">
+                                   <Button 
+                                     variant="outline" 
+diff --git a/src/components/features/point_of_sale_components/CancelConfirmModal.jsx b/src/components/features/point_of_sale_components/CancelConfirmModal.jsx
+index c2b15c2..acf8831 100644
+--- a/src/components/features/point_of_sale_components/CancelConfirmModal.jsx
++++ b/src/components/features/point_of_sale_components/CancelConfirmModal.jsx
+@@ -1,18 +1,19 @@
+ import { Button } from "@/components/ui/button";
++import ModalOverlay from "@/components/shared/ModalOverlay";
+ 
+ const CancelConfirmModal = ({ isOpen, onConfirm, onClose }) => {
+     if (!isOpen) return null;
+ 
+     return (
+-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+-            <div className="bg-card border border-border rounded-xl shadow-2xl w-[400px] p-8 text-center">
++        <ModalOverlay onClose={onClose} className="z-[100] bg-black/60 backdrop-blur-sm p-4">
++            <div role="dialog" aria-modal="true" className="bg-card border border-border rounded-xl shadow-2xl w-[400px] p-8 text-center">
+             <h3 className="text-xl font-bold text-foreground mb-6">Cancel current order?</h3>
+             <div className="flex gap-4 justify-center">
+                 <Button variant="destructive" className="px-8" onClick={onConfirm}>Yes</Button>
+                 <Button variant="outline" onClick={onClose}>No</Button>
+             </div>
+             </div>
+-        </div>
++        </ModalOverlay>
+     );
+ }
+ 
+diff --git a/src/components/features/point_of_sale_components/CashPaymentModal.jsx b/src/components/features/point_of_sale_components/CashPaymentModal.jsx
+index 6b270a5..419aaad 100644
+--- a/src/components/features/point_of_sale_components/CashPaymentModal.jsx
++++ b/src/components/features/point_of_sale_components/CashPaymentModal.jsx
+@@ -1,8 +1,9 @@
+ import { Button } from "@/components/ui/button";
+ import { X } from "lucide-react";
+ import { useState } from "react";
++import ModalOverlay from "@/components/shared/ModalOverlay";
+ 
+-const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment }) => {
++const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment, isProcessing = false }) => {
+     const [amountReceived, setAmountReceived] = useState("");
+ 
+     if (!isOpen) return null;
+@@ -42,8 +43,8 @@ const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment }) =>
+     };
+ 
+     return (
+-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+-        <div className="bg-card text-card-foreground border border-border rounded-2xl shadow-2xl w-full max-w-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-10">
++        <ModalOverlay onClose={handleClose} disabled={isProcessing} className="z-[110] bg-black/70 backdrop-blur-sm p-4">
++        <div role="dialog" aria-modal="true" className="bg-card text-card-foreground border border-border rounded-2xl shadow-2xl w-full max-w-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-10">
+             
+             <button 
+             onClick={handleClose} 
+@@ -98,7 +99,7 @@ const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment }) =>
+             </div>
+ 
+         </div>
+-        </div>
++        </ModalOverlay>
+     );
+ };
+ 
+diff --git a/src/components/features/point_of_sale_components/CheckoutModal.jsx b/src/components/features/point_of_sale_components/CheckoutModal.jsx
+index 738962f..c8606d3 100644
+--- a/src/components/features/point_of_sale_components/CheckoutModal.jsx
++++ b/src/components/features/point_of_sale_components/CheckoutModal.jsx
+@@ -1,11 +1,12 @@
+ import { X } from "lucide-react";
++import ModalOverlay from "@/components/shared/ModalOverlay";
+ 
+ const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
+   if (!isOpen) return null;
+ 
+   return (
+-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+-      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-[650px] overflow-hidden animate-fade-in relative flex flex-col">
++    <ModalOverlay onClose={onClose} className="z-[100] bg-black/70 backdrop-blur-sm p-4">
++      <div role="dialog" aria-modal="true" className="bg-card rounded-2xl shadow-2xl w-full max-w-[650px] overflow-hidden animate-fade-in relative flex flex-col">
+         
+         <div className="flex justify-between items-center p-6 border-b border-border relative">
+           <h2 className="text-xl font-bold text-muted-foreground uppercase tracking-wide">
+@@ -56,7 +57,7 @@ const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
+ 
+         </div>
+       </div>
+-    </div>
++    </ModalOverlay>
+   );
+ };
+ 
+diff --git a/src/components/features/point_of_sale_components/DiscountModal.jsx b/src/components/features/point_of_sale_components/DiscountModal.jsx
+index 3af03d1..8829367 100644
+--- a/src/components/features/point_of_sale_components/DiscountModal.jsx
++++ b/src/components/features/point_of_sale_components/DiscountModal.jsx
+@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
+ import { useDiscounts } from '@/hooks/discount_hooks/useDiscount';
+ import { X } from 'lucide-react';
+ import { useState } from 'react';
++import ModalOverlay from "@/components/shared/ModalOverlay";
+ 
+ const DiscountModal = ({ isOpen, onClose, onApply }) => {
+     const {
+@@ -32,8 +33,8 @@ const DiscountModal = ({ isOpen, onClose, onApply }) => {
+     };
+ 
+     return (
+-        <div className="p-6 fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm transition-all">
+-        <div className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-md overflow-hidden animate-fade-in border border-border">
++        <ModalOverlay onClose={onClose} className="p-6 z-[100] bg-black/70 backdrop-blur-sm transition-all">
++        <div role="dialog" aria-modal="true" className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-md overflow-hidden animate-fade-in border border-border">
+             <div className="m-6">
+                 <div className="flex justify-between items-center ">
+                 <h3 className="text-2xl font-bold text-foreground">Add Discount</h3>
+@@ -110,7 +111,7 @@ const DiscountModal = ({ isOpen, onClose, onApply }) => {
+             </div>
+             </div>
+         </div>
+-    </div>
++    </ModalOverlay>
+   );
+ };
+ 
+diff --git a/src/components/features/point_of_sale_components/GCashPaymentModal.jsx b/src/components/features/point_of_sale_components/GCashPaymentModal.jsx
+index 6cfb083..9e2572c 100644
+--- a/src/components/features/point_of_sale_components/GCashPaymentModal.jsx
++++ b/src/components/features/point_of_sale_components/GCashPaymentModal.jsx
+@@ -1,7 +1,8 @@
+ import { Button } from "@/components/ui/button";
+ import { useState } from "react";
++import ModalOverlay from "@/components/shared/ModalOverlay";
+ 
+-const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment }) => {
++const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment, isProcessing = false }) => {
+   const [referenceNumber, setReferenceNumber] = useState("");
+ 
+   if (!isOpen) return null;
+@@ -21,8 +22,8 @@ const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment }) => {
+   };
+ 
+   return (
+-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+-      <div className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-8">
++    <ModalOverlay onClose={handleClose} disabled={isProcessing} className="z-[110] bg-black/70 backdrop-blur-sm p-4">
++      <div role="dialog" aria-modal="true" className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-8">
+         
+         <div className="flex flex-col gap-8 mt-4 mb-8">
+           <div className="flex items-center justify-between gap-4">
+@@ -60,7 +61,7 @@ const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment }) => {
+         </button>
+ 
+       </div>
+-    </div>
++    </ModalOverlay>
+   );
+ };
+ 
+diff --git a/src/components/features/point_of_sale_components/ProductModal.jsx b/src/components/features/point_of_sale_components/ProductModal.jsx
+index 2e5089c..3483a58 100644
+--- a/src/components/features/point_of_sale_components/ProductModal.jsx
++++ b/src/components/features/point_of_sale_components/ProductModal.jsx
+@@ -2,6 +2,7 @@ import logo from '../../../assets/FrancoPerfumeLogo.png';
+ 
+ import { X } from 'lucide-react';
+ import { useEffect, useState } from 'react';
++import ModalOverlay from "@/components/shared/ModalOverlay";
+ 
+ const ProductModal = ({ product, isOpen, onClose, onAdd }) => {
+     const [quantity, setQuantity] = useState(1);
+@@ -56,8 +57,8 @@ const ProductModal = ({ product, isOpen, onClose, onAdd }) => {
+     };
+ 
+     return (
+-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm transition-all p-4">
+-        <div className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in border border-border relative p-8">
++        <ModalOverlay onClose={onClose} className="z-[100] bg-black/70 backdrop-blur-sm transition-all p-4">
++        <div role="dialog" aria-modal="true" className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in border border-border relative p-8">
+             
+             <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
+             <X size={26} />
+@@ -127,7 +128,7 @@ const ProductModal = ({ product, isOpen, onClose, onAdd }) => {
+             </button>
+ 
+         </div>
+-        </div>
++        </ModalOverlay>
+     );
+ };
+ 
+diff --git a/src/components/features/product_components/CreateProductModal.jsx b/src/components/features/product_components/CreateProductModal.jsx
+index 1cdd0e3..0c05b28 100644
+--- a/src/components/features/product_components/CreateProductModal.jsx
++++ b/src/components/features/product_components/CreateProductModal.jsx
+@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
+ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+ import { Textarea } from '@/components/ui/textarea';
+ import { useToast } from '@/components/ui/use-toast';
++import { discardChangesConfig, guardDismiss } from '@/utils/modalUtils';
+ import { isValid, validateForm } from '@/utils/validationUtils';
+ import { Check } from 'lucide-react';
+ import { useState } from 'react';
+@@ -29,6 +30,18 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
+ 
+     if (!isOpen) return null;
+ 
++    const isDirty = Object.values(data).some((value) => value !== "" && value !== null && value !== undefined);
++    const discardAndClose = () => {
++        setData({});
++        setErrors({});
++        onClose();
++    };
++    const dismissGuard = guardDismiss({
++        isBusy: isSubmitting,
++        isDirty,
++        onDirty: () => setConfig(discardChangesConfig(discardAndClose)),
++    });
++
+     const typeOptionData = filterOptions.find(option => option.key === "productType")?.options || [];
+     const genderOptionData = filterOptions.find(option => option.key === "productGender")?.options || [];
+     
+@@ -96,8 +109,8 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
+             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+                 <DialogContent 
+                     className="sm:max-w-xl max-h-[90vh] p-0 flex flex-col overflow-hidden"
+-                    onInteractOutside={(e) => e.preventDefault()}
+-                    onPointerDownOutside={(e) => e.preventDefault()}
++                    onPointerDownOutside={dismissGuard}
++                    onEscapeKeyDown={dismissGuard}
+                 >
+                     <DialogHeader className="p-6 pb-2 shrink-0">
+                         <DialogTitle className="text-xl font-bold">Create New Perfume</DialogTitle>
+diff --git a/src/components/features/product_components/EditProductModal.jsx b/src/components/features/product_components/EditProductModal.jsx
+index 593369a..ca0f883 100644
+--- a/src/components/features/product_components/EditProductModal.jsx
++++ b/src/components/features/product_components/EditProductModal.jsx
+@@ -10,6 +10,7 @@ import { deleteImage } from '@/services/ImageService';
+ import { isValid, validateForm } from '@/utils/validationUtils';
+ import { Check } from 'lucide-react';
+ import { useEffect, useState } from 'react';
++import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
+ 
+ const getProductFormData = (product) => ({
+     productName: product?.productName || "",
+@@ -48,6 +49,13 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
+ 
+     if (!isOpen) return null;
+ 
++    const isDirty = !!data && JSON.stringify(data) !== JSON.stringify(getProductFormData(selectedProduct));
++    const dismissGuard = guardDismiss({
++        isBusy: isSubmitting,
++        isDirty,
++        onDirty: () => setConfig(discardChangesConfig(onClose)),
++    });
++
+     const typeOptionData = filterOptions.find(option => option.key === "productType")?.options || [];
+     const genderOptionData = filterOptions.find(option => option.key === "productGender")?.options || [];
+     
+@@ -115,7 +123,11 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
+     return (
+         <>
+             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+-                <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
++                <DialogContent
++            className="sm:max-w-xl max-h-[90vh] overflow-y-auto"
++            onPointerDownOutside={dismissGuard}
++            onEscapeKeyDown={dismissGuard}
++        >
+                     <DialogHeader>
+                         <DialogTitle className="text-xl font-bold">Edit Product</DialogTitle>
+                     </DialogHeader>
+diff --git a/src/components/features/request_components/RequestColumns.jsx b/src/components/features/request_components/RequestColumns.jsx
+index 21c2140..746055d 100644
+--- a/src/components/features/request_components/RequestColumns.jsx
++++ b/src/components/features/request_components/RequestColumns.jsx
+@@ -1,17 +1,9 @@
+-const STATUS_STYLES = {
+-  'PENDING': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+-  'FOR DISPATCH': 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+-  'IN TRANSIT': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+-  'APPROVED': 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+-  'COMPLETED': 'bg-green-500/10 text-green-500 border-green-500/20',
+-  'REJECTED': 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+-};
++import StatusBadge from "@/components/shared/StatusBadge";
++import { normalizeStatus } from "@/utils/statusUtils";
+ 
+-const STAGE_STYLES = {
+-  'DESTINATION BRANCH MANAGER': 'bg-sky-500/10 text-sky-500 border-sky-500/20',
+-  'SOURCE BRANCH MANAGER': 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
+-  'OWNER': 'bg-violet-500/10 text-violet-500 border-violet-500/20',
+-};
++// The backend reports the stage as "APPROVED" once nothing is pending,
++// even for rejected or cancelled requests, so show "Closed" for those instead.
++const FINISHED_STATUSES = ["REJECTED", "CANCELLED", "DELIVERY CANCELLED"];
+ 
+ export const requestColumns = [
+     {
+@@ -29,30 +21,18 @@ export const requestColumns = [
+     {
+         id: 'status',
+         header: 'Status',
+-        render: (row) => {
+-            const status = row?.requestStatus || "N/A";
+-            const style = STATUS_STYLES[status] || "bg-muted text-muted-foreground border-border"; 
+-            return (
+-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${style}`}>
+-                    {status}
+-                </span>
+-            );
+-        }
++        render: (row) => <StatusBadge status={row?.requestStatus || "N/A"} />
+     },
+     {
+         header: 'Item Count',
+-        accessorKey: 'itemCount'
++        accessorKey: 'itemCount',
++        cellClassName: 'tabular-nums'
+     },
+     {
+         header: "Stage",
+         render: (row) => {
+-            const stage = row?.requestStage || "N/A";
+-            const style = STAGE_STYLES[stage] || "bg-muted text-muted-foreground border-border";
+-            return (
+-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${style}`}>
+-                    {stage}
+-                </span>
+-            )
++            const isFinished = FINISHED_STATUSES.includes(normalizeStatus(row?.requestStatus));
++            return <StatusBadge status={isFinished ? "CLOSED" : (row?.requestStage || "N/A")} />;
+         }
+     },
+ ]
+\ No newline at end of file
+diff --git a/src/components/features/request_components/request_detail_components/RequestedProductsColumns.jsx b/src/components/features/request_components/request_detail_components/RequestedProductsColumns.jsx
+index 39d8dd3..26b2b75 100644
+--- a/src/components/features/request_components/request_detail_components/RequestedProductsColumns.jsx
++++ b/src/components/features/request_components/request_detail_components/RequestedProductsColumns.jsx
+@@ -28,7 +28,7 @@ export const requestedProductsColumns = ( itemApprovals, handleApproveToggle, ha
+                     checked={approvalState?.isApproved ?? false}
+                     onChange={(e) => handleApproveToggle(itemId, e.target.checked)}
+                     disabled={!isEditable}
+-                    className="w-5 h-5 border border-gray-300 rounded text-center disabled:bg-gray-100"
++                    className="w-5 h-5 accent-emerald-600 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                 />
+             );
+         },
+@@ -42,7 +42,7 @@ export const requestedProductsColumns = ( itemApprovals, handleApproveToggle, ha
+                 disabled={!itemApprovals[row.requestItemId]?.isApproved}
+                 value={itemApprovals[row.requestItemId]?.approvedQty ?? row.requestedQty}
+                 onChange={(e) => handleQtyChange(row.requestItemId, e.target.value)}
+-                className="w-20 px-2 py-1 border border-gray-300 rounded text-center disabled:bg-gray-100"
++                className="w-20 px-2 py-1 border border-input bg-transparent text-foreground rounded text-center tabular-nums focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:bg-muted"
+             />
+         ),
+     },
+diff --git a/src/components/features/settings_component/EditAccountPasswordModal.jsx b/src/components/features/settings_component/EditAccountPasswordModal.jsx
+index 1fca715..7605455 100644
+--- a/src/components/features/settings_component/EditAccountPasswordModal.jsx
++++ b/src/components/features/settings_component/EditAccountPasswordModal.jsx
+@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
+ import { isValid } from "@/utils/validationUtils";
+ import { ChevronLeft, Eye, EyeOff, X } from 'lucide-react';
+ import { useState } from 'react';
++import ModalOverlay from "@/components/shared/ModalOverlay";
+ 
+ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePassword }) => {
+     const { toast } = useToast();
+@@ -105,8 +106,8 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
+     };
+ 
+     return (
+-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 font-montserrat animate-fade-in">
+-            <div className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-[500px] p-8 relative text-card-foreground">
++        <ModalOverlay onClose={handleClose} disabled={isSubmitting || !!config} className="bg-black/50 z-50 p-4 font-montserrat animate-fade-in">
++            <div role="dialog" aria-modal="true" className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-[500px] p-8 relative text-card-foreground">
+                 
+                 <div className="flex justify-between items-center mb-6">
+                     <button type="button" onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
+@@ -228,7 +229,7 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
+                 config={config}
+                 isLoading={isSubmitting}
+             />
+-        </div>
++        </ModalOverlay>
+     );
+ };
+ 
+diff --git a/src/components/features/transactions_components/ImportTransactionModal.jsx b/src/components/features/transactions_components/ImportTransactionModal.jsx
+index 5363a98..374d15c 100644
+--- a/src/components/features/transactions_components/ImportTransactionModal.jsx
++++ b/src/components/features/transactions_components/ImportTransactionModal.jsx
+@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
+ import { useToast } from '@/components/ui/use-toast';
+ import { postUploadExcel } from '@/services/TransactionService';
+ import { FileSpreadsheet, Upload, X } from 'lucide-react';
++import { guardDismiss } from '@/utils/modalUtils';
+ import { useRef, useState } from 'react';
+ 
+ const ImportTransactionModal = ({ isOpen, onClose }) => {
+@@ -104,8 +105,8 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
+             <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+                 <DialogContent
+                     className="max-w-md font-montserrat"
+-                    onInteractOutside={(e) => e.preventDefault()}
+-                    onPointerDownOutside={(e) => e.preventDefault()}
++                    onPointerDownOutside={guardDismiss({ isBusy: isSubmitting })}
++                    onEscapeKeyDown={guardDismiss({ isBusy: isSubmitting })}
+                 >
+                     <DialogHeader>
+                         <DialogTitle className="text-xl font-bold text-foreground">
+diff --git a/src/components/features/transactions_components/TransactionColumns.jsx b/src/components/features/transactions_components/TransactionColumns.jsx
+index 51b95c1..676ec74 100644
+--- a/src/components/features/transactions_components/TransactionColumns.jsx
++++ b/src/components/features/transactions_components/TransactionColumns.jsx
+@@ -1,4 +1,4 @@
+-import { formatDateTimeForTable, formatLabel } from "@/utils/formattingUtils";
++import { formatDateTimeForTable, formatLabel, formatPeso } from "@/utils/formattingUtils";
+ 
+ export const transactionColumns = [
+     {
+@@ -14,7 +14,8 @@ export const transactionColumns = [
+     },
+     {
+         header: "Sales Order ID",
+-        accessorKey: "salesOrderDisplayId"
++        accessorKey: "salesOrderDisplayId",
++        cellClassName: "font-medium"
+     },
+     {
+         header: "Perfume Sold",
+@@ -27,10 +28,13 @@ export const transactionColumns = [
+     },
+     {
+         header: "Amount",
++        className: "text-right",
++        cellClassName: "font-semibold tabular-nums",
+         render: (row) => {
++            const amount = Number(row.amount ?? 0);
+             return (
+-                <span className="text-emerald-500">
+-                    ₱ {Math.abs(row.amount ?? 0).toLocaleString()}
++                <span className={amount < 0 ? "text-red-600 dark:text-red-400" : "text-foreground"}>
++                    {formatPeso(amount)}
+                 </span>
+             )
+         }
+diff --git a/src/components/shared/ConfirmDialog.jsx b/src/components/shared/ConfirmDialog.jsx
+index a7b9e73..adedce5 100644
+--- a/src/components/shared/ConfirmDialog.jsx
++++ b/src/components/shared/ConfirmDialog.jsx
+@@ -51,7 +51,7 @@ const ConfirmDialog = ({ isOpen, onClose, config, isLoading }) => {
+             open={isOpen}
+             onOpenChange={(open) => !open && onClose()}
+         >
+-            <AlertDialogContent>
++            <AlertDialogContent onOverlayClick={() => !isLoading && onClose()}>
+ 
+                 <AlertDialogHeader className="items-center text-center sm:items-center sm:text-center">
+                     <AlertDialogTitle className="text-center justify-center font-bold">
+diff --git a/src/components/shared/DataTable.jsx b/src/components/shared/DataTable.jsx
+index 2de360d..5686b3b 100644
+--- a/src/components/shared/DataTable.jsx
++++ b/src/components/shared/DataTable.jsx
+@@ -35,7 +35,7 @@ const DataTable = ({
+                 <TableHead
+                   key={col.key || col.accessorKey || idx}
+                   // Inherits column-hiding classes like 'hidden md:table-cell'
+-                  className={`font-semibold ${col.className || ""}`}
++                  className={`font-semibold text-muted-foreground ${col.className || ""} ${col.headerClassName || ""}`}
+                 >
+                   {col.header}
+                 </TableHead>
+@@ -97,7 +97,7 @@ const DataTable = ({
+                     {columns.map((col, idx) => (
+                       <TableCell
+                         key={col.key || col.accessorKey || idx}
+-                        className={col.className || "text-muted-foreground"}
++                        className={`text-foreground ${col.className || ""} ${col.cellClassName || ""}`}
+                       >
+                         {col.render ? col.render(row) : row[col.accessorKey]}
+                       </TableCell>
+diff --git a/src/components/shared/ExportModal.jsx b/src/components/shared/ExportModal.jsx
+index 8676221..56e1124 100644
+--- a/src/components/shared/ExportModal.jsx
++++ b/src/components/shared/ExportModal.jsx
+@@ -1,5 +1,6 @@
+ import React, { useState } from 'react';
+ import { X, FileText, FileSpreadsheet, FileCode2 } from 'lucide-react';
++import ModalOverlay from "@/components/shared/ModalOverlay";
+ 
+ const ExportModal = ({ isOpen, onClose, onExport }) => {
+   const [selectedFormat, setSelectedFormat] = useState(null);
+@@ -19,9 +20,9 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
+   };
+ 
+   return (
+-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 font-montserrat">
++    <ModalOverlay onClose={onClose} className="z-[100] bg-black/50 backdrop-blur-sm p-4 font-montserrat">
+       {/* FIXED: Replaced bg-white with bg-card */}
+-      <div className="bg-card rounded-xl shadow-2xl w-full max-w-[500px] p-8 relative animate-in fade-in zoom-in-95 duration-200">
++      <div role="dialog" aria-modal="true" className="bg-card rounded-xl shadow-2xl w-full max-w-[500px] p-8 relative animate-in fade-in zoom-in-95 duration-200">
+         
+         {/* CLOSE BUTTON */}
+         <button 
+@@ -119,7 +120,7 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
+         </div>
+ 
+       </div>
+-    </div>
++    </ModalOverlay>
+   );
+ };
+ 
+diff --git a/src/components/shared/ImageUpload.jsx b/src/components/shared/ImageUpload.jsx
+index 427af40..1904885 100644
+--- a/src/components/shared/ImageUpload.jsx
++++ b/src/components/shared/ImageUpload.jsx
+@@ -2,6 +2,7 @@ import { uploadImage } from "@/services/ImageService";
+ import { centerAspectCrop, getCroppedBlob } from "@/utils/imageUtils";
+ import { validateImageFile } from "@/utils/validationUtils";
+ import { Loader2, User } from "lucide-react";
++import { guardDismiss } from "@/utils/modalUtils";
+ import { useCallback, useEffect, useRef, useState } from "react";
+ import { ReactCrop } from "react-image-crop";
+ import 'react-image-crop/dist/ReactCrop.css';
+@@ -179,8 +180,8 @@ const ImageUpload = ({
+             <Dialog open={isCropModalOpen} onOpenChange={(open) => !open && handleCropCancel()}>
+                 <DialogContent
+                     className="max-w-lg font-montserrat"
+-                    onInteractOutside={(e) => e.preventDefault()}
+-                    onPointerDownOutside={(e) => e.preventDefault()}
++                    onPointerDownOutside={guardDismiss({ isBusy: isUploading })}
++                    onEscapeKeyDown={guardDismiss({ isBusy: isUploading })}
+                 >
+                     <DialogHeader>
+                         <DialogTitle className="text-lg font-bold">Crop Image</DialogTitle>
+diff --git a/src/components/shared/LogoutModal.jsx b/src/components/shared/LogoutModal.jsx
+index 7bb57a2..deeb325 100644
+--- a/src/components/shared/LogoutModal.jsx
++++ b/src/components/shared/LogoutModal.jsx
+@@ -1,15 +1,14 @@
+ // FIXED: Changed 'useAuth' to 'UseAuth' to fix the casing conflict shown in your error image
+ import { useAuth } from '@/auth/UseAuth';
+ import { Button } from '@/components/ui/button';
++import ModalOverlay from "@/components/shared/ModalOverlay";
+ 
+ const LogoutModal = ({ setShowLogoutModal }) => {
+     const { logout } = useAuth();
+     return (
+-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all"
+-            onClick={() => setShowLogoutModal(false)}
+-        >
++        <ModalOverlay onClose={() => setShowLogoutModal(false)} className="z-50 bg-black/40 backdrop-blur-sm transition-all">
+             {/* FIXED: Replaced bg-white and border-custom-gray-2 with semantic variables */}
+-            <div className="bg-card p-8 rounded-md shadow-2xl max-w-sm w-full mx-4 border border-border animate-fade-in"
++            <div role="dialog" aria-modal="true" className="bg-card p-8 rounded-md shadow-2xl max-w-sm w-full mx-4 border border-border animate-fade-in"
+                 onClick={(e) => e.stopPropagation()}
+             >
+             {/* FIXED: Replaced text-custom-black with text-foreground */}
+@@ -23,7 +22,7 @@ const LogoutModal = ({ setShowLogoutModal }) => {
+                 <Button variant="destructive" onClick={logout}>Yes, Sign Out</Button>
+             </div>
+             </div>
+-        </div>
++        </ModalOverlay>
+     );
+ }
+ 
+diff --git a/src/components/shared/ModalOverlay.jsx b/src/components/shared/ModalOverlay.jsx
+new file mode 100644
+index 0000000..8b6a1ec
+--- /dev/null
++++ b/src/components/shared/ModalOverlay.jsx
+@@ -0,0 +1,59 @@
++import { useEffect, useRef } from "react";
++
++// Open overlays, newest last. Only the top one reacts to Escape.
++const openOverlays = [];
++
++/**
++ * Backdrop for the hand-made modals (the ones that are not Radix <Dialog>s).
++ *
++ * - Closes when a click STARTS and ENDS on the backdrop. Dragging a text
++ *   selection out of an input and releasing on the backdrop does not close it.
++ * - Closes on Escape (topmost overlay only).
++ * - `disabled` keeps it open, e.g. while a payment or upload is in progress.
++ */
++const ModalOverlay = ({ onClose, disabled = false, className = "", children }) => {
++    const pressedOnBackdrop = useRef(false);
++    const id = useRef(Symbol("modal-overlay"));
++
++    // Keep the latest props for the key handler without re-registering it
++    const latest = useRef({ onClose, disabled });
++    latest.current = { onClose, disabled };
++
++    useEffect(() => {
++        const myId = id.current;
++        openOverlays.push(myId);
++
++        const onKeyDown = (e) => {
++            if (e.key !== "Escape") return;
++            if (openOverlays[openOverlays.length - 1] !== myId) return;
++            if (latest.current.disabled) return;
++            latest.current.onClose?.();
++        };
++
++        window.addEventListener("keydown", onKeyDown);
++        return () => {
++            window.removeEventListener("keydown", onKeyDown);
++            const index = openOverlays.indexOf(myId);
++            if (index !== -1) openOverlays.splice(index, 1);
++        };
++    }, []);
++
++    return (
++        <div
++            role="presentation"
++            className={`fixed inset-0 flex items-center justify-center ${className}`}
++            onMouseDown={(e) => {
++                pressedOnBackdrop.current = e.target === e.currentTarget;
++            }}
++            onMouseUp={(e) => {
++                const isBackdropClick = pressedOnBackdrop.current && e.target === e.currentTarget;
++                pressedOnBackdrop.current = false;
++                if (isBackdropClick && !disabled) onClose?.();
++            }}
++        >
++            {children}
++        </div>
++    );
++};
++
++export default ModalOverlay;
+diff --git a/src/components/shared/StatusBadge.jsx b/src/components/shared/StatusBadge.jsx
+index cd2924f..9db18b8 100644
+--- a/src/components/shared/StatusBadge.jsx
++++ b/src/components/shared/StatusBadge.jsx
+@@ -1,86 +1,36 @@
+-import { Check, Clock, Package, PackageCheck, Truck, X } from 'lucide-react';
+-
+-export default function StatusBadge({ status }) {
+-    const normalizedStatus = (status || '').toUpperCase().replace(/_/g, ' ');
+-
+-    // FIXED: Replaced standard grays with semantic defaults
+-    let config = {
+-        bg: 'bg-muted',
+-        text: 'text-muted-foreground',
+-        border: 'border border-border',
+-        icon: Clock,
+-        label: normalizedStatus || 'UNKNOWN'
+-    };
+-
+-    switch (normalizedStatus) {
+-        // ── Request review states ────────────────────────────────────────
+-        case 'MANAGER REVIEW':
+-        case 'OTHER MANAGER REVIEW':
+-        case 'REQUESTING MANAGER REVIEW':
+-        case 'FULFILLING MANAGER REVIEW':
+-            config = { bg: 'bg-purple-100 dark:bg-purple-500/20', text: 'text-purple-700 dark:text-purple-400', border: '', icon: Clock, label: normalizedStatus };
+-            break;
+-        case 'OWNER REVIEW':
+-            config = { bg: 'bg-orange-100 dark:bg-orange-500/20', text: 'text-orange-700 dark:text-orange-400', border: '', icon: Clock, label: 'OWNER REVIEW' };
+-            break;
+-
+-        // ── Generic positive states ──────────────────────────────────────
+-        case 'APPROVED':
+-        case 'ACCEPTED':
+-            config = { bg: 'bg-green-100 dark:bg-green-500/20', text: 'text-green-700 dark:text-green-400', border: '', icon: Check, label: normalizedStatus };
+-            break;
+-
+-        // ── Generic negative states ──────────────────────────────────────
+-        case 'REJECTED':
+-        case 'CANCELLED':
+-        case 'CANCELED':
+-            config = { bg: 'bg-red-100 dark:bg-red-500/20', text: 'text-red-700 dark:text-red-400', border: '', icon: X, label: normalizedStatus };
+-            break;
+-
+-        // ── Delivery states ──────────────────────────────────────────────
+-        case 'COMPLETED':
+-            config = { bg: 'bg-green-100 dark:bg-green-500/20', text: 'text-green-700 dark:text-green-400', border: '', icon: Check, label: 'COMPLETED' };
+-            break;
+-        case 'PARTIALLY COMPLETED':
+-        case 'PARTIAL':
+-        case 'PARTIALLY RECEIVED':
+-            config = { bg: 'bg-amber-100 dark:bg-amber-500/20', text: 'text-amber-700 dark:text-amber-400', border: '', icon: PackageCheck, label: 'PARTIALLY COMPLETED' };
+-            break;
+-        case 'IN TRANSIT':
+-        case 'DISPATCHED':
+-            config = { bg: 'bg-indigo-100 dark:bg-indigo-500/20', text: 'text-indigo-700 dark:text-indigo-400', border: '', icon: Truck, label: 'IN TRANSIT' };
+-            break;
+-        case 'FOR DISPATCH':
+-        case 'PENDING':
+-        case 'CREATED':
+-            // FIXED: Used semantic variables for the neutral state
+-            config = { bg: 'bg-card dark:bg-muted/50', text: 'text-foreground', border: 'border border-border shadow-sm', icon: Clock, label: normalizedStatus };
+-            break;
+-        case 'RECEIVED':
+-        case 'DELIVERED':
+-            config = { bg: 'bg-emerald-100 dark:bg-emerald-500/20', text: 'text-emerald-700 dark:text-emerald-400', border: '', icon: PackageCheck, label: normalizedStatus };
+-            break;
+-
+-        // ── Direction (used by StatusBadge in DeliveryCard header) ───────
+-        case 'INBOUND':
+-            config = { bg: 'bg-amber-100 dark:bg-amber-500/20', text: 'text-amber-700 dark:text-amber-400', border: '', icon: Package, label: 'INBOUND' };
+-            break;
+-        case 'OUTBOUND':
+-            config = { bg: 'bg-purple-100 dark:bg-purple-500/20', text: 'text-purple-700 dark:text-purple-400', border: '', icon: Truck, label: 'OUTBOUND' };
+-            break;
+-
+-        default:
+-            config = { bg: 'bg-secondary dark:bg-secondary/50', text: 'text-secondary-foreground', border: 'border border-border', icon: Clock, label: normalizedStatus };
+-            break;
+-    }
+-
+-    const IconComponent = config.icon;
++import { normalizeStatus, statusTone, TONES } from '@/utils/statusUtils';
++import { Ban, Check, Clock, Minus, Package, PackageCheck, Truck, X } from 'lucide-react';
++
++const TONE_ICONS = {
++    success: Check,
++    progress: Truck,
++    pending: Clock,
++    partial: PackageCheck,
++    danger: X,
++    inbound: Package,
++    outbound: Truck,
++    neutral: Minus,
++};
++
++// Specific icons where the tone's default icon would be misleading
++const STATUS_ICONS = {
++    DEACTIVATED: Ban,
++    RECEIVED: PackageCheck,
++    DELIVERED: PackageCheck,
++};
++
++export default function StatusBadge({ status, label, className = "" }) {
++    const normalized = normalizeStatus(status);
++    const tone = statusTone(normalized);
++    const Icon = STATUS_ICONS[normalized] || TONE_ICONS[tone];
++    const text = (label ?? normalized) || "UNKNOWN";
+ 
+     return (
+-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold capitalize ${config.bg} ${config.text} ${config.border}`}>
+-            {/* FIXED: Replaced fill-gray-700 with fill-current so it inherits text-foreground dynamically */}
+-            <IconComponent size={14} strokeWidth={2.5} className={normalizedStatus === 'FOR DISPATCH' ? 'fill-current' : ''} />
+-            {config.label.toLowerCase()}
++        <span
++            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md border text-xs font-semibold capitalize whitespace-nowrap ${TONES[tone]} ${className}`}
++        >
++            <Icon size={13} strokeWidth={2.5} aria-hidden="true" />
++            {text.toLowerCase()}
+         </span>
+     );
+-}
+\ No newline at end of file
++}
+diff --git a/src/components/ui/alert-dialog.jsx b/src/components/ui/alert-dialog.jsx
+index a267009..6b442dd 100644
+--- a/src/components/ui/alert-dialog.jsx
++++ b/src/components/ui/alert-dialog.jsx
+@@ -40,11 +40,13 @@ function AlertDialogOverlay({
+ function AlertDialogContent({
+   className,
+   size = "default",
++  onOverlayClick,
+   ...props
+ }) {
+   return (
+     <AlertDialogPortal>
+-      <AlertDialogOverlay />
++      {/* Radix AlertDialogs never close on an outside click; onOverlayClick lets a caller opt in */}
++      <AlertDialogOverlay onClick={onOverlayClick} />
+       <AlertDialogPrimitive.Content
+         data-slot="alert-dialog-content"
+         data-size={size}
+diff --git a/src/components/ui/table.jsx b/src/components/ui/table.jsx
+index 48330a2..6d340ac 100644
+--- a/src/components/ui/table.jsx
++++ b/src/components/ui/table.jsx
+@@ -76,7 +76,7 @@ function TableHead({
+     <th
+       data-slot="table-head"
+       className={cn(
+-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
++        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-muted-foreground [&:has([role=checkbox])]:pr-0",
+         className
+       )}
+       {...props} />
+@@ -91,7 +91,7 @@ function TableCell({
+     <td
+       data-slot="table-cell"
+       className={cn(
+-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
++        "p-2 align-middle whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+         className
+       )}
+       {...props} />
+diff --git a/src/pages/PointOfSalePage.jsx b/src/pages/PointOfSalePage.jsx
+index 74a9a08..4af635c 100644
+--- a/src/pages/PointOfSalePage.jsx
++++ b/src/pages/PointOfSalePage.jsx
+@@ -291,11 +291,13 @@ const PointOfSalePage = () => {
+             onClose={() => setShowCashModal(false)} 
+             grandTotal={grandTotal} 
+             onConfirmPayment={onConfirmPayment} 
++            isProcessing={isProcessing}
+         />
+         <GCashPaymentModal 
+             isOpen={showGCashModal} 
+             onClose={() => setShowGCashModal(false)} 
+             onConfirmPayment={onConfirmPayment} 
++            isProcessing={isProcessing}
+         />
+ 
+         <CancelConfirmModal isOpen={showCancelConfirm} 
+diff --git a/src/utils/formattingUtils.jsx b/src/utils/formattingUtils.jsx
+index b3473d7..9b2a8bf 100644
+--- a/src/utils/formattingUtils.jsx
++++ b/src/utils/formattingUtils.jsx
+@@ -73,4 +73,13 @@ export const formatDateTimeForTable = (dateString) => {
+     });
+ 
+     return `${datePart}, ${timePart}`;
+-};
+\ No newline at end of file
++};
++// ₱1,234.50 / -₱250.00 — keeps the sign so refunds or corrections aren't hidden
++export const formatPeso = (amount) => {
++    const value = Number(amount) || 0;
++    const formatted = Math.abs(value).toLocaleString("en-PH", {
++        minimumFractionDigits: 2,
++        maximumFractionDigits: 2,
++    });
++    return `${value < 0 ? "-" : ""}₱${formatted}`;
++};
+diff --git a/src/utils/modalUtils.js b/src/utils/modalUtils.js
+new file mode 100644
+index 0000000..d55fe96
+--- /dev/null
++++ b/src/utils/modalUtils.js
+@@ -0,0 +1,27 @@
++/**
++ * Handler for a Radix <DialogContent>'s onPointerDownOutside / onEscapeKeyDown.
++ * Radix closes the dialog on an outside click by default; this only steps in when needed:
++ *
++ * - isBusy: keep the dialog open (saving, uploading, importing).
++ * - isDirty + onDirty: keep it open and call onDirty (e.g. ask "Discard changes?").
++ */
++export const guardDismiss = ({ isBusy = false, isDirty = false, onDirty } = {}) => (event) => {
++    if (isBusy) {
++        event.preventDefault();
++        return;
++    }
++    if (isDirty && onDirty) {
++        event.preventDefault();
++        onDirty();
++    }
++};
++
++// Shared config for the existing <ConfirmDialog>
++export const discardChangesConfig = (onDiscard) => ({
++    title: "Discard changes?",
++    description: "You have unsaved changes. If you close this window now, they will be lost.",
++    confirmText: "Discard",
++    cancelText: "Keep editing",
++    confirmVariant: "destructive",
++    onConfirm: onDiscard,
++});
+diff --git a/src/utils/statusUtils.js b/src/utils/statusUtils.js
+new file mode 100644
+index 0000000..066e746
+--- /dev/null
++++ b/src/utils/statusUtils.js
+@@ -0,0 +1,65 @@
++// One status → colour map for the whole app.
++// Tones carry meaning: green = done, blue = moving, amber = waiting / needs attention,
++// orange = done but short, red = stopped, grey = closed / informational.
++
++export const TONES = {
++    success:  "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30",
++    progress: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/30",
++    pending:  "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30",
++    partial:  "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/30",
++    danger:   "bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/30",
++    inbound:  "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30",
++    outbound: "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/30",
++    neutral:  "bg-secondary text-secondary-foreground border-border",
++};
++
++// Values the backend actually sends (requests, approvals, deliveries, items, accounts, discounts, products)
++const EXACT = {
++    // finished well
++    COMPLETED: "success", COMPLETE: "success", APPROVED: "success", ACCEPTED: "success",
++    RECEIVED: "success", DELIVERED: "success", ACTIVE: "success",
++    // moving
++    "IN TRANSIT": "progress", TRANSIT: "progress", DISPATCHED: "progress", "ASSIGNED TO DELIVERY": "progress",
++    // done but short / not final
++    PARTIAL: "partial", "PARTIALLY COMPLETED": "partial", "PARTIALLY RECEIVED": "partial",
++    "CLOSED PARTIAL": "partial", TEMPORARY: "partial",
++    // stopped
++    REJECTED: "danger", CANCELLED: "danger", CANCELED: "danger", "DELIVERY CANCELLED": "danger", DEACTIVATED: "danger",
++    // closed / informational
++    CLOSED: "neutral", FINISHED: "neutral", BYPASSED: "neutral", INACTIVE: "neutral", ARCHIVED: "neutral",
++    // approval stages shown in the Stage column (someone still has to act)
++    "SOURCE BRANCH MANAGER": "pending", "DESTINATION BRANCH MANAGER": "pending", OWNER: "pending",
++    // delivery direction
++    INBOUND: "inbound", OUTBOUND: "outbound",
++};
++
++export const normalizeStatus = (raw) =>
++    (raw ?? "").toString().toUpperCase().replace(/_/g, " ").replace(/\s+/g, " ").trim();
++
++export const statusTone = (raw) => {
++    const s = normalizeStatus(raw);
++    if (EXACT[s]) return EXACT[s];
++    if (s.startsWith("PENDING") || s.endsWith("REVIEW") || s === "CREATED" || s === "FOR DISPATCH") return "pending";
++    return "neutral";
++};
++
++export const statusClass = (raw) => TONES[statusTone(raw)];
++
++// ── Stock levels ───────────────────────────────────────────────────────────
++// Client's definition (interview, Feb 28): 0–20 bottles = low, 25–50 = medium, 50–100 = good.
++export const LOW_STOCK_THRESHOLD = 20;
++
++/**
++ * @returns {{ level: "out" | "low" | "ok", label: string | null, badgeClass: string | null, textClass: string }}
++ */
++export const stockLevel = (units) => {
++    const qty = Number(units) || 0;
++
++    if (qty <= 0) {
++        return { level: "out", label: "Out of stock", badgeClass: TONES.danger, textClass: "text-red-600 dark:text-red-400" };
++    }
++    if (qty <= LOW_STOCK_THRESHOLD) {
++        return { level: "low", label: "Low stock", badgeClass: TONES.pending, textClass: "text-amber-600 dark:text-amber-400" };
++    }
++    return { level: "ok", label: null, badgeClass: null, textClass: "text-foreground" };
++};

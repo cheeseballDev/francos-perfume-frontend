@@ -1,9 +1,11 @@
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Check, Minus, Plus, X } from "lucide-react";
+import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { useState } from "react";
 
 const getBatchFormData = (batch) => ({
@@ -24,6 +26,7 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
     const [data, setData] = useState(() => getBatchFormData(selectedBatch))
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [config, setConfig] = useState(null);
     const minDate = selectedBatch?.dateReceived ? selectedBatch.dateReceived.split('T')[0] : "";
 
     const handleChange = (field, value) => {
@@ -68,13 +71,21 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
     }
 
 
+    const isDirty = JSON.stringify(data) !== JSON.stringify(getBatchFormData(selectedBatch));
+    const dismissGuard = guardDismiss({
+        isBusy: isSubmitting,
+        isDirty,
+        onDirty: () => setConfig(discardChangesConfig(onClose)),
+    });
+
     return (
+        <>
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent 
             className="max-w-md font-montserrat p-8" 
             showCloseButton={true}
-            onInteractOutside={(e) => e.preventDefault()}
-            onPointerDownOutside={(e) => e.preventDefault()}
+            onPointerDownOutside={dismissGuard}
+            onEscapeKeyDown={dismissGuard}
         >
             <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-foreground">
@@ -170,6 +181,13 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
             </DialogFooter>
         </DialogContent>
         </Dialog>
+
+        <ConfirmDialog
+            isOpen={!!config}
+            onClose={() => setConfig(null)}
+            config={config}
+        />
+        </>
     );
 };
 

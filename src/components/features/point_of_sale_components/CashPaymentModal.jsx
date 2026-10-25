@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useState } from "react";
+import ModalOverlay from "@/components/shared/ModalOverlay";
 
-const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment }) => {
+const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment, isProcessing = false }) => {
     const [amountReceived, setAmountReceived] = useState("");
 
     if (!isOpen) return null;
@@ -42,8 +43,8 @@ const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment }) => 
     };
 
     return (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-        <div className="bg-card text-card-foreground border border-border rounded-2xl shadow-2xl w-full max-w-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-10">
+        <ModalOverlay onClose={handleClose} disabled={isProcessing} className="z-[110] bg-black/70 backdrop-blur-sm p-4">
+        <div role="dialog" aria-modal="true" className="bg-card text-card-foreground border border-border rounded-2xl shadow-2xl w-full max-w-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-10">
             
             <button 
             onClick={handleClose} 
@@ -98,7 +99,7 @@ const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment }) => 
             </div>
 
         </div>
-        </div>
+        </ModalOverlay>
     );
 };
 

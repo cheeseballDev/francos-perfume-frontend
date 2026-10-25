@@ -2,6 +2,7 @@ import { uploadImage } from "@/services/ImageService";
 import { centerAspectCrop, getCroppedBlob } from "@/utils/imageUtils";
 import { validateImageFile } from "@/utils/validationUtils";
 import { Loader2, User } from "lucide-react";
+import { guardDismiss } from "@/utils/modalUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ReactCrop } from "react-image-crop";
 import 'react-image-crop/dist/ReactCrop.css';
@@ -179,8 +180,8 @@ const ImageUpload = ({
             <Dialog open={isCropModalOpen} onOpenChange={(open) => !open && handleCropCancel()}>
                 <DialogContent
                     className="max-w-lg font-montserrat"
-                    onInteractOutside={(e) => e.preventDefault()}
-                    onPointerDownOutside={(e) => e.preventDefault()}
+                    onPointerDownOutside={guardDismiss({ isBusy: isUploading })}
+                    onEscapeKeyDown={guardDismiss({ isBusy: isUploading })}
                 >
                     <DialogHeader>
                         <DialogTitle className="text-lg font-bold">Crop Image</DialogTitle>

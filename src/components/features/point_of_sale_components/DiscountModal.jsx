@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useDiscounts } from '@/hooks/discount_hooks/useDiscount';
 import { X } from 'lucide-react';
 import { useState } from 'react';
+import ModalOverlay from "@/components/shared/ModalOverlay";
 
 const DiscountModal = ({ isOpen, onClose, onApply }) => {
     const {
@@ -32,8 +33,8 @@ const DiscountModal = ({ isOpen, onClose, onApply }) => {
     };
 
     return (
-        <div className="p-6 fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm transition-all">
-        <div className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-md overflow-hidden animate-fade-in border border-border">
+        <ModalOverlay onClose={onClose} className="p-6 z-[100] bg-black/70 backdrop-blur-sm transition-all">
+        <div role="dialog" aria-modal="true" className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-md overflow-hidden animate-fade-in border border-border">
             <div className="m-6">
                 <div className="flex justify-between items-center ">
                 <h3 className="text-2xl font-bold text-foreground">Add Discount</h3>
@@ -110,7 +111,7 @@ const DiscountModal = ({ isOpen, onClose, onApply }) => {
             </div>
             </div>
         </div>
-    </div>
+    </ModalOverlay>
   );
 };
 

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { deleteImage } from '@/services/ImageService';
+import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useEffect, useState } from 'react';
 import { useAuth } from "../../../auth/UseAuth";
@@ -61,6 +62,13 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
     }, [isOpen, selectedAccount]);
 
     if (!isOpen) return null;
+
+    const isDirty = !!data && JSON.stringify(data) !== JSON.stringify(getAccountFormData(selectedAccount));
+    const dismissGuard = guardDismiss({
+        isBusy: isSubmitting,
+        isDirty,
+        onDirty: () => setConfig(discardChangesConfig(onClose)),
+    });
 
     const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
     const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
@@ -161,8 +169,8 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent
             className="sm:max-w-3xl max-h-[90vh] overflow-y-auto"
-            onInteractOutside={(e) => e.preventDefault()}
-            onPointerDownOutside={(e) => e.preventDefault()}
+            onPointerDownOutside={dismissGuard}
+            onEscapeKeyDown={dismissGuard}
          >
           <DialogHeader>
             <DialogTitle>Edit Account</DialogTitle>

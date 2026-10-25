@@ -1,15 +1,14 @@
 // FIXED: Changed 'useAuth' to 'UseAuth' to fix the casing conflict shown in your error image
 import { useAuth } from '@/auth/UseAuth';
 import { Button } from '@/components/ui/button';
+import ModalOverlay from "@/components/shared/ModalOverlay";
 
 const LogoutModal = ({ setShowLogoutModal }) => {
     const { logout } = useAuth();
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all"
-            onClick={() => setShowLogoutModal(false)}
-        >
+        <ModalOverlay onClose={() => setShowLogoutModal(false)} className="z-50 bg-black/40 backdrop-blur-sm transition-all">
             {/* FIXED: Replaced bg-white and border-custom-gray-2 with semantic variables */}
-            <div className="bg-card p-8 rounded-md shadow-2xl max-w-sm w-full mx-4 border border-border animate-fade-in"
+            <div role="dialog" aria-modal="true" className="bg-card p-8 rounded-md shadow-2xl max-w-sm w-full mx-4 border border-border animate-fade-in"
                 onClick={(e) => e.stopPropagation()}
             >
             {/* FIXED: Replaced text-custom-black with text-foreground */}
@@ -23,7 +22,7 @@ const LogoutModal = ({ setShowLogoutModal }) => {
                 <Button variant="destructive" onClick={logout}>Yes, Sign Out</Button>
             </div>
             </div>
-        </div>
+        </ModalOverlay>
     );
 }
 

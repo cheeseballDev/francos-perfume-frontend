@@ -11,6 +11,7 @@ import PaginationBar from "@/components/shared/PaginationBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDateForInput, formatDateForTable } from '@/utils/formattingUtils';
+import { stockLevel } from '@/utils/statusUtils';
 import { ChevronDown, ChevronUp, Edit, Loader2 } from "lucide-react";
 import { useState } from "react";
 import perfumePlaceholder from "../../../assets/FrancoPerfumeLogo.png";
@@ -56,7 +57,7 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
             const isExpanded = expandedRows[rowKey];
             const displayUnits = product.productQuantity || 0;
             const totalBatches = product.productBatchCount || 0;
-            const isLowStock = displayUnits > 0 && displayUnits < 10;
+            const stock = stockLevel(displayUnits);
 
             return (
               <div key={rowKey} className="bg-card border border-border rounded-lg shadow-sm overflow-hidden transition-all shrink-0">
@@ -75,7 +76,11 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-3">
                         <h3 className="font-bold text-lg text-foreground leading-none">{product.productName || "Unknown Product"}</h3>
-                        {isLowStock && <Badge variant="destructive" className="h-5 text-[10px] uppercase font-bold tracking-wider">⚠️ Low Stock</Badge>}
+                        {stock.label && (
+                          <Badge variant="outline" className={`h-5 border text-[10px] uppercase font-bold tracking-wider ${stock.badgeClass}`}>
+                            {stock.label}
+                          </Badge>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className={`h-5 border text-xs ${product.branchName?.toUpperCase() === 'WAREHOUSE' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'}`}>
@@ -88,8 +93,8 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
                   </div>
 
                   <div className="text-right pr-4">
-                    <p className="font-bold text-foreground text-lg">{displayUnits} units</p>
-                    <p className="text-xs text-muted-foreground">{totalBatches} batches</p>
+                    <p className={`font-bold text-lg tabular-nums ${stock.textClass}`}>{displayUnits} units</p>
+                    <p className="text-xs text-foreground">{totalBatches} {totalBatches === 1 ? "batch" : "batches"}</p>
                   </div>
                 </div>
 
@@ -117,7 +122,7 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
                                 <TableCell className="font-medium text-foreground">{batch.batchId || 0}</TableCell>
                                 <TableCell className="text-foreground">{formatDateForTable(batch.dateReceived) || 0}</TableCell>
                                 <TableCell className="text-foreground">{batch.expiryDate || 0}</TableCell>
-                                <TableCell className="text-center text-foreground">{batch.quantity || 0}</TableCell>
+                                <TableCell className="text-center text-foreground tabular-nums">{batch.quantity || 0}</TableCell>
                                 <TableCell className="text-right pr-4">
                                   <Button 
                                     variant="outline" 

@@ -51,7 +51,7 @@ const ConfirmDialog = ({ isOpen, onClose, config, isLoading }) => {
             open={isOpen}
             onOpenChange={(open) => !open && onClose()}
         >
-            <AlertDialogContent>
+            <AlertDialogContent onOverlayClick={() => !isLoading && onClose()}>
 
                 <AlertDialogHeader className="items-center text-center sm:items-center sm:text-center">
                     <AlertDialogTitle className="text-center justify-center font-bold">

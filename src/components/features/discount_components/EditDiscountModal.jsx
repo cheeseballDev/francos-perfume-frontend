@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useEffect, useState } from 'react';
+import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 
 const getDiscountFormData = (discount) => {
   if (!discount) {
@@ -49,6 +50,13 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
     }, [isOpen, selectedDiscount]);
 
     if (!isOpen) return null;
+
+    const isDirty = !!data && JSON.stringify(data) !== JSON.stringify(getDiscountFormData(selectedDiscount));
+    const dismissGuard = guardDismiss({
+        isBusy: isSubmitting,
+        isDirty,
+        onDirty: () => setConfig(discardChangesConfig(onClose)),
+    });
 
     const isPercent = data.discountType === 'PERCENTAGE';
 
@@ -138,7 +146,11 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent
+            className="sm:max-w-3xl"
+            onPointerDownOutside={dismissGuard}
+            onEscapeKeyDown={dismissGuard}
+        >
           <DialogHeader>
             <DialogTitle>Edit Discount</DialogTitle>
           </DialogHeader>

@@ -1,4 +1,4 @@
-import { formatDateTimeForTable, formatLabel } from "@/utils/formattingUtils";
+import { formatDateTimeForTable, formatLabel, formatPeso } from "@/utils/formattingUtils";
 
 export const transactionColumns = [
     {
@@ -14,7 +14,8 @@ export const transactionColumns = [
     },
     {
         header: "Sales Order ID",
-        accessorKey: "salesOrderDisplayId"
+        accessorKey: "salesOrderDisplayId",
+        cellClassName: "font-medium"
     },
     {
         header: "Perfume Sold",
@@ -27,10 +28,13 @@ export const transactionColumns = [
     },
     {
         header: "Amount",
+        className: "text-right",
+        cellClassName: "font-semibold tabular-nums",
         render: (row) => {
+            const amount = Number(row.amount ?? 0);
             return (
-                <span className="text-emerald-500">
-                    ₱ {Math.abs(row.amount ?? 0).toLocaleString()}
+                <span className={amount < 0 ? "text-red-600 dark:text-red-400" : "text-foreground"}>
+                    {formatPeso(amount)}
                 </span>
             )
         }

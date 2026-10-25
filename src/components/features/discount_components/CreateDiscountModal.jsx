@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { toast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useState } from 'react';
+import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 
 const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscount }) => {
     const [config, setConfig] = useState(null);
@@ -14,6 +15,18 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!isOpen) return null;
+
+    const isDirty = Object.values(data || {}).some((value) => value !== "" && value !== null && value !== undefined);
+    const discardAndClose = () => {
+        setData({});
+        setErrors({});
+        onClose();
+    };
+    const dismissGuard = guardDismiss({
+        isBusy: isSubmitting,
+        isDirty,
+        onDirty: () => setConfig(discardChangesConfig(discardAndClose)),
+    });
 
     const isPercent = data.discountType === 'PERCENTAGE';
 
@@ -106,7 +119,11 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
     return (
         <>
             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-                <DialogContent className="sm:max-w-3xl">
+                <DialogContent
+            className="sm:max-w-3xl"
+            onPointerDownOutside={dismissGuard}
+            onEscapeKeyDown={dismissGuard}
+        >
                     <DialogHeader>
                         <DialogTitle>Create Discount</DialogTitle>
                     </DialogHeader>

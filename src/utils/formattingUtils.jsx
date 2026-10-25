@@ -74,3 +74,12 @@ export const formatDateTimeForTable = (dateString) => {
 
     return `${datePart}, ${timePart}`;
 };
+// ₱1,234.50 / -₱250.00 — keeps the sign so refunds or corrections aren't hidden
+export const formatPeso = (amount) => {
+    const value = Number(amount) || 0;
+    const formatted = Math.abs(value).toLocaleString("en-PH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+    return `${value < 0 ? "-" : ""}₱${formatted}`;
+};

@@ -141,7 +141,6 @@ const UserSettingsCard = ({ accountId }) => {
     };
 
     const handleImageChange = (url) => {
-        console.log(url);
         if (!url && originalImageUrl) {
             setIsRemovingImage(true);
         } else if (url) {

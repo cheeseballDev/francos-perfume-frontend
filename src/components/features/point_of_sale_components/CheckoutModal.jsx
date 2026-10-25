@@ -1,11 +1,12 @@
 import { X } from "lucide-react";
+import ModalOverlay from "@/components/shared/ModalOverlay";
 
 const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-[650px] overflow-hidden animate-fade-in relative flex flex-col">
+    <ModalOverlay onClose={onClose} className="z-[100] bg-black/70 backdrop-blur-sm p-4">
+      <div role="dialog" aria-modal="true" className="bg-card rounded-2xl shadow-2xl w-full max-w-[650px] overflow-hidden animate-fade-in relative flex flex-col">
         
         <div className="flex justify-between items-center p-6 border-b border-border relative">
           <h2 className="text-xl font-bold text-muted-foreground uppercase tracking-wide">
@@ -56,7 +57,7 @@ const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
 
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 

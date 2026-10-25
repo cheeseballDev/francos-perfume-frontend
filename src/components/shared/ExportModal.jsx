@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, FileText, FileSpreadsheet, FileCode2 } from 'lucide-react';
+import ModalOverlay from "@/components/shared/ModalOverlay";
 
 const ExportModal = ({ isOpen, onClose, onExport }) => {
   const [selectedFormat, setSelectedFormat] = useState(null);
@@ -19,9 +20,9 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 font-montserrat">
+    <ModalOverlay onClose={onClose} className="z-[100] bg-black/50 backdrop-blur-sm p-4 font-montserrat">
       {/* FIXED: Replaced bg-white with bg-card */}
-      <div className="bg-card rounded-xl shadow-2xl w-full max-w-[500px] p-8 relative animate-in fade-in zoom-in-95 duration-200">
+      <div role="dialog" aria-modal="true" className="bg-card rounded-xl shadow-2xl w-full max-w-[500px] p-8 relative animate-in fade-in zoom-in-95 duration-200">
         
         {/* CLOSE BUTTON */}
         <button 
@@ -119,7 +120,7 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
         </div>
 
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 

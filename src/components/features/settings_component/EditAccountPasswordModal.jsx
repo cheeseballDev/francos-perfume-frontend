@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { isValid } from "@/utils/validationUtils";
 import { ChevronLeft, Eye, EyeOff, X } from 'lucide-react';
 import { useState } from 'react';
+import ModalOverlay from "@/components/shared/ModalOverlay";
 
 const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePassword }) => {
     const { toast } = useToast();
@@ -105,8 +106,8 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 font-montserrat animate-fade-in">
-            <div className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-[500px] p-8 relative text-card-foreground">
+        <ModalOverlay onClose={handleClose} disabled={isSubmitting || !!config} className="bg-black/50 z-50 p-4 font-montserrat animate-fade-in">
+            <div role="dialog" aria-modal="true" className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-[500px] p-8 relative text-card-foreground">
                 
                 <div className="flex justify-between items-center mb-6">
                     <button type="button" onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -228,7 +229,7 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
                 config={config}
                 isLoading={isSubmitting}
             />
-        </div>
+        </ModalOverlay>
     );
 };
 

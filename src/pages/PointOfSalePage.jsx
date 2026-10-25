@@ -291,11 +291,13 @@ const PointOfSalePage = () => {
             onClose={() => setShowCashModal(false)} 
             grandTotal={grandTotal} 
             onConfirmPayment={onConfirmPayment} 
+            isProcessing={isProcessing}
         />
         <GCashPaymentModal 
             isOpen={showGCashModal} 
             onClose={() => setShowGCashModal(false)} 
             onConfirmPayment={onConfirmPayment} 
+            isProcessing={isProcessing}
         />
 
         <CancelConfirmModal isOpen={showCancelConfirm} 

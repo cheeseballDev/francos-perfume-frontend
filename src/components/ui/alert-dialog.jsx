@@ -40,11 +40,13 @@ function AlertDialogOverlay({
 function AlertDialogContent({
   className,
   size = "default",
+  onOverlayClick,
   ...props
 }) {
   return (
     <AlertDialogPortal>
-      <AlertDialogOverlay />
+      {/* Radix AlertDialogs never close on an outside click; onOverlayClick lets a caller opt in */}
+      <AlertDialogOverlay onClick={onOverlayClick} />
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         data-size={size}

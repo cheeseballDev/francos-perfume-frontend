@@ -10,6 +10,7 @@ import { deleteImage } from '@/services/ImageService';
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 
 const getProductFormData = (product) => ({
     productName: product?.productName || "",
@@ -47,6 +48,13 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
     }, [isOpen, selectedProduct]);
 
     if (!isOpen) return null;
+
+    const isDirty = !!data && JSON.stringify(data) !== JSON.stringify(getProductFormData(selectedProduct));
+    const dismissGuard = guardDismiss({
+        isBusy: isSubmitting,
+        isDirty,
+        onDirty: () => setConfig(discardChangesConfig(onClose)),
+    });
 
     const typeOptionData = filterOptions.find(option => option.key === "productType")?.options || [];
     const genderOptionData = filterOptions.find(option => option.key === "productGender")?.options || [];
@@ -115,7 +123,11 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
     return (
         <>
             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-                <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+                <DialogContent
+            className="sm:max-w-xl max-h-[90vh] overflow-y-auto"
+            onPointerDownOutside={dismissGuard}
+            onEscapeKeyDown={dismissGuard}
+        >
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold">Edit Product</DialogTitle>
                     </DialogHeader>

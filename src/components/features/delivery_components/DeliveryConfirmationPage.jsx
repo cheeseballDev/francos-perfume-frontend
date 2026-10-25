@@ -182,7 +182,7 @@ const DeliveryConfirmationPage = () => {
                                 
                                 return (
                                     <tr key={item.productId} className="border-b border-border last:border-0">
-                                        <td className="py-4 text-muted-foreground">{item.productDisplayId || item.productId}</td>
+                                        <td className="py-4 text-foreground">{item.productDisplayId || item.productId}</td>
                                         <td className="py-4 font-medium text-foreground">{item.productName}</td>
                                         <td className="py-4 text-center font-bold text-foreground">{item.quantity}</td>
                                         <td className="py-4 text-center">

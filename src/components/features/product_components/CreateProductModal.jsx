@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { discardChangesConfig, guardDismiss } from '@/utils/modalUtils';
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { Check } from 'lucide-react';
 import { useState } from 'react';
@@ -28,6 +29,18 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
 
 
     if (!isOpen) return null;
+
+    const isDirty = Object.values(data).some((value) => value !== "" && value !== null && value !== undefined);
+    const discardAndClose = () => {
+        setData({});
+        setErrors({});
+        onClose();
+    };
+    const dismissGuard = guardDismiss({
+        isBusy: isSubmitting,
+        isDirty,
+        onDirty: () => setConfig(discardChangesConfig(discardAndClose)),
+    });
 
     const typeOptionData = filterOptions.find(option => option.key === "productType")?.options || [];
     const genderOptionData = filterOptions.find(option => option.key === "productGender")?.options || [];
@@ -96,8 +109,8 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <DialogContent 
                     className="sm:max-w-xl max-h-[90vh] p-0 flex flex-col overflow-hidden"
-                    onInteractOutside={(e) => e.preventDefault()}
-                    onPointerDownOutside={(e) => e.preventDefault()}
+                    onPointerDownOutside={dismissGuard}
+                    onEscapeKeyDown={dismissGuard}
                 >
                     <DialogHeader className="p-6 pb-2 shrink-0">
                         <DialogTitle className="text-xl font-bold">Create New Perfume</DialogTitle>

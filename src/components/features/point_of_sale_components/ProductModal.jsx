@@ -2,6 +2,7 @@ import logo from '../../../assets/FrancoPerfumeLogo.png';
 
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import ModalOverlay from "@/components/shared/ModalOverlay";
 
 const ProductModal = ({ product, isOpen, onClose, onAdd }) => {
     const [quantity, setQuantity] = useState(1);
@@ -56,8 +57,8 @@ const ProductModal = ({ product, isOpen, onClose, onAdd }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm transition-all p-4">
-        <div className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in border border-border relative p-8">
+        <ModalOverlay onClose={onClose} className="z-[100] bg-black/70 backdrop-blur-sm transition-all p-4">
+        <div role="dialog" aria-modal="true" className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in border border-border relative p-8">
             
             <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors">
             <X size={26} />
@@ -127,7 +128,7 @@ const ProductModal = ({ product, isOpen, onClose, onAdd }) => {
             </button>
 
         </div>
-        </div>
+        </ModalOverlay>
     );
 };
 

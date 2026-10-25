@@ -1,17 +1,9 @@
-const STATUS_STYLES = {
-  'PENDING': 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-  'FOR DISPATCH': 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-  'IN TRANSIT': 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-  'APPROVED': 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-  'COMPLETED': 'bg-green-500/10 text-green-500 border-green-500/20',
-  'REJECTED': 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-};
+import StatusBadge from "@/components/shared/StatusBadge";
+import { normalizeStatus } from "@/utils/statusUtils";
 
-const STAGE_STYLES = {
-  'DESTINATION BRANCH MANAGER': 'bg-sky-500/10 text-sky-500 border-sky-500/20',
-  'SOURCE BRANCH MANAGER': 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
-  'OWNER': 'bg-violet-500/10 text-violet-500 border-violet-500/20',
-};
+// The backend reports the stage as "APPROVED" once nothing is pending,
+// even for rejected or cancelled requests, so show "Closed" for those instead.
+const FINISHED_STATUSES = ["REJECTED", "CANCELLED", "DELIVERY CANCELLED"];
 
 export const requestColumns = [
     {
@@ -29,30 +21,18 @@ export const requestColumns = [
     {
         id: 'status',
         header: 'Status',
-        render: (row) => {
-            const status = row?.requestStatus || "N/A";
-            const style = STATUS_STYLES[status] || "bg-muted text-muted-foreground border-border"; 
-            return (
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${style}`}>
-                    {status}
-                </span>
-            );
-        }
+        render: (row) => <StatusBadge status={row?.requestStatus || "N/A"} />
     },
     {
         header: 'Item Count',
-        accessorKey: 'itemCount'
+        accessorKey: 'itemCount',
+        cellClassName: 'tabular-nums'
     },
     {
         header: "Stage",
         render: (row) => {
-            const stage = row?.requestStage || "N/A";
-            const style = STAGE_STYLES[stage] || "bg-muted text-muted-foreground border-border";
-            return (
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${style}`}>
-                    {stage}
-                </span>
-            )
+            const isFinished = FINISHED_STATUSES.includes(normalizeStatus(row?.requestStatus));
+            return <StatusBadge status={isFinished ? "CLOSED" : (row?.requestStage || "N/A")} />;
         }
     },
 ]

@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/components/ui/use-toast';
 import { postUploadExcel } from '@/services/TransactionService';
 import { FileSpreadsheet, Upload, X } from 'lucide-react';
+import { guardDismiss } from '@/utils/modalUtils';
 import { useRef, useState } from 'react';
 
 const ImportTransactionModal = ({ isOpen, onClose }) => {
@@ -104,8 +105,8 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
             <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
                 <DialogContent
                     className="max-w-md font-montserrat"
-                    onInteractOutside={(e) => e.preventDefault()}
-                    onPointerDownOutside={(e) => e.preventDefault()}
+                    onPointerDownOutside={guardDismiss({ isBusy: isSubmitting })}
+                    onEscapeKeyDown={guardDismiss({ isBusy: isSubmitting })}
                 >
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-foreground">

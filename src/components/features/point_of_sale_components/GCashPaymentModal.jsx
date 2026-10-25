@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import ModalOverlay from "@/components/shared/ModalOverlay";
 
-const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment }) => {
+const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment, isProcessing = false }) => {
   const [referenceNumber, setReferenceNumber] = useState("");
 
   if (!isOpen) return null;
@@ -21,8 +22,8 @@ const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-8">
+    <ModalOverlay onClose={handleClose} disabled={isProcessing} className="z-[110] bg-black/70 backdrop-blur-sm p-4">
+      <div role="dialog" aria-modal="true" className="bg-card text-card-foreground rounded-md shadow-2xl w-full max-w-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative p-8">
         
         <div className="flex flex-col gap-8 mt-4 mb-8">
           <div className="flex items-center justify-between gap-4">
@@ -60,7 +61,7 @@ const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment }) => {
         </button>
 
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 

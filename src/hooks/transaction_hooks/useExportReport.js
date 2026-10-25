@@ -28,6 +28,7 @@ export const useExportReport = () => {
     };
 
     const exportExcel = useCallback(async (dateFrom, dateTo) => {
+        console.log(dateFrom, dateTo);
         setIsExporting(true);
         setIsError(null);
         try {

@@ -35,7 +35,7 @@ const DataTable = ({
                 <TableHead
                   key={col.key || col.accessorKey || idx}
                   // Inherits column-hiding classes like 'hidden md:table-cell'
-                  className={`font-semibold ${col.className || ""}`}
+                  className={`font-semibold text-muted-foreground ${col.className || ""} ${col.headerClassName || ""}`}
                 >
                   {col.header}
                 </TableHead>
@@ -97,7 +97,7 @@ const DataTable = ({
                     {columns.map((col, idx) => (
                       <TableCell
                         key={col.key || col.accessorKey || idx}
-                        className={col.className || "text-muted-foreground"}
+                        className={`text-foreground ${col.className || ""} ${col.cellClassName || ""}`}
                       >
                         {col.render ? col.render(row) : row[col.accessorKey]}
                       </TableCell>

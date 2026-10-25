@@ -71,7 +71,6 @@ export const useLogin = () => {
 
         } catch (error) {
             setError(error.response?.data);
-            console.log(error.response?.data);
         } finally {
             setIsLoading(false);
         }
