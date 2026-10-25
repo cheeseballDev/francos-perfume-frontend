@@ -47,28 +47,12 @@ const NavigationManager = ({ user }) => {
     return null;
 };
 
-const usePersistentSession = () => {
-    useEffect(() => {
-        const LOGIN_TIME_KEY = 'login_timestamp';
-        const TOKEN_LIFETIME_MS = 86400000; 
-
-        const loginTime = localStorage.getItem(LOGIN_TIME_KEY);
-        const now = Date.now();
-
-        if (loginTime && now - Number(loginTime) > TOKEN_LIFETIME_MS) {
-            window.dispatchEvent(new CustomEvent('session-expired'));
-        }
-    }, []);
-};
-
 const App = () => {
     const { user, logout } = useAuth();
     const { toast } = useToast();
 
     const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
-
-    usePersistentSession();
 
     useEffect(() => {
         const handleResize = () => setIsMobileView(window.innerWidth < 768);

@@ -2,7 +2,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/SupabaseClient";
 import { getAllNotifications, patchMarkAsAllRead, patchMarkNotificationAsRead } from "@/services/NotificationService";
-import { formatDateTimeForTable } from "@/utils/formattingUtils";
 
 import { useCallback, useEffect, useState } from "react";
 
@@ -20,11 +19,11 @@ export const useNotifications = () => {
 
             const notificationList = Array.isArray(data) 
                 ? data 
-                : data?.notifications;
+                : data?.notifications ?? [];
 
             setNotifications(notificationList);
-            const unread = notificationList.filter(n => !n.isRead).length;
-            setUnreadCount(unread);
+            setUnreadCount(data?.unreadCount || 0);
+        
         } catch (error) {
             console.error("Failed to load notifications:", error);
         } finally {
@@ -55,13 +54,12 @@ export const useNotifications = () => {
                             type: newRow.type,
                             referenceId: newRow.reference_id,
                             isRead: newRow.is_read,
-                            createdAt: formatDateTimeForTable(newRow.created_at)
+                            createdAt: newRow.created_at
                         };
 
                        setNotifications((prev) => {
                             const updated = [formattedNotification, ...prev];
-                            const unread = updated.filter(n => !n.isRead).length;
-                            setUnreadCount(unread);
+                            setUnreadCount(unreadCount);
                             return updated;
                         });
 
@@ -80,6 +78,10 @@ export const useNotifications = () => {
     }, [fetchNotifications, toast]);
 
     const markAsRead = async (id) => {
+        const target = notifications.find((n) => n.notificationId === id);
+        if (!target || target.isRead) return;
+
+
         setNotifications((prev) =>
             prev.map((n) => (n.notificationId === id ? { ...n, isRead: true } : n))
         );

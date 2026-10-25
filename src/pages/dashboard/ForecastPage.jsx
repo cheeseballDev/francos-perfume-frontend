@@ -61,35 +61,38 @@ const ForecastPage = () => {
         productId: "",
         month: new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2,
         year: new Date().getMonth() + 2 > 12 ? new Date().getFullYear() + 1 : new Date().getFullYear(),
+        engine: "ML",
     });
 
-    const handleRefreshForecast = () => {
+    const handleRefreshForecast = async () => {
         if (!formData.branchId || !formData.productId) return;
 
-        try {
-            fetchForecast({
-                year: Number(formData.year),
-                month: Number(formData.month), 
-                productId: Number(formData.productId),
-                branchId: Number(formData.branchId),
-                discountPercent: 0,
-                discountAmount: 0,
-                hasDiscount: false,
-                isPercentageDiscount: false,
-            });
-        } catch (error ){
+        const result = await fetchForecast({
+            year: Number(formData.year),
+            month: Number(formData.month),
+            productId: Number(formData.productId),
+            branchId: Number(formData.branchId),
+            engine: formData.engine,
+        });
+
+        if (result?.error) {
             toast({
                 title: "Generating Forecast Failed",
-                description: `An error occurred while generating the forecast.\n${error.response?.data}`,
+                description: "",
                 variant: "destructive",
                 duration: 5000
             });
         }
     };
 
+    const engineLabel = ENGINES.find((en) => en.value === forecastData?.stocksEngine)?.label;
+
   // Wire raw API DTO data directly to the UI components with zero frontend calculations
   useEffect(() => {
     if (forecastData) {
+      if (!forecastData.revenue) setChartData([]);
+      if (!forecastData.stocks) setPerfumeForecasts([]);
+
       if (forecastData.revenue) {
         const rev = forecastData.revenue;
         const monthLabel = MONTHS.find(m => m.value === Number(formData.month))?.label.substring(0, 3);
@@ -116,8 +119,8 @@ const ForecastPage = () => {
           trend: st.recommendedOrderQuantity > 0 ? "up" : "down",
           currentStock: st.currentStock,
           predictedDemand: st.predictedUnitsSold,
-          change: st.recommendedOrderQuantity, // Direct mapping from C# model
-          confidence: null // No confidence score provided by backend
+          change: st.recommendedOrderQuantity,
+          confidence: null 
         }]);
       }
     }
@@ -167,7 +170,7 @@ const ForecastPage = () => {
         <div className="mb-6 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg text-xs text-destructive flex items-center gap-2 shrink-0">
           <AlertTriangle size={13} />
           <span>
-            <strong>Forecast API message:</strong> {asyncState.error?.message || "Check network/parameters."}
+            <strong>Forecast API message:</strong> Selected forecast engine is unavailable. Please use ML.net
           </span>
         </div>
       )}
@@ -179,7 +182,7 @@ const ForecastPage = () => {
             <Sparkles className="text-emerald-500" size={20} />
             <CardTitle className="text-base text-foreground">AI Forecasting Engine</CardTitle>
           </div>
-          <CardDescription>Select parameters to query ML.NET and Gemini AI predictions</CardDescription>
+          <CardDescription>Choose the parameters and the engine (ML.NET or Gemini AI) to generate a forecast</CardDescription>
         </CardHeader>
         
         <CardContent className="pt-4">
@@ -256,23 +259,10 @@ const ForecastPage = () => {
             </Button>
           </div>
 
-          {/* Gemini AI Panel */}
-          {forecastData?.ai && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 mt-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-fade-in">
-              <div className="col-span-3 text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-[-10px]">GEMINI AI PREDICTION</div>
-              <div className="bg-background/80 border border-border rounded-lg p-3 text-center backdrop-blur-sm">
-                <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Current Stock</p>
-                <p className="text-2xl font-bold text-foreground">{forecastData.ai.currentStock}</p>
-              </div>
-              <div className="bg-background/80 border border-border rounded-lg p-3 text-center backdrop-blur-sm">
-                <p className="text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">Predicted Demand</p>
-                <p className="text-2xl font-bold text-blue-500">{forecastData.ai.predictedUnitsSold}</p>
-              </div>
-              <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-lg p-3 text-center backdrop-blur-sm">
-                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-1 uppercase tracking-wider">Recommended Order</p>
-                <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{forecastData.ai.recommendedOrderQuantity}</p>
-              </div>
-            </div>
+          {forecastData?.stocks && (
+            <p className="text-xs text-muted-foreground">
+              Stock forecast generated by <span className="font-semibold text-foreground">{engineLabel}</span>
+            </p>
           )}
         </CardContent>
       </Card>
@@ -334,8 +324,12 @@ const ForecastPage = () => {
         <CardHeader>
           <div className="flex justify-between items-start">
             <div className="flex flex-col gap-1.5">
-              <CardTitle className="text-base text-foreground">ML.NET Target Product Forecast</CardTitle>
-              <CardDescription>FastTree Regression output for the selected product</CardDescription>
+              <CardTitle className="text-base text-foreground">Target Product Forecast</CardTitle>
+              <CardDescription>
+                {forecastData?.stocksEngine === "AI"
+                  ? "Gemini AI output for the selected product"
+                  : "ML.NET FastTree regression output for the selected product"}
+              </CardDescription>
             </div>
           </div>
         </CardHeader>

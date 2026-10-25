@@ -65,43 +65,41 @@ export const useKPI = () => {
         }
     }, []);
 
+    const debounceTimer = useRef(null);
+
     useEffect(() => {
         fetchAllKPIs();
-        const channel = supabase
-            .channel("public:kpi-updates")
-            .on(
-                "postgres_changes",
-                { event: "*", schema: "public", table: "inventory_batch_items" },
-                () => fetchAllKPIs(true)
-            ).on(
-                "postgres_changes",
-                { event: "*", schema: "public", table: "inventory" },
-                () => fetchAllKPIs(true)
-            )
-            .on(
-                "postgres_changes",
-                { event: "*", schema: "public", table: "sales_order" },
-                () => fetchAllKPIs(true)
-            )
-            .on(
-                "postgres_changes",
-                { event: "*", schema: "public", table: "request" },
-                () => fetchAllKPIs(true)
-            ).on(
-                "postgres_changes",
-                { event: "*", schema: "public", table: "request_approval" },
-                () => fetchAllKPIs(true)
-            )
-            .on(
-                "postgres_changes",
-                { event: "*", schema: "public", table: "delivery" },
-                () => fetchAllKPIs(true)
-            )
-            .subscribe();
+        
+        const scheduleRefresh = () => {
+            clearTimeout(debounceTimer.current);
+            debounceTimer.current = setTimeout(() => fetchAllKPIs(true), 2000);
+        };
 
+        const tables = [
+            "inventory_batch_items",
+            "inventory",
+            "sales_order",
+            "request",
+            "request_approval",
+            "delivery",
+        ]
+
+        let channel = supabase.channel("public:kpi-updates");
+        tables.forEach((table) => {
+            channel = channel.on(
+                "postgres_changes",
+                { event: "*", schema: "public", table},
+                scheduleRefresh
+            );;
+        });
+
+        channel.subscribe();
+        
         return () => {
+            clearTimeout(debounceTimer.current);
             supabase.removeChannel(channel);
         };
+
     }, [fetchAllKPIs]);
 
     return {

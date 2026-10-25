@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 
 const loadFromSession = () => {
@@ -21,6 +21,36 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
     };
+
+    const getTokenExpiry = (token) => {
+        try {
+            const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+            const { exp } = JSON.parse(atob(payload));
+            return exp ? exp * 1000 : null;
+        } catch {
+            return null;
+        }
+    }
+
+    useEffect(() => {
+        if (!user?.accessToken) return;
+
+        const expiresAt = getTokenExpiry(user.accessToken);
+        if (!expiresAt) return;
+
+        const timeLeft = expiresAt - Date.now();
+
+        if (timeLeft <= 0) {
+            window.dispatchEvent(new CustomEvent("session-expired"));
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            window.dispatchEvent(new CustomEvent("session-expired"))
+        }, timeLeft);
+
+        return () => clearTimeout(timer);
+    }, [user?.accessToken]);
 
     const logout = () => {
         localStorage.clear();
