@@ -13,9 +13,9 @@ const PointOfSaleFilterBar = ({ filter, filterOptions = [], updateFilter }) => {
     });
 
     return (
-        <div className="flex gap-3 mb-6 items-center">
-            <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+        <div className="flex flex-wrap gap-3 mb-6 items-center">
+            <div className="relative min-w-[16rem] flex-[1_1_24rem]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" size={20} />
                 <input 
                     type="text" 
                     placeholder="Search products..." 
@@ -26,7 +26,7 @@ const PointOfSaleFilterBar = ({ filter, filterOptions = [], updateFilter }) => {
             </div>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2 shrink-0">
                         <Filter size={18} />
                         Filter {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
                     </Button>

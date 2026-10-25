@@ -1,0 +1,603 @@
+diff --git a/src/components/features/barcode_components/BarcodeProductList.jsx b/src/components/features/barcode_components/BarcodeProductList.jsx
+index bd4e076..9c2c8d1 100644
+--- a/src/components/features/barcode_components/BarcodeProductList.jsx
++++ b/src/components/features/barcode_components/BarcodeProductList.jsx
+@@ -1,4 +1,4 @@
+-import { SearchBar } from "@/components/shared";
++import { SearchFilterBar } from "@/components/shared";
+ import DataTable from "@/components/shared/DataTable";
+ import { Button } from "@/components/ui/button";
+ import { Loader2, Printer } from 'lucide-react';
+@@ -59,17 +59,22 @@ const BarcodeProductList = ({
+ 
+     return (
+         <div className="flex flex-col h-full gap-4">
+-            <div className="flex items-center justify-between gap-4">
+-                <SearchBar value={searchQuery} onChange={handleSearchChange} />
+-                <Button 
+-                    variant="outline" 
+-                    onClick={handleDownloadAll}
+-                    disabled={isDownloading}
+-                >
+-                    {isDownloading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Printer size={16} className="mr-2" />} 
+-                    {isDownloading ? "Downloading..." : "Download All"}
+-                </Button>
+-            </div>
++            <SearchFilterBar
++                searchValue={searchQuery}
++                onSearchChange={handleSearchChange}
++                className=""
++                actions={
++                    <Button
++                        variant="outline"
++                        onClick={handleDownloadAll}
++                        disabled={isDownloading}
++                        className="shrink-0"
++                    >
++                        {isDownloading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Printer size={16} className="mr-2" />}
++                        {isDownloading ? "Downloading..." : "Download All"}
++                    </Button>
++                }
++            />
+ 
+             <DataTable
+                 columns={barcodeColumns}
+diff --git a/src/components/features/point_of_sale_components/PointOfSaleFilterBar.jsx b/src/components/features/point_of_sale_components/PointOfSaleFilterBar.jsx
+index d4f4c7a..66d934a 100644
+--- a/src/components/features/point_of_sale_components/PointOfSaleFilterBar.jsx
++++ b/src/components/features/point_of_sale_components/PointOfSaleFilterBar.jsx
+@@ -13,9 +13,9 @@ const PointOfSaleFilterBar = ({ filter, filterOptions = [], updateFilter }) => {
+     });
+ 
+     return (
+-        <div className="flex gap-3 mb-6 items-center">
+-            <div className="relative flex-1 max-w-md">
+-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
++        <div className="flex flex-wrap gap-3 mb-6 items-center">
++            <div className="relative min-w-[16rem] flex-[1_1_24rem]">
++                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" size={20} />
+                 <input 
+                     type="text" 
+                     placeholder="Search products..." 
+@@ -26,7 +26,7 @@ const PointOfSaleFilterBar = ({ filter, filterOptions = [], updateFilter }) => {
+             </div>
+             <DropdownMenu>
+                 <DropdownMenuTrigger asChild>
+-                    <Button variant="outline" className="gap-2">
++                    <Button variant="outline" className="gap-2 shrink-0">
+                         <Filter size={18} />
+                         Filter {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
+                     </Button>
+diff --git a/src/components/shared/FilterDropdown.jsx b/src/components/shared/FilterDropdown.jsx
+index 49aa3bc..8949cc9 100644
+--- a/src/components/shared/FilterDropdown.jsx
++++ b/src/components/shared/FilterDropdown.jsx
+@@ -1,34 +1,54 @@
+ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+ 
+-const FilterDropdown = ({ filter, updateFilter, filterOptions }) => {  
++const ALL = "__all__";
++
++/**
++ * One dropdown per filter group. The wrapper uses `display: contents`, so inside
++ * <SearchFilterBar> every dropdown sits in the same row as the search bar and
++ * wraps onto the next line when there's no room.
++ *
++ * Each trigger has a fixed width and truncates long values with "…", so the text
++ * never runs under the chevron. Hovering shows the full value.
++ */
++const FilterDropdown = ({ filter = {}, updateFilter, filterOptions, className = "contents" }) => {
+     if (!Array.isArray(filterOptions) || filterOptions.length === 0) {
+         return null;
+     }
+-    
++
+     return (
+-      <div className="flex flex-wrap items-center gap-3">
+-        {filterOptions?.map((option) => (
+-          <Select
+-            key={option.key}
+-            value={filter[option.key] || '__all__'}
+-            onValueChange={(val) => updateFilter(option.key, val === '__all__' ? '' : val)}>
+-            <SelectTrigger className="w-40 bg-background">
+-                <SelectValue placeholder={option.label} />
+-            </SelectTrigger>
+-            <SelectContent>
+-                {option.options.map((opt) => (
+-                    <SelectItem
+-                        key={opt.label}
+-                        value={opt.value || '__all__'}
++        <div className={className}>
++            {filterOptions.map((option) => {
++                const current = filter[option.key] || ALL;
++                const selected = option.options.find((opt) => (opt.value || ALL) === current);
++                const display = selected?.label ?? option.label;
++
++                return (
++                    <Select
++                        key={option.key}
++                        value={current}
++                        onValueChange={(val) => updateFilter(option.key, val === ALL ? "" : val)}
+                     >
+-                        {opt.label}
+-                    </SelectItem>
+-                ))}
+-            </SelectContent>
+-        </Select>
+-        ))}
+-    </div>
+-    )
+-}
++                        <SelectTrigger
++                            title={display}
++                            aria-label={option.label?.replace("Filter: ", "")}
++                            className="w-[calc(50%-0.375rem)] sm:w-44 min-w-0 shrink-0 bg-background"
++                        >
++                            <SelectValue placeholder={option.label} className="min-w-0 flex-1 text-left">
++                                <span className="block truncate">{display}</span>
++                            </SelectValue>
++                        </SelectTrigger>
++                        <SelectContent position="popper" className="max-h-72">
++                            {option.options.map((opt) => (
++                                <SelectItem key={opt.value || ALL} value={opt.value || ALL}>
++                                    {opt.label}
++                                </SelectItem>
++                            ))}
++                        </SelectContent>
++                    </Select>
++                );
++            })}
++        </div>
++    );
++};
+ 
+-export default FilterDropdown;
+\ No newline at end of file
++export default FilterDropdown;
+diff --git a/src/components/shared/SearchBar.jsx b/src/components/shared/SearchBar.jsx
+index 4135d67..d5c8b26 100644
+--- a/src/components/shared/SearchBar.jsx
++++ b/src/components/shared/SearchBar.jsx
+@@ -22,7 +22,7 @@ const SearchBar = ({ value, onChange, placeholder = "Search by name or id..."})
+   }, [localValue, onChange, value]);
+ 
+   return (
+-    <div className="relative w-full sm:w-96">
++    <div className="relative w-full">
+       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+         <Search className="h-4 w-4 text-muted-foreground" size={18} />
+       </div>
+@@ -31,7 +31,7 @@ const SearchBar = ({ value, onChange, placeholder = "Search by name or id..."})
+         placeholder={placeholder}
+         value={localValue} 
+         onChange={(e) => setLocalValue(e.target.value)}
+-        className="w-full pl-9 pr-4 py-2 border border-border bg-background text-foreground rounded text-sm focus:outline-none focus:border-primary transition-colors"
++        className="w-full h-9 pl-9 pr-4 border border-input bg-background text-foreground rounded-md text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring/30 transition-colors"
+       />
+     </div>
+   );
+diff --git a/src/components/shared/SearchFilterBar.jsx b/src/components/shared/SearchFilterBar.jsx
+new file mode 100644
+index 0000000..ce8c10d
+--- /dev/null
++++ b/src/components/shared/SearchFilterBar.jsx
+@@ -0,0 +1,37 @@
++import FilterDropdown from "./FilterDropdown";
++import SearchBar from "./SearchBar";
++
++/**
++ * Search bar + filter dropdowns (+ optional action buttons) in one row.
++ *
++ * - The search bar grows to fill whatever space the filters leave (at least 16rem).
++ * - Filters sit next to it and wrap onto the next line when the screen is too narrow;
++ *   on phones they go two per row under the search bar.
++ * - `actions` (e.g. "Create New Account") stay on the right.
++ */
++const SearchFilterBar = ({
++    searchValue,
++    onSearchChange,
++    searchPlaceholder,
++    filter,
++    updateFilter,
++    filterOptions,
++    actions = null,
++    className = "mb-6",
++}) => (
++    <div className={`flex flex-wrap items-center gap-3 ${className}`}>
++        <div className="min-w-[16rem] flex-[1_1_24rem]">
++            <SearchBar value={searchValue} onChange={onSearchChange} placeholder={searchPlaceholder} />
++        </div>
++
++        <FilterDropdown filter={filter} updateFilter={updateFilter} filterOptions={filterOptions} />
++
++        {actions && (
++            <div className="flex w-full flex-wrap items-center gap-3 sm:ml-auto sm:w-auto [&>*]:w-full sm:[&>*]:w-auto">
++                {actions}
++            </div>
++        )}
++    </div>
++);
++
++export default SearchFilterBar;
+diff --git a/src/components/shared/index.js b/src/components/shared/index.js
+index 5b27a61..0487a37 100644
+--- a/src/components/shared/index.js
++++ b/src/components/shared/index.js
+@@ -5,6 +5,7 @@ export { default as ImageUpload } from './ImageUpload';
+ export { default as LogoutModal } from './LogoutModal';
+ export { default as ProfileDropdown } from './ProfileDropdown';
+ export { default as SearchBar } from './SearchBar';
++export { default as SearchFilterBar } from './SearchFilterBar';
+ export { default as Sidebar } from './Sidebar';
+ export { default as StatusBadge } from './StatusBadge';
+ 
+diff --git a/src/pages/dashboard/DeliveriesPage.jsx b/src/pages/dashboard/DeliveriesPage.jsx
+index 6e7c387..3416812 100644
+--- a/src/pages/dashboard/DeliveriesPage.jsx
++++ b/src/pages/dashboard/DeliveriesPage.jsx
+@@ -1,10 +1,9 @@
+ import { useAuth } from "@/auth/UseAuth";
+ import DeliveryCard from "@/components/features/delivery_components/DeliveryCard";
+ import DeliverySkeletonList from "@/components/loaders/DeliverySkeletonList";
+-import { FilterDropdown } from "@/components/shared";
++import { SearchFilterBar } from "@/components/shared";
+ import ConfirmDialog from "@/components/shared/ConfirmDialog";
+ import PaginationBar from "@/components/shared/PaginationBar";
+-import SearchBar from "@/components/shared/SearchBar";
+ import StatusCard from "@/components/shared/StatusCard";
+ import { Button } from "@/components/ui/button";
+ import { useToast } from "@/components/ui/use-toast";
+@@ -271,24 +270,13 @@ const DeliveriesPage = () => {
+                 </Button>
+             </div>
+ 
+-            <div className="flex flex-col gap-4 mb-6">
+-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+-                    <div className="w-full sm:max-w-xl">
+-                        <SearchBar
+-                            value={searchQuery}
+-                            onChange={handleSearchChange}
+-                        />
+-                    </div>
+-                </div>
+-
+-                <div className="flex flex-wrap items-center gap-3">
+-                    <FilterDropdown
+-                        filter={filter}
+-                        updateFilter={updateFilter}
+-                        filterOptions={filterOptions}
+-                    />
+-                </div>
+-            </div>
++            <SearchFilterBar
++                searchValue={searchQuery}
++                onSearchChange={handleSearchChange}
++                filter={filter}
++                updateFilter={updateFilter}
++                filterOptions={filterOptions}
++            />
+ 
+             <div className="space-y-4">
+                 {asyncState.isLoading ? (
+diff --git a/src/pages/dashboard/DiscountPage.jsx b/src/pages/dashboard/DiscountPage.jsx
+index 1ef13d7..062732b 100644
+--- a/src/pages/dashboard/DiscountPage.jsx
++++ b/src/pages/dashboard/DiscountPage.jsx
+@@ -4,7 +4,7 @@ import { discountColumns } from "@/components/features/discount_components/Disco
+ import DiscountInfoModal from "@/components/features/discount_components/DiscountInfoModal";
+ import EditDiscountModal from "@/components/features/discount_components/EditDiscountModal";
+ import DiscountTableSkeleton from "@/components/loaders/DiscountTableSkeleton";
+-import { FilterDropdown, SearchBar } from "@/components/shared";
++import { SearchFilterBar } from "@/components/shared";
+ import DataTable from "@/components/shared/DataTable";
+ import { Button } from "@/components/ui/button";
+ import { useDiscounts } from "@/hooks/discount_hooks/useDiscount";
+@@ -63,33 +63,23 @@ const DiscountPage = () => {
+         
+         <p className="text-muted-foreground text-sm mb-8">Create, remove, and change discounts</p>
+             
+-            <div className="flex flex-col gap-4 mb-8">
+-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+-            <div className="w-full sm:max-w-xl">
+-                <SearchBar
+-                value={searchQuery}
+-                onChange={handleSearchChange}
+-                />
+-            </div>
+-
+-            {role !== 'MANAGER' && (
+-            <Button
+-                onClick={() => setIsCreateDiscountModalOpen(true)}
+-            >
+-                <Plus className="h-5 w-5 mr-2" />
+-                Create New Discount
+-            </Button>
++        <SearchFilterBar
++            searchValue={searchQuery}
++            onSearchChange={handleSearchChange}
++            filter={filter}
++            updateFilter={updateFilter}
++            filterOptions={filterOptions}
++            className="mb-8"
++            actions={role !== 'MANAGER' && (
++                <Button
++                    onClick={() => setIsCreateDiscountModalOpen(true)}
++                    className="shrink-0"
++                >
++                    <Plus className="h-5 w-5 mr-2" />
++                    Create New Discount
++                </Button>
+             )}
+-            </div>
+-
+-            <div className="flex flex-wrap items-center gap-3">
+-                <FilterDropdown
+-                filter={filter}
+-                updateFilter={updateFilter}
+-                filterOptions={filterOptions}
+-                />
+-            </div>
+-        </div>
++        />
+ 
+         <h2 className="text-2xl font-bold text-foreground mb-6">Discounts List</h2>
+ 
+diff --git a/src/pages/dashboard/InventoryPage.jsx b/src/pages/dashboard/InventoryPage.jsx
+index 98fd282..f66bb5d 100644
+--- a/src/pages/dashboard/InventoryPage.jsx
++++ b/src/pages/dashboard/InventoryPage.jsx
+@@ -3,8 +3,7 @@ import TableSkeleton from "@/components/loaders/TableSkeleton";
+ import { formatDateForInput, formatDateForTable } from "@/utils/formattingUtils";
+ import { useState } from "react";
+ import EditBatchModal from "../../components/features/inventory_components/EditBatchModal";
+-import FilterDropdown from "../../components/shared/FilterDropdown";
+-import SearchBar from "../../components/shared/SearchBar";
++import SearchFilterBar from "../../components/shared/SearchFilterBar";
+ import { useInventory } from "../../hooks/inventory_hooks/useInventory";
+ 
+ const InventoryPage = () => {
+@@ -86,21 +85,13 @@ const InventoryPage = () => {
+             </div>
+         </div>
+ 
+-        <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+-            <div className="w-full sm:max-w-md">
+-                <SearchBar
+-                    value={searchQuery}
+-                    onChange={handleSearchChange}
+-                />
+-            </div>
+-            <div className="w-full sm:w-auto">
+-                <FilterDropdown 
+-                    filter={filter}
+-                    updateFilter={updateFilter}
+-                    filterOptions={filterOptions}
+-                />
+-            </div>
+-        </div>
++        <SearchFilterBar
++            searchValue={searchQuery}
++            onSearchChange={handleSearchChange}
++            filter={filter}
++            updateFilter={updateFilter}
++            filterOptions={filterOptions}
++        />
+ 
+       <div className="flex flex-col gap-4 pb-4 flex-1">
+         {asyncState?.isLoading ? (
+diff --git a/src/pages/dashboard/ManageAccountsPage.jsx b/src/pages/dashboard/ManageAccountsPage.jsx
+index 91edc00..90ea27d 100644
+--- a/src/pages/dashboard/ManageAccountsPage.jsx
++++ b/src/pages/dashboard/ManageAccountsPage.jsx
+@@ -3,13 +3,12 @@ import AccountInfoModal from "@/components/features/accounts_components/AccountD
+ import CreateAccountModal from "@/components/features/accounts_components/CreateAccountModal";
+ import EditAccountModal from "@/components/features/accounts_components/EditAccountModal";
+ import AccountTableSkeleton from "@/components/loaders/AccountTableSkeleton";
+-import { FilterDropdown } from "@/components/shared";
++import { SearchFilterBar } from "@/components/shared";
+ import DataTable from "@/components/shared/DataTable";
+ import { Button } from "@/components/ui/button";
+ import { useAccount } from "@/hooks/account_hooks/useAccount";
+ import { Eye, Plus } from "lucide-react";
+ import { useState } from "react";
+-import SearchBar from "../../components/shared/SearchBar";
+ 
+ const ManageAccountsPage = () => {
+     const { 
+@@ -64,34 +63,23 @@ const ManageAccountsPage = () => {
+         Manage, create, and modify accounts of each user
+       </p>
+ 
+-      <div className="flex flex-col gap-4 mb-8">
+-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+-          <div className="w-full sm:max-w-xl">
+-            <SearchBar
+-              value={searchQuery}
+-              onChange={handleSearchChange}
+-            />
+-            
+-          </div>
+-
+-        {role !== 'MANAGER' && (
++      <SearchFilterBar
++        searchValue={searchQuery}
++        onSearchChange={handleSearchChange}
++        filter={filter}
++        updateFilter={updateFilter}
++        filterOptions={filterOptions}
++        className="mb-8"
++        actions={role !== 'MANAGER' && (
+           <Button
+             onClick={() => setIsCreateAccountModalOpen(true)}
++            className="shrink-0"
+           >
+             <Plus className="h-5 w-5 mr-2" />
+             Create New Account
+           </Button>
+         )}
+-      </div>
+-
+-      <div className="flex flex-wrap items-center gap-3">
+-        <FilterDropdown 
+-          filter={filter}
+-          updateFilter={updateFilter}
+-          filterOptions={filterOptions}
+-        />
+-      </div>
+-    </div>
++      />
+ 
+     <h2 className="text-2xl font-bold text-foreground mb-6">Accounts List</h2>
+ 
+diff --git a/src/pages/dashboard/ProductsPage.jsx b/src/pages/dashboard/ProductsPage.jsx
+index eac74bd..937c3e4 100644
+--- a/src/pages/dashboard/ProductsPage.jsx
++++ b/src/pages/dashboard/ProductsPage.jsx
+@@ -2,7 +2,7 @@ import CreateProductModal from '@/components/features/product_components/CreateP
+ import EditProductModal from '@/components/features/product_components/EditProductModal';
+ import ProductGrid from '@/components/features/product_components/ProductGrid';
+ import ProductGridSkeleton from '@/components/loaders/ProductGridSkeleton';
+-import { FilterDropdown, SearchBar } from '@/components/shared';
++import { SearchFilterBar } from '@/components/shared';
+ import PaginationBar from '@/components/shared/PaginationBar';
+ import { Button } from '@/components/ui/button';
+ import { useProduct } from '@/hooks/product_hooks/useProduct';
+@@ -52,34 +52,23 @@ export default function ProductsPage() {
+                 </div>
+             </div>
+ 
+-            <div className="flex flex-col gap-4 mb-8">
+-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+-                    <div className="w-full sm:max-w-xl">
+-                        <SearchBar
+-                            value={searchQuery}
+-                            onChange={handleSearchChange}
+-                        />
+-                    </div>
+-
+-                    {isOwner && (
+-                        <Button
+-                            onClick={() => setIsCreateProductModalOpen(true)}
+-                            className="w-full sm:w-auto shrink-0"
+-                        >
+-                            <Plus className="h-5 w-5 mr-2" />
+-                            Create New Product
+-                        </Button>
+-                    )}
+-                </div>
+-
+-                <div className="flex flex-wrap items-center gap-3">
+-                    <FilterDropdown 
+-                        filter={filter}
+-                        updateFilter={updateFilter}
+-                        filterOptions={filterOptions}
+-                    />
+-                </div>
+-            </div>
++            <SearchFilterBar
++                searchValue={searchQuery}
++                onSearchChange={handleSearchChange}
++                filter={filter}
++                updateFilter={updateFilter}
++                filterOptions={filterOptions}
++                className="mb-8"
++                actions={isOwner && (
++                    <Button
++                        onClick={() => setIsCreateProductModalOpen(true)}
++                        className="shrink-0"
++                    >
++                        <Plus className="h-5 w-5 mr-2" />
++                        Create New Product
++                    </Button>
++                )}
++            />
+ 
+             {asyncState?.isLoading ? (
+                 <ProductGridSkeleton count={6} />
+diff --git a/src/pages/dashboard/RequestPage.jsx b/src/pages/dashboard/RequestPage.jsx
+index 7e2601f..de2d2d6 100644
+--- a/src/pages/dashboard/RequestPage.jsx
++++ b/src/pages/dashboard/RequestPage.jsx
+@@ -1,7 +1,7 @@
+ import { useAuth } from "@/auth/UseAuth";
+ import { requestColumns } from "@/components/features/request_components/RequestColumns";
+ import RequestTableSkeleton from "@/components/loaders/RequestTableSkeleton";
+-import { FilterDropdown, SearchBar } from "@/components/shared";
++import { SearchFilterBar } from "@/components/shared";
+ import DataTable from "@/components/shared/DataTable";
+ import { Button } from "@/components/ui/button";
+ import { useRequest } from "@/hooks/request_hooks/useRequest";
+@@ -114,23 +114,14 @@ const RequestPage = () => {
+             </Button>
+         </div>
+ 
+-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+-            <div className="w-full sm:max-w-xl">
+-                <SearchBar
+-                value={searchQuery}
+-                onChange={handleSearchChange}
+-                />
+-            </div>
+-
+-            <div className="flex flex-wrap items-center gap-3">
+-                <FilterDropdown 
+-                    filter={filter}
+-                    updateFilter={updateFilter}
+-                    filterOptions={filterOptions}
+-                />
+-            </div>
+-
+-        </div>
++        <SearchFilterBar
++            searchValue={searchQuery}
++            onSearchChange={handleSearchChange}
++            filter={filter}
++            updateFilter={updateFilter}
++            filterOptions={filterOptions}
++            className="mb-4"
++        />
+ 
+             {asyncState?.isLoading ? (
+                 <RequestTableSkeleton rowCount={10} />
+diff --git a/src/pages/dashboard/TransactionsPage.jsx b/src/pages/dashboard/TransactionsPage.jsx
+index 5dde163..af3c62c 100644
+--- a/src/pages/dashboard/TransactionsPage.jsx
++++ b/src/pages/dashboard/TransactionsPage.jsx
+@@ -3,7 +3,7 @@ import ImportTransactionModal from '@/components/features/transactions_component
+ import { transactionColumns } from '@/components/features/transactions_components/TransactionColumns';
+ import TransactionDetailsModal from '@/components/features/transactions_components/TransactionDetailsModal';
+ import TransactionTableSkeleton from '@/components/loaders/TransactionTableSkeleton';
+-import { FilterDropdown, SearchBar } from '@/components/shared';
++import { SearchFilterBar } from '@/components/shared';
+ import DataTable from '@/components/shared/DataTable';
+ import { Button } from '@/components/ui/button';
+ import { useTransaction } from '@/hooks/transaction_hooks/useTransaction';
+@@ -61,21 +61,13 @@ export default function TransactionsPage() {
+                     </div>
+                 </div>
+ 
+-                <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+-                    <div className="w-full sm:max-w-md">
+-                        <SearchBar
+-                            value={searchQuery}
+-                            onChange={handleSearchChange}
+-                        />
+-                    </div>
+-                    <div className="w-full sm:w-auto">
+-                        <FilterDropdown 
+-                            filter={filter}
+-                            updateFilter={updateFilter}
+-                            filterOptions={filterOptions}
+-                        />
+-                    </div>
+-                </div>
++                <SearchFilterBar
++                    searchValue={searchQuery}
++                    onSearchChange={handleSearchChange}
++                    filter={filter}
++                    updateFilter={updateFilter}
++                    filterOptions={filterOptions}
++                />
+ 
+                 {asyncState?.isLoading ? (
+                     <TransactionTableSkeleton rowCount={10} />

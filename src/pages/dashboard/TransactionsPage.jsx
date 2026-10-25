@@ -3,7 +3,7 @@ import ImportTransactionModal from '@/components/features/transactions_component
 import { transactionColumns } from '@/components/features/transactions_components/TransactionColumns';
 import TransactionDetailsModal from '@/components/features/transactions_components/TransactionDetailsModal';
 import TransactionTableSkeleton from '@/components/loaders/TransactionTableSkeleton';
-import { FilterDropdown, SearchBar } from '@/components/shared';
+import { SearchFilterBar } from '@/components/shared';
 import DataTable from '@/components/shared/DataTable';
 import { Button } from '@/components/ui/button';
 import { useTransaction } from '@/hooks/transaction_hooks/useTransaction';
@@ -61,21 +61,13 @@ export default function TransactionsPage() {
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
-                    <div className="w-full sm:max-w-md">
-                        <SearchBar
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                        />
-                    </div>
-                    <div className="w-full sm:w-auto">
-                        <FilterDropdown 
-                            filter={filter}
-                            updateFilter={updateFilter}
-                            filterOptions={filterOptions}
-                        />
-                    </div>
-                </div>
+                <SearchFilterBar
+                    searchValue={searchQuery}
+                    onSearchChange={handleSearchChange}
+                    filter={filter}
+                    updateFilter={updateFilter}
+                    filterOptions={filterOptions}
+                />
 
                 {asyncState?.isLoading ? (
                     <TransactionTableSkeleton rowCount={10} />

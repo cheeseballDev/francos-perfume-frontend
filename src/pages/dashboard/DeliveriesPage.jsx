@@ -1,10 +1,9 @@
 import { useAuth } from "@/auth/UseAuth";
 import DeliveryCard from "@/components/features/delivery_components/DeliveryCard";
 import DeliverySkeletonList from "@/components/loaders/DeliverySkeletonList";
-import { FilterDropdown } from "@/components/shared";
+import { SearchFilterBar } from "@/components/shared";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import PaginationBar from "@/components/shared/PaginationBar";
-import SearchBar from "@/components/shared/SearchBar";
 import StatusCard from "@/components/shared/StatusCard";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -271,24 +270,13 @@ const DeliveriesPage = () => {
                 </Button>
             </div>
 
-            <div className="flex flex-col gap-4 mb-6">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="w-full sm:max-w-xl">
-                        <SearchBar
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                        />
-                    </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                    <FilterDropdown
-                        filter={filter}
-                        updateFilter={updateFilter}
-                        filterOptions={filterOptions}
-                    />
-                </div>
-            </div>
+            <SearchFilterBar
+                searchValue={searchQuery}
+                onSearchChange={handleSearchChange}
+                filter={filter}
+                updateFilter={updateFilter}
+                filterOptions={filterOptions}
+            />
 
             <div className="space-y-4">
                 {asyncState.isLoading ? (

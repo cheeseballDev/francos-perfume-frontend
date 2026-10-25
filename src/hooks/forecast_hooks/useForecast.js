@@ -93,7 +93,7 @@ export const useForecast = () => {
         ]);
 
         if (requestId !== latestRequest.current) {
-            return { ok: false, error: null }; // a newer request replaced this one
+            return { ok: false, error: null }; 
         }
 
         setForecastData({

@@ -1,7 +1,7 @@
 import { useAuth } from "@/auth/UseAuth";
 import { requestColumns } from "@/components/features/request_components/RequestColumns";
 import RequestTableSkeleton from "@/components/loaders/RequestTableSkeleton";
-import { FilterDropdown, SearchBar } from "@/components/shared";
+import { SearchFilterBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useRequest } from "@/hooks/request_hooks/useRequest";
@@ -114,23 +114,14 @@ const RequestPage = () => {
             </Button>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
-            <div className="w-full sm:max-w-xl">
-                <SearchBar
-                value={searchQuery}
-                onChange={handleSearchChange}
-                />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-                <FilterDropdown 
-                    filter={filter}
-                    updateFilter={updateFilter}
-                    filterOptions={filterOptions}
-                />
-            </div>
-
-        </div>
+        <SearchFilterBar
+            searchValue={searchQuery}
+            onSearchChange={handleSearchChange}
+            filter={filter}
+            updateFilter={updateFilter}
+            filterOptions={filterOptions}
+            className="mb-4"
+        />
 
             {asyncState?.isLoading ? (
                 <RequestTableSkeleton rowCount={10} />

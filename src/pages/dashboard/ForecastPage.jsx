@@ -87,25 +87,24 @@ const ForecastPage = () => {
 
     const engineLabel = ENGINES.find((en) => en.value === forecastData?.stocksEngine)?.label;
 
-  // Wire raw API DTO data directly to the UI components with zero frontend calculations
-  useEffect(() => {
-    if (forecastData) {
-      if (!forecastData.revenue) setChartData([]);
-      if (!forecastData.stocks) setPerfumeForecasts([]);
+    useEffect(() => {
+        if (forecastData) {
+            if (!forecastData.revenue) setChartData([]);
+            if (!forecastData.stocks) setPerfumeForecasts([]);
 
-      if (forecastData.revenue) {
-        const rev = forecastData.revenue;
-        const monthLabel = MONTHS.find(m => m.value === Number(formData.month))?.label.substring(0, 3);
-        const yearLabel = String(formData.year).substring(2);
-        
-        setChartData([
-          {
-            month: `${monthLabel} '${yearLabel}`,
-            value: rev.expectedRevenue,
-            upper: rev.highestRevenue,
-            lower: rev.lowestRevenue,
-            isActual: false
-          }
+            if (forecastData.revenue) {
+                const rev = forecastData.revenue;
+                const monthLabel = MONTHS.find(m => m.value === Number(formData.month))?.label.substring(0, 3);
+                const yearLabel = String(formData.year).substring(2);
+                
+            setChartData([
+            {
+                month: `${monthLabel} '${yearLabel}`,
+                value: rev.expectedRevenue,
+                upper: rev.highestRevenue,
+                lower: rev.lowestRevenue,
+                isActual: false
+            }
         ]);
       }
 

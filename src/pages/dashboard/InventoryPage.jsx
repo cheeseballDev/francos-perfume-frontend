@@ -3,8 +3,7 @@ import TableSkeleton from "@/components/loaders/TableSkeleton";
 import { formatDateForInput, formatDateForTable } from "@/utils/formattingUtils";
 import { useState } from "react";
 import EditBatchModal from "../../components/features/inventory_components/EditBatchModal";
-import FilterDropdown from "../../components/shared/FilterDropdown";
-import SearchBar from "../../components/shared/SearchBar";
+import SearchFilterBar from "../../components/shared/SearchFilterBar";
 import { useInventory } from "../../hooks/inventory_hooks/useInventory";
 
 const InventoryPage = () => {
@@ -86,21 +85,13 @@ const InventoryPage = () => {
             </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
-            <div className="w-full sm:max-w-md">
-                <SearchBar
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                />
-            </div>
-            <div className="w-full sm:w-auto">
-                <FilterDropdown 
-                    filter={filter}
-                    updateFilter={updateFilter}
-                    filterOptions={filterOptions}
-                />
-            </div>
-        </div>
+        <SearchFilterBar
+            searchValue={searchQuery}
+            onSearchChange={handleSearchChange}
+            filter={filter}
+            updateFilter={updateFilter}
+            filterOptions={filterOptions}
+        />
 
       <div className="flex flex-col gap-4 pb-4 flex-1">
         {asyncState?.isLoading ? (

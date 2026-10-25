@@ -2,7 +2,7 @@ import CreateProductModal from '@/components/features/product_components/CreateP
 import EditProductModal from '@/components/features/product_components/EditProductModal';
 import ProductGrid from '@/components/features/product_components/ProductGrid';
 import ProductGridSkeleton from '@/components/loaders/ProductGridSkeleton';
-import { FilterDropdown, SearchBar } from '@/components/shared';
+import { SearchFilterBar } from '@/components/shared';
 import PaginationBar from '@/components/shared/PaginationBar';
 import { Button } from '@/components/ui/button';
 import { useProduct } from '@/hooks/product_hooks/useProduct';
@@ -52,34 +52,23 @@ export default function ProductsPage() {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-4 mb-8">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="w-full sm:max-w-xl">
-                        <SearchBar
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                        />
-                    </div>
-
-                    {isOwner && (
-                        <Button
-                            onClick={() => setIsCreateProductModalOpen(true)}
-                            className="w-full sm:w-auto shrink-0"
-                        >
-                            <Plus className="h-5 w-5 mr-2" />
-                            Create New Product
-                        </Button>
-                    )}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                    <FilterDropdown 
-                        filter={filter}
-                        updateFilter={updateFilter}
-                        filterOptions={filterOptions}
-                    />
-                </div>
-            </div>
+            <SearchFilterBar
+                searchValue={searchQuery}
+                onSearchChange={handleSearchChange}
+                filter={filter}
+                updateFilter={updateFilter}
+                filterOptions={filterOptions}
+                className="mb-8"
+                actions={isOwner && (
+                    <Button
+                        onClick={() => setIsCreateProductModalOpen(true)}
+                        className="shrink-0"
+                    >
+                        <Plus className="h-5 w-5 mr-2" />
+                        Create New Product
+                    </Button>
+                )}
+            />
 
             {asyncState?.isLoading ? (
                 <ProductGridSkeleton count={6} />

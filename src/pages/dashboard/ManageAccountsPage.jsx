@@ -3,13 +3,12 @@ import AccountInfoModal from "@/components/features/accounts_components/AccountD
 import CreateAccountModal from "@/components/features/accounts_components/CreateAccountModal";
 import EditAccountModal from "@/components/features/accounts_components/EditAccountModal";
 import AccountTableSkeleton from "@/components/loaders/AccountTableSkeleton";
-import { FilterDropdown } from "@/components/shared";
+import { SearchFilterBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "@/hooks/account_hooks/useAccount";
 import { Eye, Plus } from "lucide-react";
 import { useState } from "react";
-import SearchBar from "../../components/shared/SearchBar";
 
 const ManageAccountsPage = () => {
     const { 
@@ -64,34 +63,23 @@ const ManageAccountsPage = () => {
         Manage, create, and modify accounts of each user
       </p>
 
-      <div className="flex flex-col gap-4 mb-8">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="w-full sm:max-w-xl">
-            <SearchBar
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
-            
-          </div>
-
-        {role !== 'MANAGER' && (
+      <SearchFilterBar
+        searchValue={searchQuery}
+        onSearchChange={handleSearchChange}
+        filter={filter}
+        updateFilter={updateFilter}
+        filterOptions={filterOptions}
+        className="mb-8"
+        actions={role !== 'MANAGER' && (
           <Button
             onClick={() => setIsCreateAccountModalOpen(true)}
+            className="shrink-0"
           >
             <Plus className="h-5 w-5 mr-2" />
             Create New Account
           </Button>
         )}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <FilterDropdown 
-          filter={filter}
-          updateFilter={updateFilter}
-          filterOptions={filterOptions}
-        />
-      </div>
-    </div>
+      />
 
     <h2 className="text-2xl font-bold text-foreground mb-6">Accounts List</h2>
 

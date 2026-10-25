@@ -1,4 +1,4 @@
-import { SearchBar } from "@/components/shared";
+import { SearchFilterBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { Loader2, Printer } from 'lucide-react';
@@ -59,17 +59,22 @@ const BarcodeProductList = ({
 
     return (
         <div className="flex flex-col h-full gap-4">
-            <div className="flex items-center justify-between gap-4">
-                <SearchBar value={searchQuery} onChange={handleSearchChange} />
-                <Button 
-                    variant="outline" 
-                    onClick={handleDownloadAll}
-                    disabled={isDownloading}
-                >
-                    {isDownloading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Printer size={16} className="mr-2" />} 
-                    {isDownloading ? "Downloading..." : "Download All"}
-                </Button>
-            </div>
+            <SearchFilterBar
+                searchValue={searchQuery}
+                onSearchChange={handleSearchChange}
+                className=""
+                actions={
+                    <Button
+                        variant="outline"
+                        onClick={handleDownloadAll}
+                        disabled={isDownloading}
+                        className="shrink-0"
+                    >
+                        {isDownloading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Printer size={16} className="mr-2" />}
+                        {isDownloading ? "Downloading..." : "Download All"}
+                    </Button>
+                }
+            />
 
             <DataTable
                 columns={barcodeColumns}
