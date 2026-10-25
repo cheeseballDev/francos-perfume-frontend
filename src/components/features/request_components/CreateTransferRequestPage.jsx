@@ -215,6 +215,8 @@ const CreateTransferRequestPage = () => {
                         branchOptions={branchOptions}
                     />
                     <ProductSelector
+                        selectedProduct={selectedProduct}
+                        setSelectedProduct={setSelectedProduct}
                         quantity={quantity}
                         setQuantity={setQuantity}
                         productOptions={productOptions}

@@ -220,7 +220,7 @@ const DeliveriesPage = () => {
                 <p className="text-muted-foreground text-sm">Manage transfer deliveries</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-flow-col gap-4 mb-6">
                 <StatusCard
                     title="Pending Dispatches"
                     Icon={Clock}
@@ -233,12 +233,14 @@ const DeliveriesPage = () => {
                     mainValue={outboundDeliveriesCount}
                     subText={`${incompleteOutboundDeliveriesCount} incomplete, ${completedOutboundDeliveriesCount} completed`}
                 />
-                <StatusCard
-                    title="Inbound Deliveries"
-                    Icon={Clock}
-                    mainValue={inboundDeliveriesCount}
-                    subText={`${incompleteInboundDeliveriesCount} incomplete, ${completedInboundDeliveriesCount} completed`}
-                />
+                {user?.trueRole !== "OWNER" && (
+                    <StatusCard
+                        title="Inbound Deliveries"
+                        Icon={Clock}
+                        mainValue={inboundDeliveriesCount}
+                        subText={`${incompleteInboundDeliveriesCount} incomplete, ${completedInboundDeliveriesCount} completed`}
+                    />
+                )}
             </div>
 
             <div className="grid grid-cols-3 gap-2 mb-4">

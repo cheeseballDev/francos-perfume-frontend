@@ -1,14 +1,12 @@
+import StatusBadge from "@/components/shared/StatusBadge";
+
 const DeliveryItem = ({ delivery }) => (
-    <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg border border-border">
-        <div>
+    <div className="flex justify-between items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+        <div className="min-w-0">
             <p className="text-sm font-bold text-foreground">{delivery?.deliveryDisplayId}</p>
-            <p className="text-xs text-muted-foreground">{delivery?.fromBranch} → {delivery?.toBranch}</p>
+            <p className="text-xs text-muted-foreground truncate">{delivery?.fromBranch} → {delivery?.toBranch}</p>
         </div>
-        <div className="text-right">
-            <span className="text-xs font-bold px-2 py-1 rounded-md bg-purple-500/20 text-purple-600">
-                {delivery?.deliveryStatus}
-            </span>
-        </div>
+        <StatusBadge status={delivery?.deliveryStatus || "PENDING DISPATCH"} />
     </div>
 );
 

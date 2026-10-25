@@ -10,6 +10,8 @@ import { useKPI } from "@/hooks/kpi_hooks/useKPI";
 import { Banknote, Boxes, Clock, Package, Receipt, ShieldAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StatusCard from "../../components/shared/StatusCard";
+import { formatPeso } from "@/utils/formattingUtils";
+import { TONES } from "@/utils/statusUtils";
 
 const DashboardHome = () => {
     const { user } = useAuth();
@@ -30,28 +32,29 @@ const DashboardHome = () => {
         auditLogs
     } = useAuditLog();
 
+    // Short form for the card (₱1.2M / ₱45.3K); the exact amount goes underneath via formatPeso
     const formatRevenue = (amount) => {
-        if (!amount) return "₱0";
-        if (amount >= 1000000) {
-            return `₱${(amount / 1000000).toFixed(1)}M`;
-        }
-        if (amount >= 1000) {
-            return `₱${(amount / 1000).toFixed(1)}K`;
-        }
-        return `₱${amount.toFixed(2)}`;
+        const value = Number(amount) || 0;
+        if (Math.abs(value) >= 1000000) return `${value < 0 ? "-" : ""}₱${(Math.abs(value) / 1000000).toFixed(1)}M`;
+        if (Math.abs(value) >= 1000) return `${value < 0 ? "-" : ""}₱${(Math.abs(value) / 1000).toFixed(1)}K`;
+        return formatPeso(value);
     };
+
+    const lowStockCount = lowStock?.lowStockProductCount ?? 0;
+    const revenue = Number(totalRevenue?.totalRevenue) || 0;
 
     const topCards = [
         { 
             title: "Total Inventory", 
             mainValue: (inventoryStock?.inventoryCount || 0).toLocaleString(), 
-            subText: (
-                <>
-                    <span className="text-destructive font-semibold ">
-                        {lowStock?.lowStockProductCount ?? 0} items
-                    </span>
-                    {" "}in low stock.
-                </>
+            subText: lowStockCount > 0 ? (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold ${TONES.pending}`}>
+                    {lowStockCount} {lowStockCount === 1 ? "item" : "items"} in low stock
+                </span>
+            ) : (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-xs font-semibold ${TONES.success}`}>
+                    All items in stock
+                </span>
             ),
             Icon: Boxes, 
             color: "text-emerald-500",
@@ -59,8 +62,8 @@ const DashboardHome = () => {
         },
         { 
             title: "Total Revenue", 
-            mainValue: formatRevenue(totalRevenue?.totalRevenue || 0),
-            subText: "Overall", 
+            mainValue: formatRevenue(revenue),
+            subText: `${formatPeso(revenue)} overall`, 
             Icon: Banknote, 
             color: "text-emerald-500",
             route: "/home/transactions" 
