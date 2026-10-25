@@ -20,7 +20,8 @@ export default function ProductsPage() {
         updateFilter,
         filterOptions,
         updateProduct,
-        createProduct
+        createProduct,
+        archiveProduct,
     } = useProduct();
 
     const isOwner = user?.trueRole === 'OWNER';
@@ -99,8 +100,10 @@ export default function ProductsPage() {
                 isOpen={isEditProductModalOpen}
                 onClose={() => setIsEditProductModalOpen(false)}
                 selectedProduct={selectedProduct}
+                setSelectedProduct={setSelectedProduct}
                 filterOptions={filterOptions}
                 updateProduct={updateProduct}
+                archiveProduct={archiveProduct}
             /> 
 
         </div>

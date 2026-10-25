@@ -27,7 +27,7 @@ export const archivedAccountColumns = [
     },
     {
         header: "Branch",
-        accessorKey: "branchId"
+        accessorKey: "branchLocation"
     },
     {
         header: "Email",

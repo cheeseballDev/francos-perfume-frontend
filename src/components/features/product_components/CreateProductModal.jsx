@@ -216,6 +216,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </>
     );

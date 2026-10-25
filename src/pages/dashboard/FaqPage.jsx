@@ -1,5 +1,5 @@
+import { ArrowLeft, ChevronDown, ChevronRight, HelpCircle, Search } from 'lucide-react';
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronRight, HelpCircle, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const faqData = [
@@ -10,10 +10,6 @@ const faqData = [
         q: "How do I change my temporary password?",
         a: "When logging in with a temporary password, the system will automatically prompt you to enter and confirm a new secure password before granting access to your dashboard or the POS."
       },
-      {
-        q: "What is the difference between Cashier and Manager modules?",
-        a: "The Cashier module strictly handles POS transactions, cart management, and applying discounts. The Manager module gives you access to the dashboard to monitor sales, process inventory requests, and track branch performance."
-      }
     ]
   },
   {

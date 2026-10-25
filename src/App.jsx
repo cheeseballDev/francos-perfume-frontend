@@ -32,11 +32,10 @@ const NavigationManager = ({ user }) => {
     useEffect(() => {
         if (user) {
         const role = user.activeRole;
-        
+
         if (role === 'CASHIER' && !path.startsWith('/pos')) {
             navigate('/pos', { replace: true });
-        } 
-        else if (['MANAGER', 'OWNER', 'ADMIN', 'STAFF'].includes(role)) {
+        } else {
             if (!path.startsWith('/home')) {
             navigate('/home', { replace: true });
             }
@@ -84,7 +83,7 @@ const App = () => {
             variant: "destructive",
             title: "Session Expired",
             description: "Your session has expired. Please log in again.",
-            duration: 5000,
+            duration: 10000,
         });
 
         logout();
@@ -100,7 +99,7 @@ const App = () => {
     <div className="flex flex-col h-screen overflow-hidden">
       {isOffline && (
         <div className="w-full bg-destructive text-destructive-foreground text-center py-2 font-semibold text-sm z-[9999]">
-          Lost internet connectivity! Contact administrators if problem is not on your end.
+            Lost internet connectivity! Contact administrators if problem is not on your end.
         </div>
       )}
 

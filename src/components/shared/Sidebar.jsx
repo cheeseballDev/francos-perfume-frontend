@@ -45,7 +45,6 @@ const Sidebar = () => {
   };
 
   return (
-    // FIXED: Removed z-20. The sidebar now naturally sits underneath fixed overlays.
     <div className="w-64 bg-card border-r border-border text-card-foreground flex flex-col shrink-0 h-full relative z-10">
       
       <div className="py-6 px-6 border-b border-border flex flex-col items-center justify-center">

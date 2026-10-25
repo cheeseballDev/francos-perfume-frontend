@@ -1,3 +1,4 @@
+import { useAuth } from '@/auth/UseAuth';
 import { ImageUpload } from '@/components/shared';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import FormField from '@/components/shared/FormField';
@@ -5,9 +6,9 @@ import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useEffect, useState } from 'react';
-import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 
 const accountValidationSchema = {
     firstName: [isValid.required],
@@ -29,6 +30,7 @@ const ROLE_RANKS = {
 
 const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount }) => {
     const { toast } = useToast();
+    const { user } = useAuth();
 
     const [config, setConfig] = useState(null);
     const [data, setData] = useState({});
@@ -61,7 +63,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
     const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
 
     const branchOptions = branchOptionData.filter(
-        (option) => option.value !== "" && option.value !== "__all__"
+        (option) => option.value !== "" && option.value !== "__all__" && option.value !== "WAREHOUSE"
     );
 
     const roleOptions = roleOptionData.filter(
@@ -71,7 +73,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
         }
 
         const targetRoleRank = ROLE_RANKS[option.value.toUpperCase()] || 0;
-        const currentUserRank = ROLE_RANKS[localStorage.getItem("trueRole")] || 0;
+        const currentUserRank = ROLE_RANKS[user?.trueRole] || 0;
 
         return targetRoleRank < currentUserRank;
     });
@@ -156,6 +158,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
                     bucket="account-profile-pictures"
                     imageText='User Image'
                     aspect={1}
+                    isEditing={true}
                     //className=""
                 />
             </div>

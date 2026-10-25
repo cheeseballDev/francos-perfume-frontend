@@ -21,9 +21,7 @@ const ProfileDropdown = () => {
         fetchCurrentUserData();
     }, [user.employeeId]); 
 
-    const canSwitchAccess = 
-        user?.trueRole?.toLowerCase() === 'manager' || 
-        user?.role?.toLowerCase() === 'manager';
+    const canSwitchAccess = user?.trueRole !== "OWNER";
 
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isOpen, setIsOpen] = useState(false);

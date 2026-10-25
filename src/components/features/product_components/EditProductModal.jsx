@@ -7,10 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { deleteImage } from '@/services/ImageService';
-import { isValid, validateForm } from '@/utils/validationUtils';
-import { Check } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
+import { isValid, validateForm } from '@/utils/validationUtils';
+import { Archive, Check } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const getProductFormData = (product) => ({
     productName: product?.productName || "",
@@ -29,7 +29,7 @@ const productValidationSchema = {
     productDescription: [isValid.required],
 };
 
-const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = [], updateProduct }) => {
+const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct, filterOptions = [], updateProduct, archiveProduct }) => {
     const { toast } = useToast();
     
     const [config, setConfig] = useState(null);
@@ -39,6 +39,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
     const [originalImageUrl, setOriginalImageUrl] = useState(selectedProduct?.productImageUrl || null);
     const [isRemovingImage, setIsRemovingImage] = useState(false);
 
+    const productId = selectedProduct?.productId || 0;
 
     useEffect(() => {
         if (isOpen && selectedProduct) {
@@ -90,7 +91,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
                 await deleteImage(originalImageUrl, "product-pictures");
             }
 
-            await updateProduct(selectedProduct.productId, data);
+            await updateProduct(productId, data);
             
             toast({
                 title: "Success",
@@ -109,6 +110,40 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
             setIsSubmitting(false);
             setConfig(null);
         }
+    }
+
+    const handleArchiveProduct = () => {
+        setConfig({
+        title: "Are you sure you want to archive this product?",
+        description: "You will only be able to archive this product if there are no more units left in across ALL branches.",
+        confirmText: "Archive Product",
+            onConfirm: async () => {
+                try {
+                    setIsSubmitting(true);
+                    await archiveProduct(productId);
+                    
+                    toast({
+                        title: "Success",
+                        description: "Product archived successfully.",
+                    });
+
+                    onClose();
+
+                } catch (error) {
+                    toast({
+                        title: "Product Archiving Failed",
+                        description: `An error occurred while archiving the product.\n${error.response?.data}`,
+                        variant: "destructive",
+                        duration: 10000
+                    });
+                    
+                } finally {
+                    setIsSubmitting(false);
+                    setConfig(null);
+                    setSelectedProduct(null);
+                }
+            },
+        });
     }
 
     const handleImageChange = (url) => {
@@ -222,6 +257,16 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
                             <Check className="w-4 h-4 mr-2" />
                             {isSubmitting ? "Saving..." : "Save Changes"}
                         </Button>
+
+                        <Button
+                            variant="destructive"
+                            className="w-full col-span-2"
+                            onClick={handleArchiveProduct}
+                            disabled={isSubmitting}
+                        >
+                            <Archive />
+                            {isSubmitting ? "Archiving..." : "Archive Product"}
+                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>
@@ -230,6 +275,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, filterOptions = []
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </>
     );

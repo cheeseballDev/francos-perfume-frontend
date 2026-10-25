@@ -3,6 +3,7 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { XIcon } from "lucide-react";
+import { useRef } from "react";
 
 function Dialog({
   ...props
@@ -44,18 +45,32 @@ function DialogOverlay({
   );
 }
 
-// When a dropdown (Radix Select, popover, menu) is open inside the dialog, Radix turns off
-// pointer events underneath it. The next click inside the dialog then lands on <html>/<body>
-// and Radix reports it as an "outside" click, which would close the dialog or trigger its
-// discard prompt. Those clicks only close the dropdown, so ignore them here.
-const isClickThrough = (event) => {
-  const target = event?.detail?.originalEvent?.target;
-  if (!(target instanceof Element)) return false;
-  return (
-    target === document.documentElement ||
-    target === document.body ||
-    !!target.closest("[data-radix-popper-content-wrapper], [role='listbox'], [role='menu']")
-  );
+// Radix reports some clicks as "outside" the dialog even though they are on it:
+//
+// 1. While a dropdown (Select, menu, popover) inside the dialog is open, Radix turns off
+//    pointer events on the dialog, but the dark overlay behind it keeps them. A click on the
+//    dialog (including on the dropdown's own trigger) then lands on the overlay, and once
+//    the dropdown closes, the dialog treats it as a backdrop click.
+// 2. The click lands on <html>/<body> or inside the open dropdown.
+//
+// A real outside click is on the overlay AND outside the dialog's box, so check where the
+// pointer actually is instead of trusting the event target.
+const isFalseOutsideClick = (event, contentEl) => {
+  const original = event?.detail?.originalEvent;
+  const target = original?.target;
+
+  if (target instanceof Element) {
+    if (target === document.documentElement || target === document.body) return true;
+    if (target.closest("[data-radix-popper-content-wrapper], [role='listbox'], [role='menu']")) return true;
+  }
+
+  if (contentEl && typeof original?.clientX === "number") {
+    const rect = contentEl.getBoundingClientRect();
+    const { clientX: x, clientY: y } = original;
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
+  }
+
+  return false;
 };
 
 function DialogContent({
@@ -64,8 +79,16 @@ function DialogContent({
   showCloseButton = true,
   onPointerDownOutside,
   onInteractOutside,
+  ref,
   ...props
 }) {
+  const contentRef = useRef(null);
+  const setRefs = (node) => {
+    contentRef.current = node;
+    if (typeof ref === "function") ref(node);
+    else if (ref) ref.current = node;
+  };
+
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -75,15 +98,16 @@ function DialogContent({
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
+        ref={setRefs}
         onPointerDownOutside={(event) => {
-          if (isClickThrough(event)) {
+          if (isFalseOutsideClick(event, contentRef.current)) {
             event.preventDefault();
             return;
           }
           onPointerDownOutside?.(event);
         }}
         onInteractOutside={(event) => {
-          if (isClickThrough(event)) {
+          if (isFalseOutsideClick(event, contentRef.current)) {
             event.preventDefault();
             return;
           }

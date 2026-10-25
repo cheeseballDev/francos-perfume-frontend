@@ -51,7 +51,7 @@ const ArchivedProductDetailsModal = ({ isOpen, onClose, selectedArchivedProduct,
             <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <DialogContent className="sm:max-w-3xl">
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-bold">Transaction Details</DialogTitle>
+                        <DialogTitle className="text-xl font-bold">Archive Details</DialogTitle>
                     </DialogHeader>
 
                     <div className="p-4 space-y-6">
@@ -86,6 +86,7 @@ const ArchivedProductDetailsModal = ({ isOpen, onClose, selectedArchivedProduct,
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </>
         

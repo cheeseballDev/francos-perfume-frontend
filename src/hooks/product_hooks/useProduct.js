@@ -1,3 +1,4 @@
+import { patchArchiveProduct } from "@/services/ArchiveService";
 import { getAllProductBarcodeDownload, getAllProducts, getOneProductBarcode, getOneProductBarcodeDownload, getProductDetails, getProductFilters, patchUpdateProductDetails, postAddNewProduct } from "@/services/ProductService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -99,7 +100,17 @@ export const useProduct = () => {
         }
     }
 
-    // FIXED: Stripped asyncState to prevent Skeleton removal
+    const archiveProduct = async (productId) => {
+        try {
+            await patchArchiveProduct(productId);
+            await new Promise((resolve) => setTimeout(resolve, 200));
+            await fetchAllProducts();
+        } catch (err) {
+            setAsyncState({ error: err })
+            throw err;
+        }
+    }
+
     const fetchProductFilters = useCallback(async () => {
         try {
             const data = await getProductFilters();
@@ -177,6 +188,7 @@ export const useProduct = () => {
       createProduct,
       fetchOneProductBarcode,
       downloadOneProductBarcode,
-      downloadAllProductBarcodes
+      downloadAllProductBarcodes,
+      archiveProduct
     };
 }

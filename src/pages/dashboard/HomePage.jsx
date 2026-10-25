@@ -7,11 +7,11 @@ import TransactionItem from "@/components/features/home_components/home_items/Tr
 import DashboardSkeleton from "@/components/loaders/DashboardSkeleton";
 import { useAuditLog } from "@/hooks/audit_hooks/useAuditLog";
 import { useKPI } from "@/hooks/kpi_hooks/useKPI";
-import { Banknote, Boxes, Clock, Package, Receipt, ShieldAlert } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import StatusCard from "../../components/shared/StatusCard";
 import { formatPeso } from "@/utils/formattingUtils";
 import { TONES } from "@/utils/statusUtils";
+import { Banknote, Boxes, Clock, Package, Receipt } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import StatusCard from "../../components/shared/StatusCard";
 
 const DashboardHome = () => {
     const { user } = useAuth();
@@ -98,19 +98,6 @@ const DashboardHome = () => {
         }
         return true;
     });
-
-    // todo: remove cashier
-    if (userRole === "CASHIER") {
-        return (
-            <div className="flex flex-col items-center justify-center h-[80vh] text-center animate-fade-in font-montserrat">
-                <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
-                <h1 className="text-3xl font-bold text-foreground mb-2">Access Restricted</h1>
-                <p className="text-muted-foreground max-w-md">
-                    Cashiers do not have permission to view dashboard metrics. Please navigate to the Point of Sale or Transactions list.
-                </p>
-            </div>
-        );
-    }
 
     return (
         <div className="animate-fade-in font-montserrat flex flex-col h-full pb-8">

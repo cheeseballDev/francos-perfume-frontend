@@ -178,11 +178,12 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
 
             <div className="py-4 border-b border-border">
                 <ImageUpload
-                    value={data.employeeImageUrl}
+                    value={data.employeeImageUrl || ""}
                     onChange={handleImageChange}
                     bucket="account-profile-pictures"
                     imageText='User Image'
                     aspect={1}
+                    isEditing={true}
                     //className=""
                 />
             </div>
