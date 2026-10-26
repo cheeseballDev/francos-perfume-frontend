@@ -1,10 +1,24 @@
 import ForcePasswordChangeModal from '@/components/features/settings_component/ForcePasswordChangeModal';
 import FormField from '@/components/shared/FormField';
 import { Button } from '@/components/ui/button';
+import { LOGOUT_REASON_KEY } from '@/auth/authConstants';
 import { useLogin } from '@/hooks/useLogin';
 import { useTheme } from '@/theme/useTheme';
 import { ChevronLeft, Loader2, Moon, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import logo from '../assets/FrancoPerfumeLogo.png';
+
+const LOGOUT_MESSAGES = {
+    expired: "Your session has expired. Please log in again.",
+};
+
+const readLogoutReason = () => {
+    try {
+        return LOGOUT_MESSAGES[sessionStorage.getItem(LOGOUT_REASON_KEY)] || null;
+    } catch {
+        return null;
+    }
+};
 
 const LoginPage = () => {
     const {
@@ -27,11 +41,26 @@ const LoginPage = () => {
 
     const { isDark, toggleTheme } = useTheme();
 
+    // e.g. "Your session has expired…", set by logout("expired")
+    const [logoutMessage, setLogoutMessage] = useState(readLogoutReason);
+
+    useEffect(() => {
+        // Show it once: a refresh of the login page shouldn't show it again
+        try {
+            sessionStorage.removeItem(LOGOUT_REASON_KEY);
+        } catch {
+            // ignore
+        }
+    }, []);
+
     const onSubmit = async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        setLogoutMessage(null);
         await handleLogin(); 
     };
+
+    const message = error || logoutMessage;
                 
   
     if (view === 'module') {
@@ -88,7 +117,10 @@ const LoginPage = () => {
                     type="email"
                     placeholder="Enter email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                        setEmail(e.target.value);
+                        setLogoutMessage(null);
+                    }}
                 />
 
                 <FormField
@@ -96,11 +128,14 @@ const LoginPage = () => {
                     type="password"
                     placeholder="Enter password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                        setPassword(e.target.value);
+                        setLogoutMessage(null);
+                    }}
                 />
 
-                {error && (
-                    <p className="text-sm text-destructive text-center -mt-1">{error}</p>
+                {message && (
+                    <p role="alert" className="text-sm text-destructive text-center -mt-1">{message}</p>
                 )}
 
                 <Button 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
+import { LOGOUT_REASON_KEY } from "./authConstants";
 
 const loadFromSession = () => {
     const savedUser = localStorage.getItem('user');
@@ -52,8 +53,18 @@ export const AuthProvider = ({ children }) => {
         return () => clearTimeout(timer);
     }, [user?.accessToken]);
 
-    const logout = () => {
+    // `reason` is optional, e.g. logout("expired"). It is kept in sessionStorage because
+    // the redirect below reloads the page (and localStorage is cleared), so React state
+    // and toasts don't survive it. LoginPage reads it and shows the message under the password.
+    const logout = (reason) => {
         localStorage.clear();
+        if (typeof reason === "string") {
+            try {
+                sessionStorage.setItem(LOGOUT_REASON_KEY, reason);
+            } catch {
+                // storage blocked: the user still gets logged out, just without the message
+            }
+        }
         setUser(null);
         window.location.href = '/login';
     };

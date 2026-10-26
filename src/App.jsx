@@ -1,5 +1,4 @@
 import { Toaster } from '@/components/ui/toaster';
-import { useToast } from '@/components/ui/use-toast';
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet, Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './auth/UseAuth';
@@ -48,7 +47,6 @@ const NavigationManager = ({ user }) => {
 
 const App = () => {
     const { user, logout } = useAuth();
-    const { toast } = useToast();
 
     const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -78,20 +76,12 @@ const App = () => {
     }, []);
 
     useEffect(() => {
-        const handleSessionExpired = () => {
-        toast({
-            variant: "destructive",
-            title: "Session Expired",
-            description: "Your session has expired. Please log in again.",
-            duration: 10000,
-        });
-
-        logout();
-        };
+        const handleSessionExpired = () => logout("expired");
 
         window.addEventListener('session-expired', handleSessionExpired);
+
         return () => window.removeEventListener('session-expired', handleSessionExpired);
-    }, [toast, logout]);
+    },[logout])
 
     if (isMobileView) { return <MobileBlocker />; }
 
