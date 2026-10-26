@@ -32,6 +32,7 @@ export const patchUpdateBatch = async (batchId, dto) => {
 
 export const getInventoryFilters = async () => {
     const response = await apiClient.get(`${PATH}/filters`);
+    console.log(response.data);
     return response.data;
 };
 

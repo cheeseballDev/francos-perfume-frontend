@@ -55,7 +55,6 @@ export const useLogin = () => {
     };
 
     const continueLogin = (result) => {
-        console.log(result);
         setFirstName(result.firstName);
         setLastName(result.lastName);
 

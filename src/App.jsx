@@ -17,7 +17,6 @@ import LoginPage from './pages/LoginPage';
 import PointOfSalePage from './pages/PointOfSalePage';
 import { MODULES, canUsePos, modulePath } from './utils/roleAccess';
 
-// Permissions come from the account role (trueRole), never from the module the user is in
 const ProtectedRoute = ({ user, allowedRoles }) => {
   if (!user) return <Navigate to="/login" replace />;
   if (!allowedRoles.includes(user.trueRole)) {
@@ -26,10 +25,6 @@ const ProtectedRoute = ({ user, allowedRoles }) => {
   return <Outlet />;
 }
 
-// Keeps the user inside the module they picked: /pos/* for POS, /home/* for the dashboard.
-// It only steps in when the path belongs to the other module. The old version sent
-// every non-/home path (including /pos for managers) back to /home on each navigation,
-// and it raced ProtectedRoute's own redirect when switching modules.
 const NavigationManager = ({ user }) => {
     const navigate = useNavigate();
     const path = useLocation().pathname;
@@ -157,15 +152,13 @@ const App = () => {
               </Route>
             </Route>
             
-            <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'STAFF', 'CASHIER']} />}>
-              <Route path="/pos" element={<PointOfSalePage />} />
-              <Route path="/pos/settings" element={<UserSettingsPage />} />
-              
-              {/* ADDED: FAQ Page available specifically for Cashiers */}
+            <Route element={<PosRoute user={user} />}>
+               <Route path="/pos" element={<PointOfSalePage />} />
+               <Route path="/pos/settings" element={<UserSettingsPage />} />
               <Route path="/pos/faq" element={<FaqPage />} />
             </Route>
 
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to={user ? modulePath(user) : "/login"} replace />} />
           </Routes>
         </Router>
       </div>

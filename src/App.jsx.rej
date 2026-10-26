@@ -1,0 +1,20 @@
+diff a/src/App.jsx b/src/App.jsx	(rejected hunks)
+@@ -143,15 +157,15 @@ const App = () => {
+               </Route>
+             </Route>
+             
+-            <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'CASHIER']} />}>
++            <Route element={<PosRoute user={user} />}>
+               <Route path="/pos" element={<PointOfSalePage />} />
+               <Route path="/pos/settings" element={<UserSettingsPage />} />
+               
+-              {/* ADDED: FAQ Page available specifically for Cashiers */}
++              {/* FAQ inside the POS module */}
+               <Route path="/pos/faq" element={<FaqPage />} />
+             </Route>
+ 
+-            <Route path="*" element={<Navigate to="/login" replace />} />
++            <Route path="*" element={<Navigate to={user ? modulePath(user) : "/login"} replace />} />
+           </Routes>
+         </Router>
+       </div>

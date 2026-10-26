@@ -28,12 +28,14 @@ export const useInventory = () => {
         productGender: '',
         pageCount: 1,
         pageSize: 10,
+        stockStatus: ''
     });
 
     const [filterOptions, setFilterOptions] = useState({
         productType: [],
         productGender: [],
         branch: [],
+        stockStatus: []
     });
 
     const INVENTORY_FILTER_SCHEMA = [
@@ -41,6 +43,16 @@ export const useInventory = () => {
       { key: "productGender", label: "Filter: Product Gender", allLabel: "All Product Genders" },
       { key: "branch", label: "Filter: Branch", allLabel: "All Branches" },
     ]
+
+    const STOCK_FILTER_SCHEMA = {
+        key: "stockStatus",
+        label: "Filter: Stock Level",
+        options: [
+            { label: "All Stock Levels", value: ""},
+            { label: "Good", value: "GOOD" },
+            { label: "Low", value: "LOW" }
+        ]
+    }
 
     const fetchInventory = useCallback(async () => {
       if (isFirstLoad.current) {
@@ -127,7 +139,10 @@ export const useInventory = () => {
     const fetchFilters = useCallback(async () => {
         try {
             const data = await getInventoryFilters();
-            setFilterOptions(buildFilterOptions(data, INVENTORY_FILTER_SCHEMA));
+            setFilterOptions([
+                ...buildFilterOptions(data, INVENTORY_FILTER_SCHEMA),
+                STOCK_FILTER_SCHEMA,
+        ]);
         } catch (err) {
             console.error("Filter load error:", err);
         }
