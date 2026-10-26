@@ -1,12 +1,13 @@
+import { LOGOUT_REASON_KEY } from '@/auth/authConstants';
 import ForcePasswordChangeModal from '@/components/features/settings_component/ForcePasswordChangeModal';
 import FormField from '@/components/shared/FormField';
 import { Button } from '@/components/ui/button';
-import { LOGOUT_REASON_KEY } from '@/auth/authConstants';
 import { useLogin } from '@/hooks/useLogin';
 import { useTheme } from '@/theme/useTheme';
 import { ChevronLeft, Loader2, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import logo from '../assets/FrancoPerfumeLogo.png';
+import OtpVerification from './OtpVerification';
 
 const LOGOUT_MESSAGES = {
     expired: "Your session has expired. Please log in again.",
@@ -36,16 +37,17 @@ const LoginPage = () => {
         handlePasswordUpdate,
         firstName,
         lastName,
-        error
+        error,
+        handleVerifyOtp,
+        handleResendOtp,
+        cancelOtp
     } = useLogin();
 
     const { isDark, toggleTheme } = useTheme();
 
-    // e.g. "Your session has expired…", set by logout("expired")
     const [logoutMessage, setLogoutMessage] = useState(readLogoutReason);
 
     useEffect(() => {
-        // Show it once: a refresh of the login page shouldn't show it again
         try {
             sessionStorage.removeItem(LOGOUT_REASON_KEY);
         } catch {
@@ -53,7 +55,7 @@ const LoginPage = () => {
         }
     }, []);
 
-    const onSubmit = async (e) => {
+    const onSubmit = async (e) => { 
         e.preventDefault();
         e.stopPropagation();
         setLogoutMessage(null);
@@ -62,7 +64,7 @@ const LoginPage = () => {
 
     const message = error || logoutMessage;
                 
-  
+
     if (view === 'module') {
         return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-background font-montserrat p-4 relative">
@@ -96,7 +98,20 @@ const LoginPage = () => {
         )
     }
 
-  return (
+    if (view === 'otp') {
+        return (
+            <OtpVerification
+                email={email}
+                onVerify={handleVerifyOtp}
+                onResend={handleResendOtp}
+                onCancel={cancelOtp}
+                isLoading={isLoading}
+                error={error}
+            />
+        );
+    }
+
+    return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background font-montserrat p-4 relative">
         <button
             onClick={toggleTheme}
@@ -158,6 +173,8 @@ const LoginPage = () => {
             Forgot password? <a href="/forgot-password" className="text-destructive font-medium hover:underline">Reset it here</a>.
             </p>
         </div>
+
+
 
         <ForcePasswordChangeModal 
             isOpen={showPasswordModal}

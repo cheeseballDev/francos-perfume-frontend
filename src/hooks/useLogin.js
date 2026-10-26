@@ -1,5 +1,6 @@
 import { useAuth } from "@/auth/UseAuth";
-import { login, login as loginApi } from "@/services/LoginService";
+import { login, login as loginApi, resendOtp, verifyLoginOtp } from "@/services/LoginService";
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -47,6 +48,24 @@ export const useLogin = () => {
         }
     };
 
+    const continueLogin = (result) => {
+        console.log(result);
+        setFirstName(result.firstName);
+        setLastName(result.lastName);
+
+        if (result.requiresPasswordChange) {
+                setShowPasswordModal(true);
+                return;
+            }
+
+            if (result.requiresOtp) {
+                setView('otp');
+                return;
+            }
+
+        processSuccessfulLogin(result);
+    };
+
     const handleLogin = async () => {
         setIsLoading(true);
         setError(null);
@@ -58,16 +77,7 @@ export const useLogin = () => {
         }
 
         try {
-            const result = await login(email, password);
-            setFirstName(result.firstName);
-            setLastName(result.lastName);
-
-            if (result.requiresPasswordChange) {
-                setShowPasswordModal(true);
-                return;
-            }
-
-            processSuccessfulLogin(result);
+            continueLogin(await login(email, password));
 
         } catch (error) {
             setError(error.response?.data);
@@ -82,14 +92,46 @@ export const useLogin = () => {
         setError(null);
         try {
             const result = await loginApi(email, password, newPassword);
+            setPassword(newPassword);
             setShowPasswordModal(false);
-            processSuccessfulLogin(result);
+            continueLogin(result);
         } catch (error) {
             setError(error.response?.data);
         } finally {
             setIsLoading(false);
         }
     };
+
+    const handleVerifyOtp = async (code) => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            processSuccessfulLogin(await verifyLoginOtp(email, code));
+        } catch (err) {
+            setError(getAPIError(err, "Invalid or expired code"));
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    const handleResendOtp = async () => {
+        setError(null);
+        try {
+            await resendOtp(email);
+            return true;
+        } catch (err) {
+            setError(getAPIError(err, "Could not send new code"));
+            return false;
+        }
+    }
+
+    const cancelOtp = () => {
+        setView("login");
+        setPassword("");
+        setError(null);
+    }
+
 
     const handleModuleSelect = (selectedModule) => {
         if (!pendingAuthData) return;
@@ -119,5 +161,8 @@ export const useLogin = () => {
         handlePasswordUpdate,
         firstName,
         lastName,
+        handleVerifyOtp,
+        handleResendOtp,
+        cancelOtp
     };
 };

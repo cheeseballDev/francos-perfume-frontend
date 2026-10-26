@@ -1,6 +1,7 @@
+import PasswordConditionsList from "@/components/shared/PasswordConditionsList";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { isValid } from "@/utils/validationUtils";
+import { allPasswordConditionsMet, getPasswordConditions } from "@/utils/validationUtils";
 import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { useState } from "react";
 
@@ -14,39 +15,15 @@ const ForcePasswordChangeModal = ({ isOpen, onClose, onSuccess, oldPassword, fir
 
     if (!isOpen) return null;
 
-    const checkNameCondition = () => {
-        if (password.length === 0) return false;
-        const passLower = password.toLowerCase();
-
-        const first = firstName?.toLowerCase();
-        const last = lastName?.toLowerCase();
-
-        if (first && passLower.includes(first)) return false;
-        if (last && passLower.includes(last)) return false;
-        return true;
-    };
-
-    const isDifferentFromOld = password !== oldPassword && password.length > 0;
+    const conditions = getPasswordConditions({ password, firstName, lastName, oldPassword });
     const passwordsMatch = password === confirmPassword && password.length > 0;
-    const passwordError = isValid.password(password);
-    const canSubmit = !passwordError && checkNameCondition() && passwordsMatch;
-
-    const conditions = {
-        hasNoName: checkNameCondition(),
-        hasMinLength: password.length >= 12,
-        hasUpper: /[A-Z]/.test(password),
-        hasLower: /[a-z]/.test(password),
-        hasNumber: /[0-9]/.test(password),
-        hasSpecial: /[#.\-?!@$%^&*]/.test(password),
-        isNotOld: isDifferentFromOld,
-    };
+    const canSubmit = allPasswordConditionsMet(conditions) && passwordsMatch;
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        const errorCheck = isValid.password(password);
-        if (errorCheck || !checkNameCondition() || !passwordsMatch) return;
+        if (!canSubmit) return;
     
         try {
             setIsSubmitting(true);
@@ -70,10 +47,6 @@ const ForcePasswordChangeModal = ({ isOpen, onClose, onSuccess, oldPassword, fir
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const getConditionClass = (isMet) => {
-        return isMet ? "text-green-500 font-medium transition-colors" : "text-destructive transition-colors";
     };
 
     return (
@@ -136,18 +109,7 @@ const ForcePasswordChangeModal = ({ isOpen, onClose, onSuccess, oldPassword, fir
                         )}
                     </div>
 
-                    <div className="pt-2">
-                        <p className="text-[15px] font-bold text-foreground mb-2">Password conditions (MUST HAVE):</p>
-                        <ul className="text-sm space-y-1.5 ml-4">
-                            <li className={getConditionClass(conditions.isNotOld)}>Must be different from temporary password</li>
-                            <li className={getConditionClass(conditions.hasNoName)}>Must not include your name</li>
-                            <li className={getConditionClass(conditions.hasMinLength)}>12 characters minimum</li>
-                            <li className={getConditionClass(conditions.hasUpper)}>Include uppercase letter</li>
-                            <li className={getConditionClass(conditions.hasLower)}>Include lowercase letter</li>
-                            <li className={getConditionClass(conditions.hasNumber)}>Include number</li>
-                            <li className={getConditionClass(conditions.hasSpecial)}>Include a special character: (#.-?!@$%^&*)</li>
-                        </ul>
-                    </div>
+                    <PasswordConditionsList conditions={conditions} />
 
                     <Button 
                         type="submit" 

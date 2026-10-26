@@ -62,6 +62,42 @@ export const isValid = {
 
 };
 
+export const getPasswordConditions = ({
+    password = "",
+    firstName,
+    lastName,
+    oldPassword,
+    oldPasswordLabel = "Must be different from temporary password",
+} = {}) => {
+    const hasValue = password.length > 0;
+    const lower = password.toLowerCase();
+    const compact = lower.replace(/\s+/g, "");
+    const names = [firstName, lastName]
+        .map((name) => name?.toLowerCase().replace(/\s+/g, ""))
+        .filter((name) => name && name.length >= 2);
+
+    const conditions = [];
+
+    if (oldPassword !== undefined) {
+        conditions.push({ key: "isNotOld", label: oldPasswordLabel, met: hasValue && password !== oldPassword });
+    }
+    if (names.length > 0) {
+        conditions.push({ key: "hasNoName", label: "Must not include your name", met: hasValue && !names.some((name) => compact.includes(name)) });
+    }
+
+    conditions.push(
+        { key: "hasMinLength", label: "12 characters minimum", met: password.length >= 12 },
+        { key: "hasUpper", label: "Include uppercase letter", met: /[A-Z]/.test(password) },
+        { key: "hasLower", label: "Include lowercase letter", met: /[a-z]/.test(password) },
+        { key: "hasNumber", label: "Include number", met: /[0-9]/.test(password) },
+        { key: "hasSpecial", label: "Include a special character: (#.-?!@$%^&*)", met: /[#.\-?!@$%^&*]/.test(password) },
+    );
+
+    return conditions;
+};
+
+export const allPasswordConditionsMet = (conditions) => conditions.every((c) => c.met);
+
 export const checkIfValid = (value, rules = []) => {
     for (const rule of rules) {
         const error = rule(value);

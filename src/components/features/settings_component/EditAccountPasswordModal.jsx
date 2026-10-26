@@ -1,10 +1,12 @@
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import ModalOverlay from "@/components/shared/ModalOverlay";
+import PasswordConditionsList from "@/components/shared/PasswordConditionsList";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { isValid } from "@/utils/validationUtils";
+import { getAPIError } from "@/utils/apiErrorUtils";
+import { allPasswordConditionsMet, getPasswordConditions } from "@/utils/validationUtils";
 import { ChevronLeft, Eye, EyeOff, X } from 'lucide-react';
 import { useState } from 'react';
-import ModalOverlay from "@/components/shared/ModalOverlay";
 
 const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePassword }) => {
     const { toast } = useToast();
@@ -20,33 +22,17 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
 
     if (!isOpen) return null;
 
-    const checkNameCondition = () => {
-        if (newPassword.length === 0) return false;
-        const passLower = newPassword.toLowerCase();
-        const first = user?.firstName?.toLowerCase();
-        const last = user?.lastName?.toLowerCase();
-
-        if (first && passLower.includes(first)) return false;
-        if (last && passLower.includes(last)) return false;
-        return true;
-    };
-
-    const isDifferentFromOld = newPassword !== currentPassword && newPassword.length > 0;
+    const conditions = getPasswordConditions({
+        password: newPassword,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        oldPassword: currentPassword,
+        oldPasswordLabel: "Must be different from current password",
+    });
     const passwordsMatch = newPassword === confirmPassword && newPassword.length > 0;
-    const passwordError = isValid.password(newPassword);
-    const canSubmit = !passwordError && checkNameCondition() && passwordsMatch;
+    const canSubmit = currentPassword.length > 0 && allPasswordConditionsMet(conditions) && passwordsMatch;
 
-    const conditions = {
-        isNotOld: isDifferentFromOld,
-        hasNoName: checkNameCondition(),
-        hasMinLength: newPassword.length >= 12,
-        hasUpper: /[A-Z]/.test(newPassword),
-        hasLower: /[a-z]/.test(newPassword),
-        hasNumber: /[0-9]/.test(newPassword),
-        hasSpecial: /[#.\-?!@$%^&*]/.test(newPassword),
-    };
 
-    
     const handleClose = () => {
         setNewPassword('');
         setCurrentPassword('');
@@ -61,8 +47,7 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        const errorCheck = isValid.password(newPassword);
-        if (errorCheck || !checkNameCondition() || !passwordsMatch) return;
+        if (!canSubmit) return;
 
         if (!accountId) {
             setConfig({
@@ -94,15 +79,10 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
             handleClose();
 
         } catch (error) {
-            const errorMessage = error.response?.data;
-            setCurrentPasswordError(errorMessage);
+            setCurrentPasswordError(getAPIError(error, "Couldn't update your password. Check your current password and try again."));
         } finally {
             setIsSubmitting(false);
         }
-    };
- 
-    const getConditionClass = (isMet) => {
-        return isMet ? "text-green-500 font-medium transition-colors" : "text-destructive transition-colors";
     };
 
     return (
@@ -147,7 +127,7 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
                             </button>
                         </div>
                         {currentPasswordError && (
-                            <p className="text-xs text-destructive mt-1">{currentPasswordError}</p>
+                            <p role="alert" className="text-xs text-destructive mt-1">{currentPasswordError}</p>
                         )}
                     </div>
 
@@ -192,18 +172,7 @@ const EditAccountPasswordModal = ({ isOpen, onClose, user, accountId, updatePass
                         )}
                     </div>
 
-                    <div className="pt-2">
-                        <p className="text-[15px] font-bold text-foreground mb-2">Password conditions (MUST HAVE):</p>
-                        <ul className="text-sm space-y-1.5 ml-4">
-                            <li className={getConditionClass(conditions.isNotOld)}>Must be different from current password</li>
-                            <li className={getConditionClass(conditions.hasNoName)}>Must not include your name</li>
-                            <li className={getConditionClass(conditions.hasMinLength)}>12 characters minimum</li>
-                            <li className={getConditionClass(conditions.hasUpper)}>Include uppercase letter</li>
-                            <li className={getConditionClass(conditions.hasLower)}>Include lowercase letter</li>
-                            <li className={getConditionClass(conditions.hasNumber)}>Include number</li>
-                            <li className={getConditionClass(conditions.hasSpecial)}>Include a special character: (#.-?!@$%^&*)</li>
-                        </ul>
-                    </div>
+                    <PasswordConditionsList conditions={conditions} />
 
                     <div className="flex justify-center gap-6 pt-6">
                         <Button 
