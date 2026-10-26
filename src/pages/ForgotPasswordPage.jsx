@@ -1,8 +1,9 @@
-import OtpInput from "@/components/shared/OtpInput";
+import OtpInput from "@/components/shared/OTPInput";
 import PasswordConditionsList from "@/components/shared/PasswordConditionsList";
+import { toast } from "@/components/ui/use-toast";
 import { resetPassword, sendForgotPasswordOtp, verifyForgotPasswordOtp } from "@/services/LoginService";
 import { getAPIError } from "@/utils/apiErrorUtils";
-import { allPasswordConditionsMet, getPasswordConditions } from "@/utils/validationUtils";
+import { allPasswordConditionsMet, getPasswordConditions, isValid } from "@/utils/validationUtils";
 import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +16,17 @@ const SUBTITLES = {
     code: "Enter the 6-digit code we sent to your email. It expires in 5 minutes.",
     password: "Choose a new password for your account.",
 };
+
+// The backend sends these when the reset token is missing, expired or for another email.
+// The user can't fix that on the password step, so they start again from the email step.
+const RESET_SESSION_ERRORS = ["invalid email for password change.", "password change failed."];
+const isResetSessionError = (message = "") =>
+    RESET_SESSION_ERRORS.includes(message.trim().toLowerCase()) || /token|expired/i.test(message);
+
+const getErrorMessage = (err) =>
+    !err?.response
+        ? "Can't reach the server. Check your connection and try again."
+        : getAPIError(err);
 
 const ForgotPasswordPage = () => {
     const navigate = useNavigate();
@@ -45,54 +57,113 @@ const ForgotPasswordPage = () => {
     const passwordsMatch = newPassword.length > 0 && newPassword === confirmPassword;
     const canSubmitPassword = allPasswordConditionsMet(conditions) && passwordsMatch;
 
-    const run = async (action) => {
+    // Runs an API call with the loading state. Errors show under the form;
+    // onError gets the message for step-specific handling.
+    const run = async (action, onError) => {
         setIsLoading(true);
         setError(null);
         try {
             await action();
         } catch (err) {
-            setError(getAPIError(err));
+            const message = getErrorMessage(err);
+            setError(message);
+            onError?.(message);
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Back to step 1 with a message, e.g. when the reset token is gone or expired
+    const restartFromEmail = (message) => {
+        setStep("email");
+        setOtp(EMPTY_CODE);
+        setResetToken(null);
+        setNames({ firstName: "", lastName: "" });
+        setNewPassword("");
+        setConfirmPassword("");
+        setCooldown(0);
+        setError(message);
+    };
+
     const handleSendCode = (e) => {
         e?.preventDefault();
-        if (!email.trim()) {
+        const trimmedEmail = email.trim();
+        if (!trimmedEmail) {
             setError("Enter your email address.");
             return;
         }
+        const emailError = isValid.email(trimmedEmail);
+        if (emailError) {
+            setError(`${emailError}.`);
+            return;
+        }
+        const isResend = step === "code";
         run(async () => {
-            await sendForgotPasswordOtp(email.trim());
+            await sendForgotPasswordOtp(trimmedEmail);
             setOtp(EMPTY_CODE);
             setCooldown(RESEND_SECONDS);
             setStep("code");
+            toast({
+                title: isResend ? "New code sent" : "Code sent",
+                description: "Check your email for the 6-digit code. It expires in 5 minutes.",
+            });
         });
     };
 
     const handleVerifyCode = (e) => {
         e.preventDefault();
         const code = otp.join("");
-        if (code.length < 6) return;
-        run(async () => {
-            const result = await verifyForgotPasswordOtp(email.trim(), code);
-            setResetToken(result.token);
-            setNames({ firstName: result.firstName || "", lastName: result.lastName || "" });
-            setStep("password");
-        });
+        if (code.length < 6) {
+            setError("Enter all 6 digits of the code.");
+            return;
+        }
+        run(
+            async () => {
+                const result = await verifyForgotPasswordOtp(email.trim(), code);
+                if (!result?.token) {
+                    setOtp(EMPTY_CODE);
+                    setError("We couldn't verify the code. Please try again.");
+                    return;
+                }
+                setResetToken(result.token);
+                setNames({ firstName: result.firstName || "", lastName: result.lastName || "" });
+                setStep("password");
+            },
+            // Wrong or expired code: clear the boxes so they can type it again
+            () => setOtp(EMPTY_CODE),
+        );
     };
 
     const handleResetPassword = (e) => {
         e.preventDefault();
-        if (!canSubmitPassword) return;
-        run(async () => {
-            await resetPassword(email.trim(), resetToken, newPassword);
-            navigate("/login", {
-                replace: true,
-                state: { notice: "Password changed. You can now log in with your new password." },
-            });
-        });
+        if (!resetToken) {
+            restartFromEmail("Your reset session has expired. Please request a new code.");
+            return;
+        }
+        if (!canSubmitPassword) {
+            setError(passwordsMatch ? "Your password doesn't meet all the requirements yet." : "Passwords do not match.");
+            return;
+        }
+        run(
+            async () => {
+                await resetPassword(email.trim(), resetToken, newPassword);
+                toast({
+                    title: "Password changed",
+                    description: "You can now log in with your new password.",
+                });
+                navigate("/login", { replace: true });
+            },
+            (message) => {
+                if (isResetSessionError(message)) {
+                    restartFromEmail("Your reset session has expired. Please request a new code.");
+                    return;
+                }
+                // e.g. "New password must be different from your current password."
+                // Clear both fields so they pick a different one; the message stays on screen.
+                setNewPassword("");
+                setConfirmPassword("");
+            },
+        );
     };
 
     const inputClass = "w-full border border-input bg-background text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
@@ -114,7 +185,7 @@ const ForgotPasswordPage = () => {
                                 id="email"
                                 type="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => { setEmail(e.target.value); setError(null); }}
                                 placeholder="name@example.com"
                                 className={inputClass}
                                 autoFocus
@@ -130,7 +201,7 @@ const ForgotPasswordPage = () => {
 
                 {step === "code" && (
                     <form onSubmit={handleVerifyCode} className="space-y-6">
-                        <OtpInput value={otp} onChange={setOtp} disabled={isLoading} />
+                        <OtpInput value={otp} onChange={(value) => { setOtp(value); setError(null); }} disabled={isLoading} />
                         {error && <p role="alert" className="text-sm text-destructive text-center">{error}</p>}
                         <button type="submit" disabled={isLoading || otp.join("").length < 6} className={buttonClass}>
                             {isLoading && <Loader2 className="w-5 h-5 animate-spin mr-2" />}
@@ -158,7 +229,7 @@ const ForgotPasswordPage = () => {
                                     id="newPassword"
                                     type={showPassword ? "text" : "password"}
                                     value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    onChange={(e) => { setNewPassword(e.target.value); setError(null); }}
                                     placeholder="Enter your new password"
                                     className={`${inputClass} pr-10`}
                                     autoComplete="new-password"
@@ -182,7 +253,7 @@ const ForgotPasswordPage = () => {
                                 id="confirmPassword"
                                 type="password"
                                 value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                onChange={(e) => { setConfirmPassword(e.target.value); setError(null); }}
                                 placeholder="Confirm your new password"
                                 className={`${inputClass} ${confirmPassword.length > 0 && !passwordsMatch ? "border-destructive focus:ring-destructive" : ""}`}
                                 autoComplete="new-password"

@@ -1,4 +1,4 @@
-import OtpInput from "@/components/shared/OtpInput";
+import OtpInput from "@/components/shared/OTPInput";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
