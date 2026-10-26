@@ -1,6 +1,7 @@
 import { useAuth } from '@/auth/UseAuth';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { isPosModule, modulePath } from '@/utils/roleAccess';
 import UserSettingsCard from '../../components/features/settings_component/UserSettingsCard';
 
 const UserSettingsPage = () => {
@@ -8,11 +9,7 @@ const UserSettingsPage = () => {
     const navigate = useNavigate();
 
     const handleGoBack = () => {
-        if (user?.activeRole === 'CASHIER') {
-        navigate('/pos');
-        } else {
-        navigate('/home');
-        }
+        navigate(modulePath(user));
     };
 
     return (
@@ -23,7 +20,7 @@ const UserSettingsPage = () => {
             className="flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition-colors font-bold uppercase text-sm tracking-widest"
             >
             <ArrowLeft size={18} />
-            <span>Back to {user?.activeRole === 'CASHIER' ? 'POS' : 'Dashboard'}</span>
+            <span>Back to {isPosModule(user) ? 'POS' : 'Dashboard'}</span>
             </button>
 
             <h1 className="text-3xl font-bold text-foreground tracking-tight mb-1">User Settings</h1>

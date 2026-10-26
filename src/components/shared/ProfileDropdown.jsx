@@ -4,6 +4,7 @@ import { ArrowRightLeft, HelpCircle, LogOut, Settings, User } from 'lucide-react
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from './LogoutModal';
+import { canSwitchModule, modulePath } from '@/utils/roleAccess';
 
 const ProfileDropdown = () => {
     const { user, handleSwitchAccess } = useAuth();
@@ -21,7 +22,7 @@ const ProfileDropdown = () => {
         fetchCurrentUserData();
     }, [user.employeeId]); 
 
-    const canSwitchAccess = user?.trueRole !== "OWNER";
+    const canSwitchAccess = canSwitchModule(user?.trueRole);
 
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -62,7 +63,7 @@ const ProfileDropdown = () => {
             <div 
                 onClick={() => {
                 setIsOpen(false);
-                navigate(user?.activeRole === 'CASHIER' ? '/pos/settings' : '/home/settings');
+                navigate(modulePath(user, 'settings'));
                 }}
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
             >
@@ -74,7 +75,9 @@ const ProfileDropdown = () => {
                 <div
                 onClick={() => {
                     setIsOpen(false);
-                    handleSwitchAccess();
+                    const next = handleSwitchAccess();
+                    // go straight to the other module instead of waiting for a redirect
+                    if (next) navigate(modulePath(next), { replace: true });
                 }}
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                 >
@@ -86,7 +89,7 @@ const ProfileDropdown = () => {
             <div 
                 onClick={() => {
                 setIsOpen(false);
-                navigate(user?.activeRole === 'CASHIER' ? '/pos/faq' : '/home/faq');
+                navigate(modulePath(user, 'faq'));
                 }}
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors border-t border-border"
             >

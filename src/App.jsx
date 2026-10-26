@@ -15,34 +15,46 @@ import UserSettingsPage from './pages/dashboard/UserSettingsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import LoginPage from './pages/LoginPage';
 import PointOfSalePage from './pages/PointOfSalePage';
+import { MODULES, canUsePos, modulePath } from './utils/roleAccess';
 
+// Permissions come from the account role (trueRole), never from the module the user is in
 const ProtectedRoute = ({ user, allowedRoles }) => {
-  if (!user) return <Navigate to="/login" />;
-  if (!allowedRoles.includes(user.activeRole)) { 
-    return <Navigate to="/home" replace />; 
+  if (!user) return <Navigate to="/login" replace />;
+  if (!allowedRoles.includes(user.trueRole)) {
+    return <Navigate to={modulePath(user)} replace />;
   }
   return <Outlet />;
 }
 
+// Keeps the user inside the module they picked: /pos/* for POS, /home/* for the dashboard.
+// It only steps in when the path belongs to the other module. The old version sent
+// every non-/home path (including /pos for managers) back to /home on each navigation,
+// and it raced ProtectedRoute's own redirect when switching modules.
 const NavigationManager = ({ user }) => {
     const navigate = useNavigate();
     const path = useLocation().pathname;
 
     useEffect(() => {
-        if (user) {
-        const role = user.activeRole;
+        if (!user) return;
+        const inPos = path === '/pos' || path.startsWith('/pos/');
+        const inDashboard = path === '/home' || path.startsWith('/home/');
 
-        if (role === 'CASHIER' && !path.startsWith('/pos')) {
+        if (user.activeModule === MODULES.POS && inDashboard) {
             navigate('/pos', { replace: true });
-        } else {
-            if (!path.startsWith('/home')) {
+        } else if (user.activeModule !== MODULES.POS && inPos) {
             navigate('/home', { replace: true });
-            }
-        }
         }
     }, [user, path, navigate]);
 
     return null;
+};
+
+const PosRoute = ({ user }) => {
+  if (!user) return <Navigate to="/login" replace />;
+  if (!canUsePos(user.trueRole) || user.activeModule !== MODULES.POS) {
+    return <Navigate to="/home" replace />;
+  }
+  return <Outlet />;
 };
 
 const App = () => {
@@ -100,12 +112,14 @@ const App = () => {
             <Route path='/forgot-password' element={<ForgotPasswordPage />} />
             <Route path='/login' 
               element={
-                !user ? <LoginPage /> : <Navigate to={user.activeRole === 'CASHIER' ? '/pos' : '/home'} replace />
+                !user ? <LoginPage /> : <Navigate to={modulePath(user)} replace />
               }
             />
             <Route path='/home'
               element={
-                user ? <DashboardLayout user={user} /> : <Navigate to='/login' replace /> 
+                !user ? <Navigate to='/login' replace />
+                  : user.activeModule === MODULES.POS ? <Navigate to='/pos' replace />
+                  : <DashboardLayout user={user} />
               }
             >
               <Route index element={<HomePage role={user?.trueRole} />} />
@@ -121,6 +135,7 @@ const App = () => {
                 <Route path="requests/create" element={<CreateTransferRequestPage />} />
                 <Route path="deliveries" element={<DeliveriesPage />} />
                 <Route path="deliveries/:deliveryId" element={<DeliveryDetailsPage />} />
+                <Route path="forecast" element={<ForecastPage />} />
                 {/* FIXED ROUTE TO MATCH BUTTON NAVIGATION */}
                 <Route path="deliveries/:deliveryId/confirm" element={<DeliveryConfirmationPage />} />
                 <Route path="barcode" element={<BarcodePage />} /> 
@@ -128,7 +143,6 @@ const App = () => {
 
               <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'OWNER']} />}>
                 <Route path="transactions" element={<TransactionsPage />} />
-                <Route path="forecast" element={<ForecastPage />} />
               </Route>
 
               <Route element={<ProtectedRoute user={user} allowedRoles={['OWNER']} />}>
@@ -143,7 +157,7 @@ const App = () => {
               </Route>
             </Route>
             
-            <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'CASHIER']} />}>
+            <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'STAFF', 'CASHIER']} />}>
               <Route path="/pos" element={<PointOfSalePage />} />
               <Route path="/pos/settings" element={<UserSettingsPage />} />
               

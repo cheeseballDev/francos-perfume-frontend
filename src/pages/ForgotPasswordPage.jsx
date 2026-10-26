@@ -57,8 +57,6 @@ const ForgotPasswordPage = () => {
     const passwordsMatch = newPassword.length > 0 && newPassword === confirmPassword;
     const canSubmitPassword = allPasswordConditionsMet(conditions) && passwordsMatch;
 
-    // Runs an API call with the loading state. Errors show under the form;
-    // onError gets the message for step-specific handling.
     const run = async (action, onError) => {
         setIsLoading(true);
         setError(null);
@@ -73,7 +71,6 @@ const ForgotPasswordPage = () => {
         }
     };
 
-    // Back to step 1 with a message, e.g. when the reset token is gone or expired
     const restartFromEmail = (message) => {
         setStep("email");
         setOtp(EMPTY_CODE);
@@ -129,7 +126,6 @@ const ForgotPasswordPage = () => {
                 setNames({ firstName: result.firstName || "", lastName: result.lastName || "" });
                 setStep("password");
             },
-            // Wrong or expired code: clear the boxes so they can type it again
             () => setOtp(EMPTY_CODE),
         );
     };
@@ -158,8 +154,6 @@ const ForgotPasswordPage = () => {
                     restartFromEmail("Your reset session has expired. Please request a new code.");
                     return;
                 }
-                // e.g. "New password must be different from your current password."
-                // Clear both fields so they pick a different one; the message stays on screen.
                 setNewPassword("");
                 setConfirmPassword("");
             },

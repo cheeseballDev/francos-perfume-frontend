@@ -4,7 +4,7 @@ export const canUserApproveRequest = (user, request) => {
     
 
     const { approvals = [], requestStatus, fromBranchId, toBranchId } = request;
-    const userRole = user.activeRole || user.role;
+    const userRole = user.trueRole || user.activeRole || user.role || "";
     const userBranchId = Number(user.branchId);
 
     if (["APPROVED", "REJECTED", "CANCELLED", "COMPLETED", "RECEIVED"].includes(requestStatus)) {

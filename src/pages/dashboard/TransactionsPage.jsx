@@ -14,7 +14,7 @@ import ExportTransactionModal from "../../components/features/transactions_compo
 export default function TransactionsPage() {
     const { user } = useAuth();
 
-    const isOwner = user.trueRole === "MANAGER";;
+    const isOwner = user.trueRole === "OWNER";
 
     const { 
         transactions,
@@ -93,7 +93,7 @@ export default function TransactionsPage() {
                         Export Transactions
                     </Button>
 
-                    {!isOwner &&
+                    {isOwner &&
                         <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
                             <Upload className='h-4 w-4 mr-2' />
                             Import Transactions

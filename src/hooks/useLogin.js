@@ -1,6 +1,7 @@
 import { useAuth } from "@/auth/UseAuth";
 import { login, login as loginApi, resendOtp, verifyLoginOtp } from "@/services/LoginService";
 import { getAPIError } from "@/utils/apiErrorUtils";
+import { MODULES, canSwitchModule, defaultModuleFor, hasAnyAccess } from "@/utils/roleAccess";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -18,10 +19,8 @@ export const useLogin = () => {
     const [error, setError] = useState(null);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-    const navigateByRole = (role) => {
-        if (role === 'CASHIER') navigate('/pos');
-        else if (role === 'OWNER' || role === 'ADMIN') navigate('/');
-        else navigate('/home');
+    const navigateToModule = (module) => {
+        navigate(module === MODULES.POS ? '/pos' : '/home', { replace: true });
     };
 
     const processSuccessfulLogin = (result) => {
@@ -33,18 +32,25 @@ export const useLogin = () => {
             accessToken: result.accessToken,
             trueRole: result.role,
             activeRole: result.role,
+            activeModule: defaultModuleFor(result.role),
             branchId: result.branchId,
             branchLocation: result.branchLocation
         };
 
         if (result.accessToken == null) return;
 
-        if (result.role === 'MANAGER') {
+        if (!hasAnyAccess(result.role)) {
+            setError("This account's role no longer has access. Ask an admin to update it.");
+            return;
+        }
+
+        // Roles that can use both Dashboard and POS pick one first
+        if (canSwitchModule(result.role)) {
             setPendingAuthData(userData);
             setView('module');
         } else {
             setAuthUser(userData);
-            navigateByRole(result.role);
+            navigateToModule(userData.activeModule);
         }
     };
 
@@ -138,11 +144,11 @@ export const useLogin = () => {
 
         const finalUserData = {
             ...pendingAuthData,
-            activeRole: selectedModule,
+            activeModule: selectedModule,
         };
 
         setAuthUser(finalUserData);
-        navigateByRole(selectedModule);
+        navigateToModule(selectedModule);
     };
 
     return {

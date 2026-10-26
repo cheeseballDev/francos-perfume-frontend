@@ -4,7 +4,10 @@ import { Outlet } from "react-router-dom";
 import Header from "../components/shared/Header";
 
 const DashboardLayout = () => {
-    const { activeRole, email: userEmail } = useAuth();
+    // useAuth() returns { user, ... }; reading activeRole/email off it directly gave undefined
+    const { user } = useAuth();
+    const activeRole = user?.trueRole;
+    const userEmail = user?.email;
 
     return (
         <div className="flex h-screen bg-background text-foreground font-montserrat text-[16px]">

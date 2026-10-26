@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { LOGOUT_REASON_KEY } from "./authConstants";
+import { MODULES, canSwitchModule, hasAnyAccess, normalizeUser } from "@/utils/roleAccess";
 
 const loadFromSession = () => {
     const savedUser = localStorage.getItem('user');
     if (!savedUser) return null;
 
     try {
-        return JSON.parse(savedUser);
+        // normalizeUser also fixes sessions saved before the module/role split
+        const user = normalizeUser(JSON.parse(savedUser));
+        if (!hasAnyAccess(user?.trueRole)) {
+            // e.g. a session from the removed CASHIER role: nothing it can open, so log it out
+            localStorage.removeItem('user');
+            return null;
+        }
+        return user;
     } catch (error) {
         console.error("Failed to parse stored user session", error);
         localStorage.removeItem('user');
@@ -19,8 +27,9 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(loadFromSession);
 
     const login = (userData) => {
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
+        const normalized = normalizeUser(userData);
+        localStorage.setItem('user', JSON.stringify(normalized));
+        setUser(normalized);
     };
 
     const getTokenExpiry = (token) => {
@@ -53,9 +62,6 @@ export const AuthProvider = ({ children }) => {
         return () => clearTimeout(timer);
     }, [user?.accessToken]);
 
-    // `reason` is optional, e.g. logout("expired"). It is kept in sessionStorage because
-    // the redirect below reloads the page (and localStorage is cleared), so React state
-    // and toasts don't survive it. LoginPage reads it and shows the message under the password.
     const logout = (reason) => {
         localStorage.clear();
         if (typeof reason === "string") {
@@ -69,22 +75,24 @@ export const AuthProvider = ({ children }) => {
         window.location.href = '/login';
     };
 
-    const switchRole = (newActiveRole) => {
-        setUser((prev) => {
-        if (!prev) return null;
-        const updatedUser = { ...prev, activeRole: newActiveRole };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        return updatedUser;
-        });
+    // Changes only the module (Dashboard <-> POS). The account role, and so every
+    // permission, stays the same. Before, this rewrote activeRole, so a STAFF or ADMIN
+    // who pressed "Switch Module" became "MANAGER" and pages/routes broke.
+    const switchModule = (module) => {
+        const next = normalizeUser({ ...user, activeModule: module });
+        localStorage.setItem('user', JSON.stringify(next));
+        setUser(next);
+        return next;
     };
 
+    /** Toggles the module. Returns the updated user, or null when the role can't switch. */
     const handleSwitchAccess = () => {
-        const newRole = user?.activeRole === 'MANAGER' ? 'CASHIER' : 'MANAGER';
-        switchRole(newRole);
+        if (!user || !canSwitchModule(user.trueRole)) return null;
+        return switchModule(user.activeModule === MODULES.POS ? MODULES.DASHBOARD : MODULES.POS);
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, switchRole, handleSwitchAccess }}>
+        <AuthContext.Provider value={{ user, login, logout, switchModule, handleSwitchAccess }}>
         {children}
         </AuthContext.Provider>
     );

@@ -1,3 +1,4 @@
+import { useAuth } from "@/auth/UseAuth";
 import { accountColumns } from "@/components/features/accounts_components/AccountColumns";
 import AccountInfoModal from "@/components/features/accounts_components/AccountDetailsModal";
 import CreateAccountModal from "@/components/features/accounts_components/CreateAccountModal";
@@ -11,6 +12,7 @@ import { Eye, Plus } from "lucide-react";
 import { useState } from "react";
 
 const ManageAccountsPage = () => {
+    const { user } = useAuth();
     const { 
         accounts, 
         asyncState,
@@ -33,7 +35,8 @@ const ManageAccountsPage = () => {
     const [isAccountInfoModalOpen, setIsAccountInfoModalOpen] = useState(false);
     const [isEditAccountModalOpen, setIsEditAccountModalOpen] = useState(false);
 
-    const role = localStorage.getItem("trueRole");
+    // was localStorage.getItem("trueRole"), which is never set, so managers saw "Create New Account"
+    const role = user?.trueRole;
 
     const handleRowClick = async (row) => {
         if (selectedAccount?.employeeId === row.employeeId) {

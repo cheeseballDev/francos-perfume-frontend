@@ -7,6 +7,7 @@ import { useTheme } from '@/theme/useTheme';
 import { ChevronLeft, Loader2, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import logo from '../assets/FrancoPerfumeLogo.png';
+import { MODULES } from "@/utils/roleAccess";
 import OtpVerification from './OtpVerification';
 
 const LOGOUT_MESSAGES = {
@@ -81,14 +82,14 @@ const LoginPage = () => {
             
             <div className="w-full max-w-sm flex flex-col gap-4">
             <Button 
-                onClick={() => handleModuleSelect('CASHIER')}
+                onClick={() => handleModuleSelect(MODULES.POS)}
                 className="w-full bg-primary text-primary-foreground hover:opacity-90"
             >
                 Access POS
             </Button>
             
             <Button
-                onClick={() => handleModuleSelect('MANAGER')}
+                onClick={() => handleModuleSelect(MODULES.DASHBOARD)}
                 className="w-full bg-primary text-primary-foreground hover:opacity-90"
             >
                 Access Dashboard
