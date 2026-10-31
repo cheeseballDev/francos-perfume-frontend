@@ -1,5 +1,6 @@
 import { useAuth } from '@/auth/UseAuth';
-import { PROFILE_UPDATE_EVENT, useAccount } from '@/hooks/account_hooks/useAccount';
+import { useAccount } from '@/hooks/account_hooks/useAccount';
+import { supabase } from '@/lib/SupabaseClient';
 import { canSwitchModule, modulePath } from '@/utils/roleAccess';
 import { ArrowRightLeft, HelpCircle, LogOut, Settings, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -7,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import LogoutModal from './LogoutModal';
 
 const ProfileDropdown = () => {
-    const { user, handleSwitchAccess } = useAuth();
+    const { user, updateUser, handleSwitchAccess } = useAuth();
     const navigate = useNavigate();
     const { 
         fetchAccountDetails 
@@ -16,21 +17,43 @@ const ProfileDropdown = () => {
     const [profile, setProfile] = useState([]);
 
     useEffect(() => {
-        const handleProfileUpdated = (event) => {
-            if (event.detail) {
-                setProfile(event.detail);
+        if (!user?.employeeId) return;
+        let isActive = true;
+
+        const fetchCurrentUserData = async () => {
+            try {
+                const data = await fetchAccountDetails(user.employeeId);
+                if (!isActive || !data) return;
+                setProfile(data);
+                if (data.firstName !== user.firstName || data.lastName !== user.lastName) {
+                    updateUser({ firstName: data.firstName, lastName: data.lastName });
+                }
+            } catch {
+                // keep showing the last known name/photo
             }
         };
-        window.addEventListener(PROFILE_UPDATE_EVENT, handleProfileUpdated);
-        return () => window.removeEventListener(PROFILE_UPDATE_EVENT, handleProfileUpdated);
-    })
 
-    useEffect(() => {
-        async function fetchCurrentUserData() {
-            setProfile(await fetchAccountDetails(user.employeeId));
-        }
         fetchCurrentUserData();
-    }, [user.employeeId]); 
+
+        const channel = supabase
+            .channel(`employee_profile:${user.employeeId}`)
+            .on(
+                "postgres_changes",
+                {
+                    event: "UPDATE",
+                    schema: "public",
+                    table: "employee_profile",
+                    filter: `employee_id=eq.${user.employeeId}`,
+                },
+                () => fetchCurrentUserData()
+            )
+            .subscribe();
+
+        return () => {
+            isActive = false;
+            supabase.removeChannel(channel);
+        };
+    }, [user?.employeeId, fetchAccountDetails]);
 
     const canSwitchAccess = canSwitchModule(user?.trueRole);
 

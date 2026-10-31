@@ -1,15 +1,10 @@
-import { useAuth } from "@/auth/UseAuth";
 import { getAccountFilters, getAllAccounts, getOneAccountDetails, patchResetAccountPassword, patchToggleAccountStatus, patchUpdateAccountDetails, patchUpdateAccountPassword, postAddNewAccount } from "@/services/AccountService";
 import { patchArchiveAccount } from "@/services/ArchiveService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
-export const PROFILE_UPDATE_EVENT = 'profile-updated';
-
 export const useAccount = () => {
-    const { user, updateUser }= useAuth();
-    
     const [accounts, setAccounts] = useState([]);
     const isFirstLoad = useRef(true);
 
@@ -94,9 +89,6 @@ export const useAccount = () => {
     const updateAccount = async (accountId, dto) => {
         try {
             await patchUpdateAccountDetails(accountId, dto);
-            if (user && accountId === user.employeeId) { 
-                await refreshCurrentUserProfile(accountId)
-            }
             await fetchAllAccounts();
         } catch (err) {
             setAsyncState((prev) => ({ ...prev, error: err }));
@@ -105,17 +97,6 @@ export const useAccount = () => {
             setAsyncState((prev) => ({ ...prev, isLoading: false }));
         }
     };
-
-    const refreshCurrentUserProfile = async (accountId) => {
-        try {
-            const profile = await getOneAccountDetails(accountId);
-            if (!profile) return;
-            updateUser({ firstName: profile.firstName, lastName: profile.lastName});
-            window.dispatchEvent(new CustomEvent(PROFILE_UPDATE_EVENT));
-        } catch {
-            // add toast or something
-        }
-    }
 
     const createAccount = async (dto) => {
         try {
