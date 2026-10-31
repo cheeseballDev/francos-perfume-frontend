@@ -88,6 +88,10 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
                         </Badge>
                         <Badge variant="outline" className="h-5 bg-blue-500/10 text-blue-600 border-blue-500/20">{product.productType}</Badge>
                         <Badge variant="outline" className="h-5 bg-pink-500/10 text-pink-600 border-pink-500/20">{product.productGender}</Badge>
+                        {product.stockWarning.toUpperCase() === "SLOW MOVING" &&
+                            <Badge variant="outline" className="h-5 bg-red-500/10 text-red-600 border-red-500/20">SLOW MOVING</Badge>
+                        }
+
                       </div>
                     </div>
                   </div>

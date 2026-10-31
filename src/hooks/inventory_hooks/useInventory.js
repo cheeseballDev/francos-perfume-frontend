@@ -65,6 +65,7 @@ export const useInventory = () => {
         const data = await getAllInventory(filter);
         isFirstLoad.current = false;
         setInventory(data.data);
+        console.log(data.data);
         setPagination({
             totalPages: data.totalInventoriesPages || 0,
             totalEntries: data.totalInventories || 0,
