@@ -6,7 +6,6 @@ import { useForecast } from "@/hooks/forecast_hooks/useForecast";
 import {
     AlertTriangle,
     BarChart2,
-    Eye,
     Package,
     Sparkles,
     TrendingDown,
@@ -26,16 +25,12 @@ const MONTHS = [
 
 const ENGINES = [
     { value: "ML", label: "Standard (ML.NET)"},
-    { value: "AI", label: "Third-party (Gemini AI)"}
+    { value: "AI", label: "Third-party (Claude)"}
 ]
 
 const currentYear = new Date().getFullYear();
 const YEARS = [currentYear, currentYear + 1, currentYear + 2];
 
-const aiInsights = [
-  { title: "High Demand Expected",       description: "AI detects potential stockout risks based on historical patterns", Icon: TrendingUp,   bg: "bg-emerald-100 dark:bg-emerald-500/10",  border: "border-emerald-200 dark:border-emerald-500/20",  iconColor: "text-emerald-600 dark:text-emerald-400"  },
-  { title: "Seasonal Pattern Detected",  description: "Revenue fluctuations align with standard retail holiday cycles",   Icon: Eye,          bg: "bg-blue-100 dark:bg-blue-500/10", border: "border-blue-200 dark:border-blue-500/20", iconColor: "text-blue-600 dark:text-blue-400"   },
-];
 
 const ForecastPage = () => {
     const { 
@@ -51,7 +46,6 @@ const ForecastPage = () => {
         toast
     } = useToast();
 
-    const [chartData, setChartData] = useState([]);
     const [perfumeForecasts, setPerfumeForecasts] = useState([]);
   
     const [formData, setFormData] = useState({
@@ -86,41 +80,19 @@ const ForecastPage = () => {
     const engineLabel = ENGINES.find((en) => en.value === forecastData?.stocksEngine)?.label;
 
     useEffect(() => {
-        if (forecastData) {
-            if (!forecastData.revenue) setChartData([]);
-            if (!forecastData.stocks) setPerfumeForecasts([]);
-
-            if (forecastData.revenue) {
-                const rev = forecastData.revenue;
-                const monthLabel = MONTHS.find(m => m.value === Number(formData.month))?.label.substring(0, 3);
-                const yearLabel = String(formData.year).substring(2);
-                
-            setChartData([
-            {
-                month: `${monthLabel} '${yearLabel}`,
-                value: rev.expectedRevenue,
-                upper: rev.highestRevenue,
-                lower: rev.lowestRevenue,
-                isActual: false
-            }
-        ]);
-      }
-
-      // 2. Pass raw StockForecast DTO properties directly to the list
-      if (forecastData.stocks) {
-        const st = forecastData.stocks;
-        
-        setPerfumeForecasts([{
-          id: st.productId?.toString() || "1",
-          name: st.productName,
-          trend: st.recommendedOrderQuantity > 0 ? "up" : "down",
-          currentStock: st.currentStock,
-          predictedDemand: st.predictedUnitsSold,
-          change: st.recommendedOrderQuantity,
-          confidence: null 
-        }]);
-      }
-    }
+        if (forecastData.stocks) {
+            const st = forecastData.stocks;
+            
+            setPerfumeForecasts([{
+            id: st.productId?.toString() || "1",
+            name: st.productName,
+            trend: st.recommendedOrderQuantity > 0 ? "up" : "down",
+            currentStock: st.currentStock,
+            predictedDemand: st.predictedUnitsSold,
+            change: st.recommendedOrderQuantity,
+            confidence: null 
+            }]);
+        }
   }, [forecastData, formData.month, formData.year]);
 
     const dynamicMetrics = [
@@ -179,7 +151,7 @@ const ForecastPage = () => {
             <Sparkles className="text-emerald-500" size={20} />
             <CardTitle className="text-base text-foreground">AI Forecasting Engine</CardTitle>
           </div>
-          <CardDescription>Choose the parameters and the engine (ML.NET or Gemini AI) to generate a forecast</CardDescription>
+          <CardDescription>Choose the parameters and the engine (ML.NET or Claude AI) to generate a forecast</CardDescription>
         </CardHeader>
         
         <CardContent className="pt-4">
@@ -264,7 +236,6 @@ const ForecastPage = () => {
         </CardContent>
       </Card>
 
-      {/* Dynamic Summary Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 shrink-0">
         {dynamicMetrics.map((card, i) => (
           <StatusCard
@@ -278,7 +249,6 @@ const ForecastPage = () => {
         ))}
       </div>
 
-      {/* ML.NET Perfume Level Breakdown */}
       <Card className="p-6 mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
           <div className="flex justify-between items-start">
@@ -286,7 +256,7 @@ const ForecastPage = () => {
               <CardTitle className="text-base text-foreground">Target Product Forecast</CardTitle>
               <CardDescription>
                 {forecastData?.stocksEngine === "AI"
-                  ? "Gemini AI output for the selected product"
+                  ? "Claude AI output for the selected product"
                   : "ML.NET FastTree regression output for the selected product"}
               </CardDescription>
             </div>
