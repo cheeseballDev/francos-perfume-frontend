@@ -1,3 +1,4 @@
+import { formatClock } from '@/utils/formattingUtils';
 import { useEffect, useState } from 'react';
 
 export const useClock = () => {
@@ -5,11 +6,8 @@ export const useClock = () => {
 
     useEffect(() => {
     const interval = setInterval(() => {
-      const now = new Date();
-      setCurrentDateTime(now.toLocaleString('en-US', { 
-        weekday: 'short', month: 'short', day: 'numeric', 
-        hour: '2-digit', minute: '2-digit', second: '2-digit' 
-      }));
+      // Philippine time, even if the computer is set to another time zone
+      setCurrentDateTime(formatClock(new Date()));
     }, 1000);
     return () => clearInterval(interval);
   }, []);

@@ -1,3 +1,4 @@
+import { formatReceiptDateTime } from "@/utils/formattingUtils";
 const Receipt = ({ receipt }) => {
     if (!receipt) return null;
 
@@ -18,7 +19,7 @@ const Receipt = ({ receipt }) => {
                     <b style={{ fontSize: '13px' }}>FRANCO'S PERFUME</b><br />
                     <span>{receipt.branch}</span><br />
                     <span>Receipt: #{receipt.receiptNumber}</span><br />
-                    <span>Date: {new Date(receipt.transactionDate).toLocaleString()}</span><br />
+                    <span>Date: {formatReceiptDateTime(receipt.transactionDate)}</span><br />
                     <span>Cashier: {receipt.employeeName} ({receipt.employeeId})</span>
                 </div>
 

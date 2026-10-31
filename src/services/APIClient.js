@@ -1,5 +1,6 @@
 import axios from "axios";
 import { API_URL } from "../config/index.js";
+import { toUtcDateValues } from "../utils/formattingUtils.jsx";
 
 const apiClient = axios.create({
     baseURL: API_URL,
@@ -19,6 +20,11 @@ apiClient.interceptors.request.use(
         } else {
             config.headers['Content-Type'] = 'application/json';
         }
+
+        // The backend accepts UTC only: picked dates ("2026-10-31") are sent as the
+        // start/end of that day in Philippine time, in UTC. See toUtcDateValues.
+        if (config.params) config.params = toUtcDateValues(config.params);
+        if (config.data && !(config.data instanceof FormData)) config.data = toUtcDateValues(config.data);
 
         if (config.url.includes("/auth/login")) {
             return config;

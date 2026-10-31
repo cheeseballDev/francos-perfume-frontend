@@ -124,8 +124,8 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
                             {(batchMap[rowKey] || []).map((batch) => (
                               <TableRow key={batch.batchId}>
                                 <TableCell className="font-medium text-foreground">{batch.batchId || 0}</TableCell>
-                                <TableCell className="text-foreground">{formatDateForTable(batch.dateReceived) || 0}</TableCell>
-                                <TableCell className="text-foreground">{batch.expiryDate || 0}</TableCell>
+                                <TableCell className="text-foreground">{formatDateForTable(batch.dateReceived)}</TableCell>
+                                <TableCell className="text-foreground">{formatDateForTable(batch.expiryDate)}</TableCell>
                                 <TableCell className="text-center text-foreground tabular-nums">{batch.quantity || 0}</TableCell>
                                 <TableCell className="text-right pr-4">
                                   <Button 

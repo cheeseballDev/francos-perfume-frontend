@@ -1,3 +1,4 @@
+import { formatReceiptDateTime } from "@/utils/formattingUtils";
 export const openReceiptTab = (receipt) => {
     if (!receipt) return;
 
@@ -55,7 +56,7 @@ export const openReceiptTab = (receipt) => {
                 <span class="bold" style="font-size: 13px;">FRANCO'S PERFUME</span><br>
                 <span>${receipt.branch}</span><br>
                 <span>Receipt: #${receipt.receiptNumber}</span><br>
-                <span>Date: ${new Date(receipt.transactionDate).toLocaleString()}</span><br>
+                <span>Date: ${formatReceiptDateTime(receipt.transactionDate)}</span><br>
                 <span>Cashier: ${receipt.employeeName} (${receipt.employeeId})</span>
             </div>
             
