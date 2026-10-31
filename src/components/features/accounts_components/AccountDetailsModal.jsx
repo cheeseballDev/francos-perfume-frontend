@@ -1,4 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
+import SensitiveText from "@/components/shared/SensitiveText";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DetailItem from "@/components/shared/DetailItem";
 import StatusBadge from "@/components/shared/StatusBadge";
@@ -169,7 +170,7 @@ const AccountInfoModal = ({
                 </Avatar>
 
                 <div className="min-w-0 w-full">
-                  <p className="text-sm text-muted-foreground break-all mt-1">{selectedAccount.email || "N/A"}</p>
+                  <p className="text-sm text-muted-foreground mt-1 flex justify-center"><SensitiveText key={selectedAccount.employeeId} value={selectedAccount.email} /></p>
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-2">

@@ -4,7 +4,8 @@ import apiClient from "./APIClient";
 const PATH = "/Deliveries";
 
 export const getAllDeliveries = async (filter) => {
-    const cleanedFilter = cleanFilters(filter);
+    const { fromBranches, toBranches, ...rest } = filter;
+    const cleanedFilter = cleanFilters({ ...rest, fromBranch: fromBranches, toBranch: toBranches });
     const response = await apiClient.get(`${PATH}`, { params: cleanedFilter });
     return response.data;
 };

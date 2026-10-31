@@ -1,10 +1,13 @@
 import { getBranchComparison } from "@/services/TransactionService";
-import { useCallback, useEffect, useState } from "react";
+import { DEFAULT_PERIOD, getPeriodRange } from "@/utils/periodUtils";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 // branchMetrics items: { branchId, branchName, totalRevenue, totalTransactions, totalUnitsSold }
-export const useBranchComparison = ({ enabled = true, initialFilter = {} } = {}) => {
+export const useBranchComparison = ({ enabled = true, initialFilter = {}, initialPeriod = DEFAULT_PERIOD } = {}) => {
     const [branchMetrics, setBranchMetrics] = useState([]);
-    const [filter, setFilter] = useState({ fromDate: "", toDate: "", branchIds: [], ...initialFilter });
+    const [period, setPeriod] = useState(initialPeriod);
+    const [branchIds, setBranchIds] = useState(initialFilter.branchIds ?? []);
+    const filter = useMemo(() => ({ ...getPeriodRange(period), branchIds }), [period, branchIds]);
     const [asyncState, setAsyncState] = useState({ isLoading: enabled, error: null });
 
     const fetchComparison = useCallback(async () => {
@@ -23,7 +26,9 @@ export const useBranchComparison = ({ enabled = true, initialFilter = {} } = {})
         fetchComparison();
     }, [fetchComparison]);
 
-    const updateFilter = (key, value) => setFilter((prev) => ({ ...prev, [key]: value }));
+    const updateFilter = (key, value) => {
+        if (key === "branchIds") setBranchIds(value);
+    };
 
-    return { branchMetrics, filter, updateFilter, asyncState, refetch: fetchComparison };
+    return { branchMetrics, filter, updateFilter, period, setPeriod, asyncState, refetch: fetchComparison };
 };

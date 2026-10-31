@@ -9,6 +9,15 @@ export const useRequest = () => {
     const isFirstLoad = useRef(true);
 
     const [requests, setRequest] = useState([]);
+    const [requestCounts, setRequestCounts] = useState({
+        pending: 0,
+        pendingInbound: 0,
+        pendingOutbound: 0,
+        pendingDispatch: 0,
+        pendingDispatchInbound: 0,
+        pendingDispatchOutbound: 0,
+        completed: 0,
+    });
     const [branchOptions, setBranchOptions] = useState([]);
     const [productOptions, setProductOptions] = useState([]);
    
@@ -50,6 +59,15 @@ export const useRequest = () => {
             .then(data => {
                 isFirstLoad.current = false;
                 setRequest(data.data);
+                setRequestCounts({
+                    pending: data.pendingRequestsCount || 0,
+                    pendingInbound: data.pendingInboundRequestsCount || 0,
+                    pendingOutbound: data.pendingOutboundRequestsCount || 0,
+                    pendingDispatch: data.pendingDispatchRequestsCount || 0,
+                    pendingDispatchInbound: data.pendingInboundDispatchRequestsCount || 0,
+                    pendingDispatchOutbound: data.pendingOutboundDispatchRequestsCount || 0,
+                    completed: data.completedRequestCount || 0,
+                });
 
                 setPagination({
                     totalPages: data.totalRequestPages || 0,
@@ -147,6 +165,7 @@ export const useRequest = () => {
 
     return { 
         requests, 
+        requestCounts,
         asyncState, 
         pagination, 
         filter,

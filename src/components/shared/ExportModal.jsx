@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { X, FileText, FileSpreadsheet, FileCode2 } from 'lucide-react';
 import ModalOverlay from "@/components/shared/ModalOverlay";
+import { FileCode2, FileSpreadsheet, FileText, X } from 'lucide-react';
+import { useState } from 'react';
 
 const ExportModal = ({ isOpen, onClose, onExport }) => {
   const [selectedFormat, setSelectedFormat] = useState(null);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [fromDate, setfromDate] = useState('');
+  const [toDate, settoDate] = useState('');
 
   if (!isOpen) return null;
 
@@ -15,7 +15,7 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
       return;
     }
     // Pass the selected data back to the parent component
-    onExport({ format: selectedFormat, dateFrom, dateTo });
+    onExport({ format: selectedFormat, fromDate, toDate });
     onClose();
   };
 
@@ -90,8 +90,8 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
               <span className="absolute -top-2 left-2 bg-card px-1 text-[10px] text-muted-foreground">Date From:</span>
               <input 
                 type="date" 
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
+                value={fromDate}
+                onChange={(e) => setfromDate(e.target.value)}
                 // FIXED: Adjusted borders, text colors, and added bg-transparent
                 className="w-full border border-border bg-transparent rounded-md px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" 
               />
@@ -100,8 +100,8 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
               <span className="absolute -top-2 left-2 bg-card px-1 text-[10px] text-muted-foreground">Date To:</span>
               <input 
                 type="date" 
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
+                value={toDate}
+                onChange={(e) => settoDate(e.target.value)}
                 className="w-full border border-border bg-transparent rounded-md px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary" 
               />
             </div>

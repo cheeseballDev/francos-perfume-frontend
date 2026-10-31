@@ -1,11 +1,13 @@
 import { reportColumnsRevenue, reportColumnsUnitsSold } from "@/components/features/report_components/ReportColumns";
 import ReportTableSkeleton from "@/components/loaders/ReportTableSkeleton";
 import DataTable from "@/components/shared/DataTable";
+import PeriodSelect from "@/components/shared/PeriodSelect";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useReport } from "@/hooks/report_hooks/useReport";
 import { useExportReport } from "@/hooks/transaction_hooks/useExportReport";
-import { FileDown } from "lucide-react";
+import { formatPeriodRange, getPeriodOption } from "@/utils/periodUtils";
+import { FileDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 const ReportsPage = () => {
@@ -16,7 +18,9 @@ const ReportsPage = () => {
         worstSellingByRevenue,
         worstSellingByUnitsSold,
         asyncState,
-        filter
+        filter,
+        period,
+        setPeriod
     } = useReport();
 
     const {
@@ -28,11 +32,10 @@ const ReportsPage = () => {
     const handleExportList = async () => {
         setIsDownloading(true);
         try {
-            // CAN ADD DATE FROM DATE TO HERE
             await exportSalesReport(filter);
             toast({
                 title: "Success",
-                description: "Successfully downloaded the list."
+                description: `Downloaded the top 10 sales list for ${getPeriodOption(period).shortLabel}.`
             });
         } catch (error) {
             toast({
@@ -50,10 +53,17 @@ const ReportsPage = () => {
         <>
         
             <div className="bg-background min-h-screen font-montserrat flex flex-col animate-fade-in relative">
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
                     <div>
                         <h1 className="text-[32px] font-bold text-foreground leading-none mb-2">Sales Reports</h1>
                         <p className="text-muted-foreground text-sm">View the best selling and worst selling products by revenue or units sold.</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Showing {getPeriodOption(period).shortLabel}: {formatPeriodRange(period)}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {asyncState.isFetching && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                        <PeriodSelect value={period} onChange={setPeriod} disabled={isDownloading} />
                     </div>
                 </div>
 
@@ -122,8 +132,8 @@ const ReportsPage = () => {
                         onClick={() => handleExportList()}
                         disabled={isDownloading}
                         >
-                        <FileDown className='h-4 w-4 mr-2'/>
-                        Export Top 10 Sales List
+                        {isDownloading ? <Loader2 className='h-4 w-4 mr-2 animate-spin'/> : <FileDown className='h-4 w-4 mr-2'/>}
+                        Export Top 10 Sales List ({getPeriodOption(period).label})
                     </Button>
                 </div>
                 

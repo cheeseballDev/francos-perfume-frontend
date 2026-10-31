@@ -1,4 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
+import { ReferenceLink } from "@/components/shared/ReferenceText";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
@@ -211,6 +212,11 @@ export default function DeliveryDetailsPage() {
                 }`}>
                     {selectedDelivery.direction}
                 </span>
+                {selectedDelivery.requestDisplayId && (
+                    <span className="text-sm text-muted-foreground">
+                        Request: <ReferenceLink reference={selectedDelivery.requestDisplayId} />
+                    </span>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

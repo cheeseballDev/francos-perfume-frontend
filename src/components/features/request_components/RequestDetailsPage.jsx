@@ -1,4 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
+import { ReferenceLink } from "@/components/shared/ReferenceText";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
@@ -167,6 +168,11 @@ export default function RequestDetailsPage() {
                     <span className="px-3 py-1 bg-amber-500/10 text-amber-500 text-xs font-bold rounded-full uppercase">
                         {data.requestDirection}
                     </span>
+                    {data.deliveryDisplayId && data.deliveryDisplayId !== "N/A" && (
+                        <span className="text-sm text-muted-foreground">
+                            Delivery: <ReferenceLink reference={data.deliveryDisplayId} />
+                        </span>
+                    )}
                 </div>
 
                 {isPending && (

@@ -1,4 +1,5 @@
 import StatusBadge from "@/components/shared/StatusBadge";
+import SensitiveText from "@/components/shared/SensitiveText";
 import { formatLabel } from "@/utils/formattingUtils";
 
 export const accountColumns = [
@@ -25,6 +26,7 @@ export const accountColumns = [
     {
         header: "Email",
         accessorKey: "email",
+        render: (row) => <SensitiveText value={row.email} />,
         className: "hidden md:table-cell" // Hides column on small screens
     },
     {

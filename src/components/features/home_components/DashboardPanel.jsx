@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 const DashboardPanel = ({ title, actionText, onAction, children, className = "" }) => (
     <div className={`bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col h-full ${className}`}>
         <div className="flex justify-between items-center mb-4">
@@ -15,12 +17,12 @@ const DashboardPanel = ({ title, actionText, onAction, children, className = "" 
             {children}
         </div>
         {actionText && (
-            <button 
+            <Button 
                 onClick={onAction}
-                className="w-full mt-4 py-2 bg-muted hover:bg-muted/80 text-foreground font-semibold rounded-md transition-colors"
+                className="mt-6"
             >
                 {actionText}
-            </button>
+            </Button>
         )}
     </div>
 );

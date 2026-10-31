@@ -3,15 +3,18 @@ import BranchBarChart from "@/components/features/home_components/BranchBarChart
 import DashboardPanel from "@/components/features/home_components/DashboardPanel";
 import AuditLogItem from "@/components/features/home_components/home_items/AuditLogItem";
 import DeliveryItem from "@/components/features/home_components/home_items/DeliveryItem";
+import LowStockItem from "@/components/features/home_components/home_items/LowStockItem";
 import RequestItem from "@/components/features/home_components/home_items/RequestItem";
 import TransactionItem from "@/components/features/home_components/home_items/TransactionItem";
 import DashboardSkeleton from "@/components/loaders/DashboardSkeleton";
+import PeriodSelect from "@/components/shared/PeriodSelect";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuditLog } from "@/hooks/audit_hooks/useAuditLog";
 import { useBranchComparison } from "@/hooks/kpi_hooks/useBranchComparison";
 import { useKPI } from "@/hooks/kpi_hooks/useKPI";
 import { formatPeso } from "@/utils/formattingUtils";
+import { DEFAULT_PERIOD, getPeriodOption } from "@/utils/periodUtils";
 import { TONES } from "@/utils/statusUtils";
 import { Banknote, Boxes, Clock, Package, Receipt } from "lucide-react";
 import { useState } from "react";
@@ -22,6 +25,8 @@ const DashboardHome = () => {
     const { user } = useAuth();
     const navigate = useNavigate(); 
     const userRole = user.trueRole;
+    const [kpiPeriod, setKpiPeriod] = useState(DEFAULT_PERIOD);
+    const kpiPeriodLabel = getPeriodOption(kpiPeriod).shortLabel;
 
     const {
         lowStock,
@@ -31,13 +36,18 @@ const DashboardHome = () => {
         totalRevenue,
         totalTransactions,
         asyncState
-    } = useKPI();
+    } = useKPI({ period: kpiPeriod });
 
     const {
         auditLogs
     } = useAuditLog();
 
-    const { branchMetrics, asyncState: comparisonState } = useBranchComparison({
+    const {
+        branchMetrics,
+        asyncState: comparisonState,
+        period: comparisonPeriod,
+        setPeriod: setComparisonPeriod,
+    } = useBranchComparison({
         enabled: userRole === "OWNER",
     });
 
@@ -82,7 +92,7 @@ const DashboardHome = () => {
         { 
             title: "Total Revenue", 
             mainValue: formatRevenue(revenue),
-            subText: `${formatPeso(revenue)} overall`, 
+            subText: `${formatPeso(revenue)} in the ${kpiPeriodLabel}`, 
             Icon: Banknote, 
             color: "text-emerald-500",
             route: "/home/transactions" 
@@ -106,7 +116,7 @@ const DashboardHome = () => {
         { 
             title: "Total Transactions", 
             mainValue: (totalTransactions?.totalTransactionsCount || 0).toLocaleString(), 
-            subText: "Tracked Sales", 
+            subText: `Sales in the ${kpiPeriodLabel}`, 
             Icon: Receipt, 
             color: "text-blue-500",
             route: "/home/transactions" 
@@ -120,13 +130,18 @@ const DashboardHome = () => {
 
     return (
         <div className="animate-fade-in font-montserrat flex flex-col h-full pb-8">
-            <header className="mb-8">
-                <h1 className="text-[32px] font-bold text-foreground mb-2 leading-none tracking-tight">
-                    {userRole === "ADMIN" ? "Admin Dashboard" : "Dashboard"}
-                </h1>
-                <p className="text-muted-foreground text-sm">
-                    {userRole === "ADMIN" ? "System-wide audit trail and management." : "An overview for your branch"}
-                </p>
+            <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-[32px] font-bold text-foreground mb-2 leading-none tracking-tight">
+                        {userRole === "ADMIN" ? "Admin Dashboard" : "Dashboard"}
+                    </h1>
+                    <p className="text-muted-foreground text-sm">
+                        {userRole === "ADMIN" ? "System-wide audit trail and management." : "An overview for your branch"}
+                    </p>
+                </div>
+                {(userRole === "MANAGER" || userRole === "OWNER") && (
+                    <PeriodSelect value={kpiPeriod} onChange={setKpiPeriod} showRange />
+                )}
             </header>
 
             {asyncState.isLoading ? (
@@ -174,6 +189,9 @@ const DashboardHome = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             
                             {/* Left Column */}
+                            <div className="grid-cols-2">
+
+                            </div>
                             <div className="flex flex-col gap-6">
                                 <DashboardPanel 
                                     title="Pending Requests for Approval" 
@@ -205,12 +223,33 @@ const DashboardHome = () => {
                             </div>
 
                             {/* Right Column */}
+                            
                             <div className="flex flex-col gap-6">
+                                <DashboardPanel
+                                    title={`Low Stock Items (${lowStockCount})`}
+                                    actionText="View Inventory"
+                                    onAction={() => navigate('/home/inventory')}
+                                >
+                                    {(lowStock?.lowStockProductsList ?? []).slice(0, 5).map((item, i) => (
+                                        <LowStockItem
+                                            key={`${item.productId}-${item.branchId ?? i}`}
+                                            item={{
+                                                ...item,
+                                                quantity: item.productQuantity ?? item.quantity ?? 0,
+                                                branchName: item.branchName ?? item.branchLocation,
+                                            }}
+                                        />
+                                    ))}
+
+                                    {lowStockCount === 0 && (
+                                        <p className="text-sm text-muted-foreground text-center mt-4">All items are in stock.</p>
+                                    )}
+                                </DashboardPanel>
 
                                 {/* Transactions Panel (Manager / Owner Only) */}
                                 {(userRole === "MANAGER" || userRole === "OWNER") && (
                                     <DashboardPanel 
-                                        title="Recent Transactions (Last 30 days)" 
+                                        title={`Recent Transactions (${getPeriodOption(kpiPeriod).label})`} 
                                         actionText="View All Transactions"
                                         onAction={() => navigate('/home/transactions')} 
                                     >
@@ -232,7 +271,8 @@ const DashboardHome = () => {
                         <DashboardPanel 
                             className="mb-10"
                         title="Branch Performance">
-                            <div className="flex gap-2 mb-4">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <div className="flex gap-2">
                                 {METRICS.map((m) => (
                                     <Button
                                         key={m.key}
@@ -242,6 +282,8 @@ const DashboardHome = () => {
                                         {m.label}
                                     </Button>
                                 ))}
+                            </div>
+                            <PeriodSelect value={comparisonPeriod} onChange={setComparisonPeriod} showRange />
                             </div>
 
                             {comparisonState.isLoading ? (

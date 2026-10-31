@@ -1,4 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
+import { ReferenceLink } from "@/components/shared/ReferenceText";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Eye, ShoppingCart, Truck, XCircle } from "lucide-react";
@@ -96,8 +97,8 @@ const DeliveryCard = ({
                             <StatusBadge status={delivery.deliveryStatus} />
                         </div>
                         {delivery.requestDisplayId && (
-                            <p className="text-xs italic text-muted-foreground mt-0.5">
-                                {delivery.requestDisplayId}
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                Request: <ReferenceLink reference={delivery.requestDisplayId} />
                             </p>
                         )}
                         <p className="text-sm text-muted-foreground">{route}</p>
