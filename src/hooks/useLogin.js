@@ -44,7 +44,6 @@ export const useLogin = () => {
             return;
         }
 
-        // Roles that can use both Dashboard and POS pick one first
         if (canSwitchModule(result.role)) {
             setPendingAuthData(userData);
             setView('module');

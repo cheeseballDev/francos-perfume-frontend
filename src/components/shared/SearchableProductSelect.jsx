@@ -6,7 +6,7 @@ const SearchableProductSelect = ({
     productOptions = [], 
     selectedProduct,
     setSelectedProduct,
-    placeholder = "Select product..."
+    placeholder = "Select product...",
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");

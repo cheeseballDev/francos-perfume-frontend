@@ -1,6 +1,7 @@
 import SearchableProductSelect from '@/components/shared/SearchableProductSelect';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus } from 'lucide-react';
+import { useEffect } from 'react';
 
 const ProductSelector = ({ 
     selectedProduct, 
@@ -20,8 +21,15 @@ const ProductSelector = ({
     )?.label?.toUpperCase();
     const isWarehouse = fromBranchName === 'WAREHOUSE';
 
-    const maxQty = isWarehouse ? 99 : (availableQty ?? 99);
-    const displayQty = isWarehouse ? '99' : (availableQty ?? '--');
+    const maxQty = isWarehouse ? 99 : (availableQty);
+    const displayQty = isWarehouse ? '99' : (availableQty !== 0 ? availableQty : '--');
+
+    const hasNoStock = !isWarehouse && availableQty === 0;
+
+    useEffect(() => {
+        if (!selectedProduct) return;
+        setQuantity(hasNoStock ? 0 : 1);
+    }, [selectedProduct, hasNoStock, setQuantity]);
 
     return (
         <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
@@ -85,7 +93,7 @@ const ProductSelector = ({
             <Button
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={handleAddProduct}
-                disabled={!selectedProduct}
+                disabled={!selectedProduct || availableQty === 0 || quantity === 0}
             >
                 Add Product
             </Button>

@@ -126,21 +126,21 @@ const PointOfSalePage = () => {
     return (
         <div className="flex h-screen bg-background font-montserrat overflow-hidden relative text-foreground">
             <div className="flex-1 flex flex-col h-full pl-6 py-6 pr-4">
-                <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">Point of Sale</h1>
-                    <p className="text-muted-foreground text-sm">{currentDateTime}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <button 
-                    onClick={toggleTheme} 
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all border border-transparent"
-                    aria-label="Toggle Theme"
-                    >
-                    {isDarkMode ? <Sun size={22} /> : <Moon size={22} />}
-                    </button>
-                    <ProfileDropdown />
-                </div>
+                <div className="relative z-30 flex justify-between items-center mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold text-foreground">Point of Sale</h1>
+                        <p className="text-muted-foreground text-sm">{currentDateTime}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={toggleTheme}
+                            className="w-10 h-10 flex items-center justify-center rounded-full bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all border border-transparent"
+                            aria-label="Toggle Theme"
+                        >
+                            {isDarkMode ? <Sun size={22} /> : <Moon size={22} />}
+                        </button>
+                        <ProfileDropdown />
+                    </div>
                 </div>
 
                 <PointOfSaleFilterBar 

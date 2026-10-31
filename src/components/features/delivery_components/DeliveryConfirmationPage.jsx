@@ -37,7 +37,6 @@ const STATUS_COPY = {
         title: "Confirm this delivery as received?",
         description: "All items were received in full. This will complete the delivery and add the items to inventory.",
         confirmText: "Confirm Delivery",
-        confirmVariant: "success",
     },
     [RECEIPT_STATUS.PARTIAL]: {
         button: "Confirm Partial Delivery",
@@ -120,10 +119,8 @@ const DeliveryConfirmationPage = () => {
                 rows[rowKey(item)] = "Select a reason for the missing quantity.";
             }
         });
-        const needsExpiry = status !== RECEIPT_STATUS.NOT_RECEIVED;
-        const expiryError = needsExpiry && !expiryDate ? "Enter the expiry date of the received stock." : null;
-        return { rows, expiryError, isValid: Object.keys(rows).length === 0 && !expiryError };
-    }, [items, itemReceipts, expiryDate, status]);
+        return { rows, isValid: Object.keys(rows).length === 0 };
+    }, [items, itemReceipts, status]);
 
     const updateReceipt = (key, changes) => {
         setItemReceipts((prev) => ({ ...prev, [key]: { ...prev[key], ...changes } }));
@@ -236,6 +233,8 @@ const DeliveryConfirmationPage = () => {
         : PackageX;
     const buttonColour = status === RECEIPT_STATUS.COMPLETE
         ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+        : status === RECEIPT_STATUS.PARTIAL 
+        ? "bg-amber-500 hover:bg-amber-700 text-white" 
         : "bg-destructive hover:bg-destructive/90 text-destructive-foreground";
 
     return (
@@ -331,37 +330,17 @@ const DeliveryConfirmationPage = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-[16rem_1fr] gap-6 mb-6">
-                <div className="bg-card border border-border rounded-xl shadow-sm p-6">
-                    <label htmlFor="expiry-date" className="text-lg font-bold text-foreground mb-1 block">Expiry Date</label>
-                    <p className="text-xs text-muted-foreground mb-3">Printed on the received stock.</p>
-                    <input
-                        id="expiry-date"
-                        type="date"
-                        value={expiryDate}
-                        min={todayLocal()}
-                        onChange={(e) => setExpiryDate(e.target.value)}
-                        disabled={status === RECEIPT_STATUS.NOT_RECEIVED}
-                        aria-invalid={showErrors && !!validation.expiryError}
-                        className="w-full border border-input bg-background text-foreground rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 aria-invalid:border-destructive"
-                    />
-                    {showErrors && validation.expiryError && (
-                        <p role="alert" className="text-xs text-destructive mt-1">{validation.expiryError}</p>
-                    )}
-                </div>
-
-                <div className="bg-card border border-border rounded-xl shadow-sm p-6">
-                    <h2 className="text-lg font-bold text-foreground mb-4">Additional Remarks</h2>
-                    <textarea
-                        value={remarks}
-                        onChange={(e) => setRemarks(e.target.value)}
-                        placeholder="Add your comments or message for this delivery..."
-                        className="w-full border border-input bg-background text-foreground rounded-lg p-3 text-sm resize-none h-28 outline-none focus:ring-2 focus:ring-ring transition-colors"
-                    />
-                </div>
+            <div className="bg-card border border-border rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-bold text-foreground mb-4">Additional Remarks</h2>
+                <textarea
+                    value={remarks}
+                    onChange={(e) => setRemarks(e.target.value)}
+                    placeholder="Add your comments or message for this delivery..."
+                    className="w-full border border-input bg-background text-foreground rounded-lg p-3 text-sm resize-none h-28 outline-none focus:ring-2 focus:ring-ring transition-colors"
+                />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mt-6">
                 <Button variant="outline" className="w-full font-bold py-6 text-base" onClick={() => navigate(-1)} disabled={isSubmitting}>
                     Cancel
                 </Button>

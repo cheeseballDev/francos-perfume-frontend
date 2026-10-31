@@ -40,7 +40,7 @@ const CreateTransferRequestPage = () => {
     
     const [data, setData] = useState(INITIAL_DATA_STATE);
     const [selectedProduct, setSelectedProduct] = useState('');
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     
     const [config, setConfig] = useState(null);
