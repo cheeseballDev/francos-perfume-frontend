@@ -1,4 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import { requestColumns } from "@/components/features/request_components/RequestColumns";
 import RequestTableSkeleton from "@/components/loaders/RequestTableSkeleton";
 import { SearchFilterBar } from "@/components/shared";
@@ -26,7 +27,6 @@ const RequestPage = () => {
     const searchQuery = searchParams.get('search') || '';
     const activeTab = searchParams.get('direction') || '';
 
-    const [selectedRequest, setSelectedRequest] = useState(null);
 
     useEffect(() => {
         updateFilter('direction', activeTab);
@@ -42,14 +42,12 @@ const RequestPage = () => {
         updateFilter('direction', direction);
     };
 
-    const handleRowClick = async (row) => {
-        if (selectedRequest?.requestId === row.requestId) {
-            setSelectedRequest(null);
-            return;
-        }
-
-        setSelectedRequest(row);    
-    };
+    const {
+        selected: selectedRequest,
+        setSelected: setSelectedRequest,
+        toggleRow: handleRowClick,
+        selectRow,
+    } = useRowSelection("requestId");
 
     const handleViewRequest = (row) => {
         const targetRequest = row || selectedRequest;
@@ -137,7 +135,7 @@ const RequestPage = () => {
                     selectedItem={selectedRequest}
                     onRowClick={handleRowClick}
                     onRowDoubleClick={(row) => {
-                        handleRowClick(row);
+                        selectRow(row); // was handleRowClick, which deselected an already-selected row
                         handleViewRequest(row);
                     }}
                 />

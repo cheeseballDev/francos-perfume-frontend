@@ -1,4 +1,5 @@
 import { archivedAccountColumns, archivedProductColumns } from "@/components/features/archive_components/ArchiveColumns";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import ArchivedAccountDetailsModal from "@/components/features/archive_components/ArchivedAccountDetailsModal";
 import ArchivedProductDetailsModal from "@/components/features/archive_components/ArchivedProductDetailsModal";
 import { AccountArchiveSkeleton, ProductArchiveSkeleton } from "@/components/loaders/ArchiveTableSkeletons";
@@ -34,32 +35,22 @@ const ArchivesPage = () => {
     const isAccountsLoading = accountAsyncState?.loading || accountAsyncState?.isLoading;
     const isProductsLoading = productAsyncState?.loading || productAsyncState?.isLoading;
 
-    const [selectedArchivedAccount, setSelectedArchivedAccount] = useState(null);
-    const [selectedArchivedProduct, setSelectedArchivedProduct] = useState(null);
     const [isArchivedAccountDetailsModalOpen, setIsArchivedAccountDetailsModalOpen] = useState(false);
     const [isArchivedProductDetailsModalOpen, setIsArchivedProductDetailsModalOpen] = useState(false);
 
-    const handleAccountRowClick = async (row) => {
-        if (selectedArchivedAccount?.accountArchiveId === row.accountArchiveId) {
-            setSelectedArchivedAccount(null);
-            return;
-        }
-        const details = await fetchArchivedAccount(row.accountArchiveId);
-        if (details) {
-            setSelectedArchivedAccount(prev => prev ? { ...prev, ...details } : details);
-        }
-    };
+    const {
+        selected: selectedArchivedAccount,
+        setSelected: setSelectedArchivedAccount,
+        toggleRow: handleAccountRowClick,
+        selectRow: selectAccountRow,
+    } = useRowSelection("accountArchiveId", fetchArchivedAccount);
 
-    const handleProductRowClick = async (row) => {
-        if (selectedArchivedProduct?.productArchiveId === row.productArchiveId) {
-            setSelectedArchivedProduct(null);
-            return;
-        }
-        const details = await fetchArchivedProduct(row.productArchiveId);
-        if (details) {
-            setSelectedArchivedProduct(prev => prev ? { ...prev, ...details } : details);
-        }
-    };
+    const {
+        selected: selectedArchivedProduct,
+        setSelected: setSelectedArchivedProduct,
+        toggleRow: handleProductRowClick,
+        selectRow: selectProductRow,
+    } = useRowSelection("productArchiveId", fetchArchivedProduct);
 
     return (
         <>
@@ -88,7 +79,7 @@ const ArchivesPage = () => {
                             updateFilter={updateAccountFilter}
                             selectedItem={selectedArchivedAccount}
                             onRowClick={handleAccountRowClick}
-                            onRowDoubleClick={() => setIsArchivedAccountDetailsModalOpen(true)}
+                            onRowDoubleClick={(row) => { selectAccountRow(row); setIsArchivedAccountDetailsModalOpen(true); }}
                         />
                         )}
                     <div className="flex justify-end">
@@ -119,7 +110,7 @@ const ArchivesPage = () => {
                             updateFilter={updateProductFilter}
                             selectedItem={selectedArchivedProduct}
                             onRowClick={handleProductRowClick}
-                            onRowDoubleClick={() => setIsArchivedProductDetailsModalOpen(true)}
+                            onRowDoubleClick={(row) => { selectProductRow(row); setIsArchivedProductDetailsModalOpen(true); }}
                         />
                         )}
                     <div className="flex justify-end">

@@ -8,6 +8,7 @@ import { SearchFilterBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "@/hooks/account_hooks/useAccount";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import { Eye, Plus } from "lucide-react";
 import { useState } from "react";
 
@@ -29,27 +30,19 @@ const ManageAccountsPage = () => {
     } = useAccount();
 
     const [searchQuery, setSearchQuery] = useState(""); 
-    const [selectedAccount, setSelectedAccount] = useState(null);
     
     const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
     const [isAccountInfoModalOpen, setIsAccountInfoModalOpen] = useState(false);
     const [isEditAccountModalOpen, setIsEditAccountModalOpen] = useState(false);
 
-    // was localStorage.getItem("trueRole"), which is never set, so managers saw "Create New Account"
     const role = user?.trueRole;
 
-    const handleRowClick = async (row) => {
-        if (selectedAccount?.employeeId === row.employeeId) {
-            setSelectedAccount(null);
-            return;
-        }
-        setSelectedAccount(row);    
-
-        const profile = await fetchAccountDetails(row.employeeId);
-            if (profile) {
-            setSelectedAccount(prev => prev ? { ...prev, ...profile }: profile);
-        }
-    }
+    const {
+        selected: selectedAccount,
+        setSelected: setSelectedAccount,
+        toggleRow: handleRowClick,
+        selectRow,
+    } = useRowSelection("employeeId", fetchAccountDetails);
 
     const handleSearchChange = (value) => {
         const query = value?.target ? value.target.value : value;
@@ -99,7 +92,7 @@ const ManageAccountsPage = () => {
           updateFilter={updateFilter}
           selectedItem={selectedAccount}
           onRowClick={handleRowClick}
-          onRowDoubleClick={() => setIsAccountInfoModalOpen(true)}
+          onRowDoubleClick={(row) => { selectRow(row); setIsAccountInfoModalOpen(true); }}
         />
     )}
 

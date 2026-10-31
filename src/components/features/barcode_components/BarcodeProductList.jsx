@@ -33,7 +33,8 @@ const BarcodeProductList = ({
         setSelectedProduct(row);
         const barcode = await fetchOneProductBarcode(row.productId);
         if (barcode) {
-            setSelectedProduct(prev => prev ? { ...prev, ...barcode }: barcode);
+            // only merge into the same product: the user may have clicked another row meanwhile
+            setSelectedProduct(prev => prev?.productId === row.productId ? { ...prev, ...barcode } : prev);
         }
     }
 

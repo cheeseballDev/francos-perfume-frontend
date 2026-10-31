@@ -1,4 +1,5 @@
 import { auditLogColumns } from "@/components/features/auditlogs_components/AuditLogColumns";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import AuditLogDetails from "@/components/features/auditlogs_components/AuditLogDetails";
 import ExportAuditModal from "@/components/features/auditlogs_components/ExportAuditModal"; // Adjust path if you placed it elsewhere
 import AuditLogTableSkeleton from "@/components/loaders/AuditLogTableSkeleton";
@@ -19,20 +20,14 @@ const AuditLogPage = () => {
   } = useAuditLog();
   
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-    const [selectedAuditLog, setSelectedAuditLog] = useState(null);
     const [isAuditLogDetailsModalOpen, setIsAuditLogDetailsModalOpen] = useState(false);
 
-    const handleRowClick = async (row) => {
-        if (selectedAuditLog?.logId === row.logId) {
-            setSelectedAuditLog(null);
-            return;
-        }
-        setSelectedAuditLog(row);
-        const auditLog = await fetchAuditLogDetails(row.logId);
-        if (auditLog) {
-            setSelectedAuditLog(prev => prev ? { ...prev, ...auditLog }: auditLog);
-        }
-    }
+    const {
+        selected: selectedAuditLog,
+        setSelected: setSelectedAuditLog,
+        toggleRow: handleRowClick,
+        selectRow,
+    } = useRowSelection("logId", fetchAuditLogDetails);
 
     return (
         <div className="flex flex-col h-full animate-fade-in font-montserrat pb-8 relative">
@@ -60,7 +55,7 @@ const AuditLogPage = () => {
                     //updateFilter={updateFilter}
                     selectedItem={selectedAuditLog}
                     onRowClick={handleRowClick}
-                    onRowDoubleClick={() => setIsAuditLogDetailsModalOpen(true)}
+                    onRowDoubleClick={(row) => { selectRow(row); setIsAuditLogDetailsModalOpen(true); }}
                 />
                 )}
             </div>

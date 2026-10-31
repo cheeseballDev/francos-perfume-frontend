@@ -1,4 +1,5 @@
 import { useAuth } from '@/auth/UseAuth';
+import { useRowSelection } from "@/hooks/useRowSelection";
 import ImportTransactionModal from '@/components/features/transactions_components/ImportTransactionModal';
 import { transactionColumns } from '@/components/features/transactions_components/TransactionColumns';
 import TransactionDetailsModal from '@/components/features/transactions_components/TransactionDetailsModal';
@@ -28,7 +29,6 @@ export default function TransactionsPage() {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-    const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [isTransactionDetailsModalOpen, setIsTransactionDetailsModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
@@ -38,16 +38,14 @@ export default function TransactionsPage() {
         updateFilter('search', query);
     }
 
-    const handleRowClick = async (row) => {
-        if (selectedTransaction?.salesOrderId === row.salesOrderId) {
-            setSelectedTransaction(null);
-            return;
-        }
-        const transaction = await fetchTransactionDetails(row.salesOrderId);
-        if (transaction) {
-            setSelectedTransaction(prev => prev ? { ...prev, ...transaction }: transaction);
-        }
-    }
+    // Before: the row was only selected after its details arrived, so a quick double-click
+    // opened the previously selected transaction
+    const {
+        selected: selectedTransaction,
+        setSelected: setSelectedTransaction,
+        toggleRow: handleRowClick,
+        selectRow,
+    } = useRowSelection("salesOrderId", fetchTransactionDetails);
 
 
 
@@ -82,7 +80,7 @@ export default function TransactionsPage() {
                         updateFilter={updateFilter}
                         selectedItem={selectedTransaction}
                         onRowClick={handleRowClick}
-                        onRowDoubleClick={() => setIsTransactionDetailsModalOpen(true)}
+                        onRowDoubleClick={(row) => { selectRow(row); setIsTransactionDetailsModalOpen(true); }}
                     />
                 )}
 

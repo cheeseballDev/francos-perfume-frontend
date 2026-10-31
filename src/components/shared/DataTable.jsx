@@ -83,14 +83,25 @@ const DataTable = ({
                   return (
                     <TableRow
                       key={row[keyField]}
-                      onClick={() => onRowClick && onRowClick(row)}
+                      // A double-click fires click, click, dblclick. event.detail is the click count,
+                      // so only the first click selects; the second one used to deselect the row
+                      // right before onRowDoubleClick opened the modal.
+                      onClick={(event) => {
+                        if (event.detail > 1) return;
+                        onRowClick && onRowClick(row);
+                      }}
                       onDoubleClick={() => onRowDoubleClick && onRowDoubleClick(row)}
+                      data-state={isSelected ? "selected" : undefined}
+                      aria-selected={isSelected || undefined}
+                      // Selected: a solid beige tint plus a dark bar on the left edge.
+                      // The old bg-primary/20 was lighter than the grey hover colour on a
+                      // white card, so a clicked row looked less highlighted than a hovered one.
                       className={`animate-in fade-in slide-in-from-bottom-2 duration-300 transition-colors ${
                         onRowClick || onRowDoubleClick ? "hover:cursor-pointer" : ""
-                      } 
+                      }
                       ${
                         isSelected
-                          ? "bg-primary/20 hover:bg-primary/30"
+                          ? "bg-primary/60 hover:bg-primary/70 dark:bg-primary/25 dark:hover:bg-primary/30 shadow-[inset_4px_0_0_hsl(var(--foreground))] font-medium"
                           : "hover:bg-muted"
                       }`}
                     >

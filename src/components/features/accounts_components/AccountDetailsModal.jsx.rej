@@ -1,0 +1,17 @@
+diff a/src/components/features/accounts_components/AccountDetailsModal.jsx b/src/components/features/accounts_components/AccountDetailsModal.jsx	(rejected hunks)
+@@ -29,6 +31,15 @@ const AccountInfoModal = ({
+     const accountId = selectedAccount.employeeId;
+     const isActive = selectedAccount?.status === "ACTIVE";
+ 
++    const fullName = [selectedAccount.firstName, selectedAccount.middleName, selectedAccount.lastName]
++        .filter(Boolean)
++        .join(" ") || "Unnamed account";
++    // "Juan Dela Cruz" → "JC"; shown while the photo loads, or when there is none
++    const initials = [selectedAccount.firstName, selectedAccount.lastName]
++        .map((part) => part?.trim()?.[0] ?? "")
++        .join("")
++        .toUpperCase() || "?";
++
+     const handleEditAccount = () => {
+         setIsEditAccountModalOpen(true);
+         onClose();

@@ -1,6 +1,8 @@
 import { useAuth } from "@/auth/UseAuth";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DetailItem from "@/components/shared/DetailItem";
+import StatusBadge from "@/components/shared/StatusBadge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
@@ -25,9 +27,11 @@ const AccountInfoModal = ({
 
     if (!isOpen || !selectedAccount) return null;
 
+    console.log(user);
     const isManager = user?.trueRole === "MANAGER";
     const accountId = selectedAccount.employeeId;
     const isActive = selectedAccount?.status === "ACTIVE";
+    const isSelectedAccountTheCurrentUser = accountId === user.employeeId;
 
     const handleEditAccount = () => {
         setIsEditAccountModalOpen(true);
@@ -153,35 +157,69 @@ const AccountInfoModal = ({
           </DialogHeader>
 
           <div className="p-8">
-            <div className="grid grid-cols-3 gap-6 mb-6">
-                <DetailItem label="First name" value={selectedAccount.firstName || "N/A"} />
-                <DetailItem label="Middle name" value={selectedAccount.middleName || "N/A"} />
-                <DetailItem label="Last name" value={selectedAccount.lastName || "N/A"} />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-[13rem_1fr] gap-8 mb-8">
 
-            <div className="mb-6">
+              {/* Left: photo and identity */}
+              <div className="flex flex-col items-center text-center gap-3 md:border-r md:border-border md:pr-8">
+                {/* Radix shows the fallback until the image loads, and keeps it if the URL fails */}
+                <Avatar className="size-36 after:border-2">
+                  <AvatarImage
+                    src={selectedAccount.employeeImageUrl || undefined}
+                    alt={`Profile picture of ${fullName}`}
+                  />
+                  <AvatarFallback className="text-4xl font-bold bg-primary/30 text-foreground">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="min-w-0 w-full">
+                  <p className="font-bold text-lg text-foreground leading-tight break-words">{fullName}</p>
+                  <p className="text-sm text-muted-foreground break-all mt-1">{selectedAccount.email || "N/A"}</p>
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-2">
+                  {/* plain badge: StatusBadge would give a role the "neutral" minus icon */}
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md border border-primary/40 bg-primary/20 text-xs font-semibold text-foreground">
+                    {formatLabel(selectedAccount.employeeRole) || "No role"}
+                  </span>
+                  <StatusBadge status={selectedAccount.status} label={formatLabel(selectedAccount.status) || "Unknown"} />
+                </div>
+
+                <p className="text-xs text-muted-foreground">Employee ID: {selectedAccount.employeeId ?? "N/A"}</p>
+              </div>
+
+              {/* Right: details */}
+              <div className="flex flex-col gap-6 min-w-0">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <DetailItem label="First name" value={selectedAccount.firstName || "N/A"} />
+                  <DetailItem label="Middle name" value={selectedAccount.middleName || "N/A"} />
+                  <DetailItem label="Last name" value={selectedAccount.lastName || "N/A"} />
+                </div>
+
                 <DetailItem label="Address" value={selectedAccount.address || "N/A"} uppercase={true} />
-            </div>
 
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              <DetailItem label="Email" value={selectedAccount.email || "N/A"} />
-              <DetailItem label="Contact number" value={selectedAccount.contactNumber || "N/A"} />
-            </div>
-
-            <div className="grid grid-cols-4 gap-12 mb-8">
-              <DetailItem label="Branch" value={formatLabel(selectedAccount.branchLocation) || "N/A"} />
-              <DetailItem label="Role" value={formatLabel(selectedAccount.employeeRole) || "N/A"} />
-              <DetailItem label="Status" value={formatLabel(selectedAccount.status) || "N/A"} />
-              <DetailItem label="Shift" value={formatLabel(selectedAccount.employeeShift) || "N/A"} />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <DetailItem label="Contact number" value={selectedAccount.contactNumber || "N/A"} />
+                  <DetailItem label="Branch" value={formatLabel(selectedAccount.branchLocation) || "N/A"} />
+                  <DetailItem label="Shift" value={formatLabel(selectedAccount.employeeShift) || "N/A"} />
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-6">
-              <Button onClick={handleEditAccount}>
+              <Button 
+                onClick={handleEditAccount}
+                disabled={isSelectedAccountTheCurrentUser}
+                >
                 <Edit />
                 Edit Account
               </Button>
 
-              <Button variant="destructive" onClick={handleResetPassword}>
+              <Button 
+                variant="destructive" 
+                onClick={handleResetPassword}
+                disabled={isSelectedAccountTheCurrentUser}
+                >
                 <KeyRound />
                 Reset Password
               </Button>
@@ -189,6 +227,7 @@ const AccountInfoModal = ({
               <Button
                 variant={isActive ? "destructive" : "default"}
                 onClick={handleToggleStatus}
+                disabled={isSelectedAccountTheCurrentUser}
               >
                 {isActive ? <MinusSquareIcon /> : <PlusSquareIcon />}
                 {isActive ? "Deactivate Account" : "Reactivate Account"}
@@ -197,7 +236,7 @@ const AccountInfoModal = ({
               <Button
                 variant="destructive"
                 onClick={handleArchiveAccount}
-                disabled={isManager}
+                disabled={isManager || isSelectedAccountTheCurrentUser}
               >
                 <Archive />
                 Archive Account

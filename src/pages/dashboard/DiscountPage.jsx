@@ -1,4 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import CreateDiscountModal from "@/components/features/discount_components/CreateDiscountModal";
 import { discountColumns } from "@/components/features/discount_components/DiscountColumns";
 import DiscountInfoModal from "@/components/features/discount_components/DiscountInfoModal";
@@ -30,24 +31,16 @@ const DiscountPage = () => {
   const role = user.trueRole;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDiscount, setSelectedDiscount] = useState(null);
   const [isCreateDiscountModalOpen, setIsCreateDiscountModalOpen] = useState(false);
   const [isDiscountInfoModalOpen, setIsDiscountInfoModalOpen] = useState(false);
   const [isEditDiscountModalOpen, setIsEditModalDiscountModalOpen] = useState(false);
 
-    const handleRowClick = async (row) => {
-        if (selectedDiscount?.discountId === row.discountId) {
-        setSelectedDiscount(null);
-        return;
-        }
-
-        setSelectedDiscount(row);    
-
-        const discount = await fetchDiscount(row.discountId);
-        if (discount) {
-        setSelectedDiscount(prev => prev ? { ...prev, ...discount }: discount);
-        }
-    }
+    const {
+        selected: selectedDiscount,
+        setSelected: setSelectedDiscount,
+        toggleRow: handleRowClick,
+        selectRow,
+    } = useRowSelection("discountId", fetchDiscount);
 
   
     const handleSearchChange = (value) => {
@@ -98,7 +91,7 @@ const DiscountPage = () => {
             updateFilter={updateFilter}
             selectedItem={selectedDiscount}
             onRowClick={handleRowClick}
-            onRowDoubleClick={() => setIsDiscountInfoModalOpen(true)}
+            onRowDoubleClick={(row) => { selectRow(row); setIsDiscountInfoModalOpen(true); }}
             />
         </div>
         )}
