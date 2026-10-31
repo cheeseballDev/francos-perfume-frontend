@@ -6,7 +6,9 @@ const PATH = "/Discount";
 
 export const getAllDiscounts = async (filter) => {
     const cleanedFilter = cleanFilters(filter);
-    const response = await apiClient.get(`${PATH}`, cleanedFilter);
+    const response = await apiClient.get(`${PATH}`, { 
+        params: cleanedFilter
+    });
     return response.data;
 };
 
