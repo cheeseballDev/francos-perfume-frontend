@@ -183,7 +183,7 @@ const UserSettingsCard = ({ accountId }) => {
                                     name="firstName"
                                     maxLength={25}
                                     value={data.firstName || ''} 
-                                    onChange={handleNameChange} 
+                                    onChange={(e) => handleNameChange('firstName', e.target.value)} 
                                 />
                             ) : (
                                 <p className="font-bold text-foreground py-2">{profileData?.firstName || 'N/A'}</p>
@@ -196,7 +196,7 @@ const UserSettingsCard = ({ accountId }) => {
                                     name="middleName" 
                                     maxLength={25}
                                     value={data.middleName || ''} 
-                                    onChange={handleNameChange} 
+                                    onChange={(e) => handleNameChange('middleName', e.target.value)} 
                                 />
                             ) : (
                                 <p className="font-bold text-foreground py-2">{profileData?.middleName || 'N/A'}</p>
@@ -209,7 +209,7 @@ const UserSettingsCard = ({ accountId }) => {
                                     name="lastName" 
                                     maxLength={25}
                                     value={data.lastName || ''} 
-                                    onChange={handleNameChange} 
+                                    onChange={(e) => handleNameChange('lastName', e.target.value)} 
                                 />
                             ) : (
                                 <p className="font-bold text-foreground py-2">{profileData?.lastName || 'N/A'}</p>
@@ -224,12 +224,13 @@ const UserSettingsCard = ({ accountId }) => {
                                 name="address" 
                                 maxLength={50}
                                 value={data.address} 
-                                onChange={handleChange} 
-                                error={errors.address}
+                                onChange={(e) => handleChange('address', e.target.value)} 
+                                aria-invalid={!!errors.address}
                             />
                         ) : (
                             <p className="font-bold text-foreground uppercase py-2">{profileData?.address || 'N/A'}</p>
                         )}
+                        {errors.address && <p className="text-xs text-destructive mt-1">{errors.address}</p>}
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
@@ -240,7 +241,7 @@ const UserSettingsCard = ({ accountId }) => {
                                     name="email" 
                                     maxLength={30}
                                     value={data.email} 
-                                    onChange={handleChange} 
+                                    onChange={(e) => handleChange('email', e.target.value)} 
                                     error={errors.email}
                                 />
                             ) : (

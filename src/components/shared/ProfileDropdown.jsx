@@ -1,10 +1,10 @@
 import { useAuth } from '@/auth/UseAuth';
-import { useAccount } from '@/hooks/account_hooks/useAccount';
+import { PROFILE_UPDATE_EVENT, useAccount } from '@/hooks/account_hooks/useAccount';
+import { canSwitchModule, modulePath } from '@/utils/roleAccess';
 import { ArrowRightLeft, HelpCircle, LogOut, Settings, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from './LogoutModal';
-import { canSwitchModule, modulePath } from '@/utils/roleAccess';
 
 const ProfileDropdown = () => {
     const { user, handleSwitchAccess } = useAuth();
@@ -14,6 +14,16 @@ const ProfileDropdown = () => {
     } = useAccount();
     
     const [profile, setProfile] = useState([]);
+
+    useEffect(() => {
+        const handleProfileUpdated = (event) => {
+            if (event.detail) {
+                setProfile(event.detail);
+            }
+        };
+        window.addEventListener(PROFILE_UPDATE_EVENT, handleProfileUpdated);
+        return () => window.removeEventListener(PROFILE_UPDATE_EVENT, handleProfileUpdated);
+    })
 
     useEffect(() => {
         async function fetchCurrentUserData() {

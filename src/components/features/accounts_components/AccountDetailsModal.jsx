@@ -2,13 +2,14 @@ import { useAuth } from "@/auth/UseAuth";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DetailItem from "@/components/shared/DetailItem";
 import StatusBadge from "@/components/shared/StatusBadge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { formatLabel } from "@/utils/formattingUtils";
 import { Archive, Edit, KeyRound, MinusSquareIcon, PlusSquareIcon } from "lucide-react";
 import { useState } from "react";
+import logo from '../../../assets/FrancoPerfumeLogo.png';
 
 const AccountInfoModal = ({
     isOpen,
@@ -159,21 +160,16 @@ const AccountInfoModal = ({
           <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-[13rem_1fr] gap-8 mb-8">
 
-              {/* Left: photo and identity */}
               <div className="flex flex-col items-center text-center gap-3 md:border-r md:border-border md:pr-8">
-                {/* Radix shows the fallback until the image loads, and keeps it if the URL fails */}
                 <Avatar className="size-36 after:border-2">
                   <AvatarImage
                     src={selectedAccount.employeeImageUrl || undefined}
-                    alt={`Profile picture of ${fullName}`}
+                    alt={logo}
                   />
-                  <AvatarFallback className="text-4xl font-bold bg-primary/30 text-foreground">
-                    {initials}
-                  </AvatarFallback>
+
                 </Avatar>
 
                 <div className="min-w-0 w-full">
-                  <p className="font-bold text-lg text-foreground leading-tight break-words">{fullName}</p>
                   <p className="text-sm text-muted-foreground break-all mt-1">{selectedAccount.email || "N/A"}</p>
                 </div>
 

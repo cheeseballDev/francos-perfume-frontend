@@ -135,7 +135,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                                 <FormField 
                                     label="Perfume Name:"
                                     value={data.productName || ''}
-                                    onChange={e => handleNameChange('productName', e.target.value)}
+                                    onChange={e => handleChange('productName', e.target.value)}
                                     placeholder="Enter New Perfume Name"
                                     maxLength={25}
                                     error={errors.productName}

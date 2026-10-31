@@ -1,17 +1,15 @@
+import { MODULES, canSwitchModule, hasAnyAccess, normalizeUser } from "@/utils/roleAccess";
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { LOGOUT_REASON_KEY } from "./authConstants";
-import { MODULES, canSwitchModule, hasAnyAccess, normalizeUser } from "@/utils/roleAccess";
 
 const loadFromSession = () => {
     const savedUser = localStorage.getItem('user');
     if (!savedUser) return null;
 
     try {
-        // normalizeUser also fixes sessions saved before the module/role split
         const user = normalizeUser(JSON.parse(savedUser));
         if (!hasAnyAccess(user?.trueRole)) {
-            // e.g. a session from the removed CASHIER role: nothing it can open, so log it out
             localStorage.removeItem('user');
             return null;
         }
@@ -75,9 +73,16 @@ export const AuthProvider = ({ children }) => {
         window.location.href = '/login';
     };
 
-    // Changes only the module (Dashboard <-> POS). The account role, and so every
-    // permission, stays the same. Before, this rewrote activeRole, so a STAFF or ADMIN
-    // who pressed "Switch Module" became "MANAGER" and pages/routes broke.
+    const updateUser = (changes) => {
+        setUser((prev) => {
+            if (!prev) return prev;
+
+            const next = {...prev, ...changes};
+            localStorage.setItem('user', JSON.stringify(next));
+            return next;
+        });
+    };
+
     const switchModule = (module) => {
         const next = normalizeUser({ ...user, activeModule: module });
         localStorage.setItem('user', JSON.stringify(next));
@@ -92,7 +97,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, switchModule, handleSwitchAccess }}>
+        <AuthContext.Provider value={{ user, login, logout, switchModule, updateUser, handleSwitchAccess }}>
         {children}
         </AuthContext.Provider>
     );

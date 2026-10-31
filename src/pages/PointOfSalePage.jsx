@@ -2,9 +2,6 @@ import { CancelConfirmModal, CashPaymentModal, CheckoutModal, DiscountModal, GCa
 import { ProfileDropdown } from '@/components/shared';
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from '@/components/ui/button';
-import { Loader2, Moon, ShoppingCart, Sun } from 'lucide-react';
-import { useState } from 'react';
-
 import { useBarcodeScanner } from '@/hooks/point_of_sale_hooks/useBarcodeScanner';
 import { useCart } from '@/hooks/point_of_sale_hooks/useCart';
 import { useCheckout } from '@/hooks/point_of_sale_hooks/useCheckout';
@@ -13,6 +10,8 @@ import { useClock } from '@/hooks/useClock';
 import { getScanBarcode } from '@/services/PointOfSaleService';
 import { useTheme } from '@/theme/useTheme';
 import { openReceiptTab } from '@/utils/receiptWindowUtil';
+import { Loader2, Moon, ShoppingCart, Sun } from 'lucide-react';
+import { useState } from 'react';
 
 const PointOfSalePage = () => {
     const { 
