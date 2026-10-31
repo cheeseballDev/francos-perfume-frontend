@@ -40,7 +40,7 @@ const Sidebar = () => {
 
     return `flex items-center w-full gap-2 cursor-pointer p-5 transition-colors duration-300
     ${isActuallyActive
-      ? "bg-primary/20 text-foreground border-r-4 border-primary"
+      ? "bg-primary/40 text-foreground border-r-4 border-primary"
       : "hover:bg-muted text-muted-foreground hover:text-foreground"
     }`;
   };

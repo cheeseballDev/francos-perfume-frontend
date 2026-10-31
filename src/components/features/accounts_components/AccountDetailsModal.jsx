@@ -28,7 +28,6 @@ const AccountInfoModal = ({
 
     if (!isOpen || !selectedAccount) return null;
 
-    console.log(user);
     const isManager = user?.trueRole === "MANAGER";
     const accountId = selectedAccount.employeeId;
     const isActive = selectedAccount?.status === "ACTIVE";
@@ -174,7 +173,6 @@ const AccountInfoModal = ({
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-2">
-                  {/* plain badge: StatusBadge would give a role the "neutral" minus icon */}
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-md border border-primary/40 bg-primary/20 text-xs font-semibold text-foreground">
                     {formatLabel(selectedAccount.employeeRole) || "No role"}
                   </span>
@@ -184,7 +182,6 @@ const AccountInfoModal = ({
                 <p className="text-xs text-muted-foreground">Employee ID: {selectedAccount.employeeId ?? "N/A"}</p>
               </div>
 
-              {/* Right: details */}
               <div className="flex flex-col gap-6 min-w-0">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <DetailItem label="First name" value={selectedAccount.firstName || "N/A"} />

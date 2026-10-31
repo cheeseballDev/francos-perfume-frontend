@@ -58,6 +58,8 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
         if (isOpen && selectedAccount) {
             setData(getAccountFormData(selectedAccount));
             setErrors({});
+            setOriginalImageUrl(selectedAccount.employeeImageUrl || null);
+            setIsRemovingImage(false);
         }
     }, [isOpen, selectedAccount]);
 
@@ -139,6 +141,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
                 });
 
                 onClose();
+                setSelectedAccount(null);
             } catch (error) {
                 toast({
                     title: "Update Failed",
@@ -148,8 +151,6 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
             } finally {
                 setIsSubmitting(false);
                 setConfig(null);
-                setData(null);
-                setSelectedAccount(null);
             }
         } 
         })
@@ -178,7 +179,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
 
             <div className="py-4 border-b border-border">
                 <ImageUpload
-                    value={data.employeeImageUrl || ""}
+                    value={data?.employeeImageUrl || ""}
                     onChange={handleImageChange}
                     bucket="account-profile-pictures"
                     imageText='User Image'
