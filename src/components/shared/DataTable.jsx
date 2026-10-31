@@ -34,7 +34,6 @@ const DataTable = ({
               {columns.map((col, idx) => (
                 <TableHead
                   key={col.key || col.accessorKey || idx}
-                  // Inherits column-hiding classes like 'hidden md:table-cell'
                   className={`font-semibold text-muted-foreground ${col.className || ""} ${col.headerClassName || ""}`}
                 >
                   {col.header}
@@ -61,7 +60,6 @@ const DataTable = ({
                   colSpan={columns.length}
                   className="text-center py-16 text-muted-foreground font-medium animate-in fade-in duration-300"
                 >
-                  {/* ACTIONABLE EMPTY STATE */}
                   <div className="flex flex-col items-center justify-center">
                       <PackageOpen className="h-12 w-12 text-muted-foreground/30 mb-3 stroke-[1.5]" />
                       <p className="text-base text-foreground mb-1">No items found</p>
@@ -83,25 +81,18 @@ const DataTable = ({
                   return (
                     <TableRow
                       key={row[keyField]}
-                      // A double-click fires click, click, dblclick. event.detail is the click count,
-                      // so only the first click selects; the second one used to deselect the row
-                      // right before onRowDoubleClick opened the modal.
                       onClick={(event) => {
                         if (event.detail > 1) return;
                         onRowClick && onRowClick(row);
                       }}
                       onDoubleClick={() => onRowDoubleClick && onRowDoubleClick(row)}
-                      data-state={isSelected ? "selected" : undefined}
                       aria-selected={isSelected || undefined}
-                      // Selected: a solid beige tint plus a dark bar on the left edge.
-                      // The old bg-primary/20 was lighter than the grey hover colour on a
-                      // white card, so a clicked row looked less highlighted than a hovered one.
                       className={`animate-in fade-in slide-in-from-bottom-2 duration-300 transition-colors ${
                         onRowClick || onRowDoubleClick ? "hover:cursor-pointer" : ""
                       }
                       ${
                         isSelected
-                          ? "bg-primary/60 hover:bg-primary/70 dark:bg-primary/25 dark:hover:bg-primary/30 shadow-[inset_4px_0_0_hsl(var(--foreground))] font-medium"
+                          ? "bg-primary/40 hover:bg-primary/50 dark:bg-primary/30 dark:hover:bg-primary/40 shadow-[inset_4px_0_0_var(--color-custom-primary)] font-medium"
                           : "hover:bg-muted"
                       }`}
                     >
