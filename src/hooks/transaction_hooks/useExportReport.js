@@ -1,4 +1,4 @@
-import { getExcel, getPdf } from "@/services/TransactionService";
+import { getExcel, getPdf, getSalesReportExcel } from "@/services/TransactionService";
 import { useCallback, useState } from "react";
 
 export const useExportReport = () => {
@@ -57,5 +57,20 @@ export const useExportReport = () => {
         }
     }, []);
 
-    return { exportExcel, exportPdf, isExporting, isError };
+    const exportSalesReport = useCallback(async (filter) => {
+        setIsExporting(true);
+        setIsError(null);
+        try {
+            const response = await getSalesReportExcel(filter);
+            const filename = getFilename(response, "Top_10_Sales_Report.xlsx");
+            triggerDownload(response.data, filename);
+        } catch (err) {
+            setIsError(err);
+            throw err;
+        } finally {
+            setIsExporting(false);
+        }
+    }, []);
+
+    return { exportExcel, exportPdf, exportSalesReport, isExporting, isError };
 };

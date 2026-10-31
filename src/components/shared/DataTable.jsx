@@ -7,7 +7,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Loader2, PackageOpen } from "lucide-react"; // Added PackageOpen
+import { Loader2, PackageOpen } from "lucide-react";
 
 const DataTable = ({
         columns = [],

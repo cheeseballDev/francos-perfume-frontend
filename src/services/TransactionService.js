@@ -45,3 +45,50 @@ export const postUploadExcel = async (file) => {
     const response = await apiClient.post(`${PATH}/excel`, formData);
     return response.data;
 };
+
+export const getBranchComparison = async (filter) => {
+    const params = new URLSearchParams();
+
+    if (filter.fromDate) params.append('fromDate', filter.fromDate);
+    if (filter.toDate) params.append('toDate', filter.toDate);
+
+    if (filter.branchIds && Array.isArray(filter.branchIds)) {
+        filter.branchIds.forEach(id => params.append('branchIds', id));
+    }
+
+    const response = await apiClient.get(`${PATH}/compare-branches`, { 
+        params
+    })
+    return response.data;
+}
+
+export const getSalesReport = async (filter) => {
+    const params = new URLSearchParams();
+
+    if (filter.fromDate) params.append('fromDate', filter.fromDate);
+    if (filter.toDate) params.append('toDate', filter.toDate);
+
+    if (filter.branchIds && Array.isArray(filter.branchIds)) {
+        filter.branchIds.forEach(id => params.append('branchIds', id));
+    }
+
+    const response = await apiClient.get(`${PATH}/sales-report`, { params });
+    return response.data;
+}
+
+export const getSalesReportExcel = async (filter) => {
+    const params = new URLSearchParams();
+
+    if (filter.fromDate) params.append('fromDate', filter.fromDate);
+    if (filter.toDate) params.append('toDate', filter.toDate);
+
+    if (filter.branchIds && Array.isArray(filter.branchIds)) {
+        filter.branchIds.forEach(id => params.append('branchIds', id));
+    }
+
+    const response = await apiClient.get(`${PATH}/sales-report-export-xslx`, {
+        params,
+        responseType: "blob",
+    });
+    return response;
+}

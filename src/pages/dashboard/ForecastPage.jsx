@@ -1,6 +1,4 @@
-import ForecastChart from "@/components/features/forecast_components/ForecastChart";
 import SearchableProductSelect from "@/components/shared/SearchableProductSelect";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -280,44 +278,6 @@ const ForecastPage = () => {
         ))}
       </div>
 
-      {/* Revenue Forecast Chart */}
-      <Card className="mb-6 border-border bg-card shadow-sm shrink-0">
-        <CardHeader>
-          <div className="p-4 flex items-center justify-between">
-            <div>
-              <CardTitle className="mb-2 text-base text-foreground">
-                Revenue Forecast with Confidence Interval
-              </CardTitle>
-              <CardDescription>
-                Live API prediction from ML.NET
-              </CardDescription>
-            </div>
-            <Badge variant="outline" className="text-emerald-500 border-emerald-500 text-xs">
-              Live API Data
-            </Badge>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          <ForecastChart data={chartData} />
-
-          <div className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-4 text-xs text-muted-foreground">
-            {[
-              { color: "text-muted-foreground", dashed: true,  label: "Upper Bound"     },
-              { color: "text-muted-foreground", dashed: true,  label: "Lower Bound"     },
-              { color: "text-primary",          dashed: true,  label: "Predicted Sales" },
-            ].map(({ color, dashed, label }) => (
-              <div key={label} className="flex items-center gap-1.5">
-                <svg width="24" height="8" aria-hidden="true">
-                  <line x1="0" y1="4" x2="24" y2="4" stroke="currentColor" className={color} strokeWidth="2" strokeDasharray={dashed ? "4 3" : undefined} />
-                </svg>
-                <span>{label}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* ML.NET Perfume Level Breakdown */}
       <Card className="p-6 mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
@@ -369,26 +329,6 @@ const ForecastPage = () => {
         </CardContent>
       </Card>
 
-      {/* AI Insights Card */}
-      <Card className="p-6 mb-6 border-border bg-card shadow-sm shrink-0">
-        <CardHeader>
-          <CardTitle className="text-base text-foreground">AI-Powered Insights</CardTitle>
-          <CardDescription className="mb-4">Automated recommendations based on predictive analysis</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {aiInsights.map((insight) => (
-              <div key={insight.title} className={`${insight.bg} ${insight.border} border rounded-xl p-4`}>
-                <div className="flex items-center gap-2 mb-1">
-                  <insight.Icon size={15} className={insight.iconColor} />
-                  <span className="font-semibold text-sm text-foreground">{insight.title}</span>
-                </div>
-                <p className="text-muted-foreground text-xs pl-5.75">{insight.description}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

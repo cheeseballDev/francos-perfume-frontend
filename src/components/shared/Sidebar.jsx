@@ -9,6 +9,7 @@ import {
     LayoutDashboard,
     Logs,
     ShoppingBag,
+    SquareText,
     Tag,
     Truck,
     UserPen
@@ -74,12 +75,20 @@ const Sidebar = () => {
           </Link>
         )}
 
+
         {/* FORECAST - Restricted from Admin and Staff */}
         {!isAdmin && !isStaff && (
           <Link to="/home/forecast" className={getTabClass("/home/forecast")}>
             <ChartNoAxesCombined size={24} />
             <p className="text-base">Stock Forecast</p>
           </Link>
+        )}
+
+        {!isAdmin && !isStaff && (
+            <Link to="/home/reports" className={getTabClass("/home/reports")}>
+                <SquareText size={24} />
+                <p className="text-base">Reports</p>
+            </Link>
         )}
 
         {/* REQUESTS - Restricted from Admin */}

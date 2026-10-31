@@ -1,15 +1,20 @@
 import { useAuth } from "@/auth/UseAuth";
+import BranchBarChart from "@/components/features/home_components/BranchBarChart";
 import DashboardPanel from "@/components/features/home_components/DashboardPanel";
 import AuditLogItem from "@/components/features/home_components/home_items/AuditLogItem";
 import DeliveryItem from "@/components/features/home_components/home_items/DeliveryItem";
 import RequestItem from "@/components/features/home_components/home_items/RequestItem";
 import TransactionItem from "@/components/features/home_components/home_items/TransactionItem";
 import DashboardSkeleton from "@/components/loaders/DashboardSkeleton";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuditLog } from "@/hooks/audit_hooks/useAuditLog";
+import { useBranchComparison } from "@/hooks/kpi_hooks/useBranchComparison";
 import { useKPI } from "@/hooks/kpi_hooks/useKPI";
 import { formatPeso } from "@/utils/formattingUtils";
 import { TONES } from "@/utils/statusUtils";
 import { Banknote, Boxes, Clock, Package, Receipt } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StatusCard from "../../components/shared/StatusCard";
 
@@ -31,6 +36,20 @@ const DashboardHome = () => {
     const {
         auditLogs
     } = useAuditLog();
+
+    const { branchMetrics, asyncState: comparisonState } = useBranchComparison({
+        enabled: userRole === "OWNER",
+    });
+
+    const [metric, setMetric] = useState("totalRevenue");
+
+    const METRICS = [
+        { key: "totalRevenue", label: "Revenue", format: formatPeso },
+        { key: "totalTransactions", label: "Transactions", format: (v) => v.toLocaleString() },
+        { key: "totalUnitsSold", label: "Units Sold", format: (v) => v.toLocaleString()}
+    ]
+
+    const activeMetric = METRICS.find((m) => m.key === metric);
 
     // Short form for the card (₱1.2M / ₱45.3K); the exact amount goes underneath via formatPeso
     const formatRevenue = (amount) => {
@@ -208,6 +227,35 @@ const DashboardHome = () => {
                             
                         </div>
                     )}
+
+                    {userRole === "OWNER" && (
+                        <DashboardPanel 
+                            className="mb-10"
+                        title="Branch Performance">
+                            <div className="flex gap-2 mb-4">
+                                {METRICS.map((m) => (
+                                    <Button
+                                        key={m.key}
+                                        variant={metric === m.key ? "default" : "outline"}
+                                        onClick={() => setMetric(m.key)}
+                                    >
+                                        {m.label}
+                                    </Button>
+                                ))}
+                            </div>
+
+                            {comparisonState.isLoading ? (
+                                <div className="flex flex-col gap-3">
+                                    {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-6 w-full" />)}
+                                </div>
+                            ) : comparisonState.error ? (
+                                <p className="text-sm text-destructive">Couldn't load branch comparison.</p>
+                            ) : (
+                                <BranchBarChart data={branchMetrics} valueKey={metric} format={activeMetric.format} />
+                            )}
+                        </DashboardPanel>
+                    )}
+
                 </div>
             )}
         </div>

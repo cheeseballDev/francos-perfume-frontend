@@ -1,3 +1,6 @@
+export { default as ForgotPasswordPage } from '../ForgotPasswordPage';
+export { default as LoginPage } from '../LoginPage';
+export { default as PointOfSalePage } from '../PointOfSalePage';
 export { default as ArchivesPage } from './ArchivesPage';
 export { default as AuditLogPage } from './AuditLogPage';
 export { default as BarcodePage } from './BarcodePage';
@@ -6,6 +9,9 @@ export { default as DiscountPage } from './DiscountPage';
 export { default as ForecastPage } from './ForecastPage';
 export { default as HomePage } from './HomePage';
 export { default as InventoryPage } from './InventoryPage';
+export { default as AccountsPage } from './ManageAccountsPage';
 export { default as ProductsPage } from './ProductsPage';
+export { default as ReportsPage } from './ReportsPage';
 export { default as RequestPage } from './RequestPage';
 export { default as TransactionsPage } from './TransactionsPage';
+export { default as UserSettingsPage } from './UserSettingsPage';

@@ -9,7 +9,6 @@ export const getAllInventory = async (filter) => {
     const response = await apiClient.get(`${PATH}`, {
         params: cleanedFilter,
     });
-    
     return response.data;
 };
 
@@ -32,12 +31,10 @@ export const patchUpdateBatch = async (batchId, dto) => {
 
 export const getInventoryFilters = async () => {
     const response = await apiClient.get(`${PATH}/filters`);
-    console.log(response.data);
     return response.data;
 };
 
-/*
-export const addInventoryItem = async () => {
-    
-};
-*/
+export const getSlowMovingProducts = async (branchId) => {
+    const response = await apiClient.get(`${PATH}/${branchId}/slow-moving`);
+    return response.data;
+}

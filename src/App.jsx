@@ -9,12 +9,7 @@ import CreateTransferRequestPage from './components/features/request_components/
 import RequestDetailsPage from './components/features/request_components/RequestDetailsPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import FaqPage from './pages/dashboard/FaqPage';
-import { ArchivesPage, AuditLogPage, BarcodePage, DeliveriesPage, DiscountPage, ForecastPage, HomePage, InventoryPage, ProductsPage, RequestPage, TransactionsPage } from './pages/dashboard/index.js';
-import AccountsPage from './pages/dashboard/ManageAccountsPage';
-import UserSettingsPage from './pages/dashboard/UserSettingsPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import LoginPage from './pages/LoginPage';
-import PointOfSalePage from './pages/PointOfSalePage';
+import { AccountsPage, ArchivesPage, AuditLogPage, BarcodePage, DeliveriesPage, DiscountPage, ForecastPage, ForgotPasswordPage, HomePage, InventoryPage, LoginPage, PointOfSalePage, ProductsPage, ReportsPage, RequestPage, TransactionsPage, UserSettingsPage } from './pages/dashboard/index.js';
 import { MODULES, canUsePos, modulePath } from './utils/roleAccess';
 
 const ProtectedRoute = ({ user, allowedRoles }) => {
@@ -138,6 +133,7 @@ const App = () => {
 
               <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'OWNER']} />}>
                 <Route path="transactions" element={<TransactionsPage />} />
+                <Route path="reports" element={<ReportsPage />} />
               </Route>
 
               <Route element={<ProtectedRoute user={user} allowedRoles={['OWNER']} />}>

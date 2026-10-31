@@ -32,19 +32,20 @@ const ExportTransactionModal = ({ isOpen, onClose }) => {
     if (!selectedFormat) return;
 
     setIsExporting(true);
-    
+
     try {
-      if (selectedFormat === 'pdf') {
-        await exportPdf(dateFrom, dateTo);
-      } else if (selectedFormat === 'xlsx') {
-        await exportExcel(dateFrom, dateTo);
-      }
-      
-      onClose();
+        if (selectedFormat === 'pdf') {
+            await exportPdf(dateFrom, dateTo);
+        } else if (selectedFormat === 'xlsx') {
+            await exportExcel(dateFrom, dateTo);
+        }
+        
+        onClose();
     } catch (error) {
-      console.error("Export failed:", error);
+        
+        console.error("Export failed:", error);
     } finally {
-      setIsExporting(false);
+        setIsExporting(false);
     }
   };
 
