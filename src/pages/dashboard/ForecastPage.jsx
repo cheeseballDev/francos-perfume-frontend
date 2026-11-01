@@ -1,8 +1,10 @@
+import ForecastInsightsCard from "@/components/features/forecast_components/ForecastInsightsCard";
 import SearchableProductSelect from "@/components/shared/SearchableProductSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useForecast } from "@/hooks/forecast_hooks/useForecast";
+import { useForecastInsights } from "@/hooks/forecast_hooks/useForecastInsights";
 import {
     AlertTriangle,
     BarChart2,
@@ -46,6 +48,8 @@ const ForecastPage = () => {
         toast
     } = useToast();
 
+    const insightsState = useForecastInsights();
+
     const [perfumeForecasts, setPerfumeForecasts] = useState([]);
   
     const [formData, setFormData] = useState({
@@ -59,21 +63,32 @@ const ForecastPage = () => {
     const handleRefreshForecast = async () => {
         if (!formData.branchId || !formData.productId) return;
 
-        const result = await fetchForecast({
+        const params = {
             year: Number(formData.year),
             month: Number(formData.month),
             productId: Number(formData.productId),
             branchId: Number(formData.branchId),
-            engine: formData.engine,
-        });
+        };
 
-        if (result?.error) {
-            toast({
-                title: "Generating Forecast Failed",
-                description: "",
-                variant: "destructive",
-                duration: 5000
-            });
+        const result = await fetchForecast({ ...params, engine: formData.engine });
+
+        if (!result?.ok) {
+            if (result?.error) {
+                insightsState.reset();
+                toast({
+                    title: "Generating Forecast Failed",
+                    description: "",
+                    variant: "destructive",
+                    duration: 5000
+                });
+            }
+            return;
+        }
+
+        if (formData.engine === "ML") {
+            insightsState.fetchInsights(params);
+        } else {
+            insightsState.reset();
         }
     };
 
@@ -248,6 +263,10 @@ const ForecastPage = () => {
           />
         ))}
       </div>
+
+      {(insightsState.result || insightsState.isLoading || insightsState.error) && (
+        <ForecastInsightsCard insightsState={insightsState} onRefresh={insightsState.refresh} />
+      )}
 
       <Card className="p-6 mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
