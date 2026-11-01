@@ -12,11 +12,6 @@ export const postForecastRevenue = async (dto) => {
     return response.data;
 };
 
-export const postForecastStocksAI = async (dto) => {
-    const response = await apiClient.post(`${PATH}/ai`, dto);
-    return response.data;
-};
-
 export const postForecastInsights = async (dto) => {
     const response = await apiClient.post(`${PATH}/insights`, dto);
     return response.data;

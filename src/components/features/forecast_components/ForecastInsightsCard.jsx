@@ -149,7 +149,7 @@ const ForecastInsightsCard = ({ insightsState, onRefresh }) => {
                                         <li key={risk.key} className="text-sm rounded-lg border border-destructive/30 bg-destructive/5 p-3">
                                             <p className="font-semibold text-foreground">
                                                 {risk.alreadyExpired
-                                                    ? `${risk.unitsAtRisk} units from ${risk.batchDisplayId || `batch ${risk.batchId}`} have expired`
+                                                    ? `${risk.unitsAtRisk} units from ${risk.batchDisplayId || `batch ${risk.batchId}`} are past their sell-by date deadline`
                                                     : `${risk.unitsAtRisk} units from ${risk.batchDisplayId || `batch ${risk.batchId}`} may not sell before ${formatDateForTable(risk.expiryDate)}`}
                                             </p>
                                             {risk.message && <p className="text-muted-foreground mt-0.5">{risk.message}</p>}
