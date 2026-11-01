@@ -1,8 +1,10 @@
+import ForecastInsightsCard from "@/components/features/forecast_components/ForecastInsightsCard";
 import SearchableProductSelect from "@/components/shared/SearchableProductSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useForecast } from "@/hooks/forecast_hooks/useForecast";
+import { useForecastInsights } from "@/hooks/forecast_hooks/useForecastInsights";
 import {
     AlertTriangle,
     BarChart2,
@@ -23,11 +25,6 @@ const MONTHS = [
   { value: 11, label: "November" }, { value: 12, label: "December" }
 ];
 
-const ENGINES = [
-    { value: "ML", label: "Standard (ML.NET)"},
-    { value: "AI", label: "Third-party (Claude)"}
-]
-
 const currentYear = new Date().getFullYear();
 const YEARS = [currentYear, currentYear + 1, currentYear + 2];
 
@@ -46,6 +43,8 @@ const ForecastPage = () => {
         toast
     } = useToast();
 
+    const insightsState = useForecastInsights();
+
     const [perfumeForecasts, setPerfumeForecasts] = useState([]);
   
     const [formData, setFormData] = useState({
@@ -53,19 +52,25 @@ const ForecastPage = () => {
         productId: "",
         month: new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2,
         year: new Date().getMonth() + 2 > 12 ? new Date().getFullYear() + 1 : new Date().getFullYear(),
-        engine: "ML",
     });
 
     const handleRefreshForecast = async () => {
         if (!formData.branchId || !formData.productId) return;
 
-        const result = await fetchForecast({
+        const params = {
             year: Number(formData.year),
             month: Number(formData.month),
             productId: Number(formData.productId),
             branchId: Number(formData.branchId),
-            engine: formData.engine,
-        });
+        };
+
+        const result = await fetchForecast(params);
+
+        if (result?.stocksOk) {
+            insightsState.fetchInsights(params);
+        } else if (result?.error) {
+            insightsState.reset();
+        }
 
         if (result?.error) {
             toast({
@@ -76,8 +81,6 @@ const ForecastPage = () => {
             });
         }
     };
-
-    const engineLabel = ENGINES.find((en) => en.value === forecastData?.stocksEngine)?.label;
 
     useEffect(() => {
         if (forecastData.stocks) {
@@ -139,7 +142,7 @@ const ForecastPage = () => {
         <div className="mb-6 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg text-xs text-destructive flex items-center gap-2 shrink-0">
           <AlertTriangle size={13} />
           <span>
-            <strong>Forecast API message:</strong> Selected forecast engine is unavailable. Please use ML.net
+            <strong>Forecast API message:</strong> {asyncState.error}
           </span>
         </div>
       )}
@@ -149,13 +152,13 @@ const ForecastPage = () => {
         <CardHeader className="pb-3 border-b border-border">
           <div className="flex items-center gap-2">
             <Sparkles className="text-emerald-500" size={20} />
-            <CardTitle className="text-base text-foreground">AI Forecasting Engine</CardTitle>
+            <CardTitle className="text-base text-foreground">Stock Forecast</CardTitle>
           </div>
-          <CardDescription>Choose the parameters and the engine (ML.NET or Claude AI) to generate a forecast</CardDescription>
+          <CardDescription>Choose a branch, product and month to generate a forecast</CardDescription>
         </CardHeader>
         
         <CardContent className="pt-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 items-end mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-muted-foreground">Branch</label>
               <select 
@@ -206,33 +209,14 @@ const ForecastPage = () => {
               </select>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-muted-foreground">Forecast engine</label>
-                <select
-                    className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary"
-                    value={formData.engine}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, engine: e.target.value }))}
-                >
-                    {ENGINES.map((en) => <option key={en.value} value={en.value}>{en.label}</option>)}
-                </select>
-            </div>
-
-
             <Button
-              variant="default"
+              variant="confirm"
               onClick={handleRefreshForecast}
               disabled={asyncState.isFetching || !formData.branchId || !formData.productId}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
             >
               {asyncState.isFetching ? "Analyzing..." : "Generate Forecast"}
             </Button>
           </div>
-
-          {forecastData?.stocks && (
-            <p className="text-xs text-muted-foreground">
-              Stock forecast generated by <span className="font-semibold text-foreground">{engineLabel}</span>
-            </p>
-          )}
         </CardContent>
       </Card>
 
@@ -249,16 +233,16 @@ const ForecastPage = () => {
         ))}
       </div>
 
+      {(insightsState.result || insightsState.isLoading || insightsState.error) && (
+        <ForecastInsightsCard insightsState={insightsState} onRefresh={insightsState.refresh} />
+      )}
+
       <Card className="p-6 mb-6 border-border bg-card shadow-sm shrink-0">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div className="flex flex-col gap-1.5">
               <CardTitle className="text-base text-foreground">Target Product Forecast</CardTitle>
-              <CardDescription>
-                {forecastData?.stocksEngine === "AI"
-                  ? "Claude AI output for the selected product"
-                  : "ML.NET FastTree regression output for the selected product"}
-              </CardDescription>
+              <CardDescription>ML.NET FastTree regression output for the selected product</CardDescription>
             </div>
           </div>
         </CardHeader>

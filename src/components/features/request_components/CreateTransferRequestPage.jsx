@@ -6,7 +6,7 @@ import { postCreateRequest } from '@/services/RequestService';
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BranchSelector from './create_transfer_components/BranchSelector';
 import ProductList from './create_transfer_components/ProductList';
 import ProductSelector from './create_transfer_components/ProductSelector';
@@ -28,6 +28,7 @@ const requestValidationSchema = {
 
 const CreateTransferRequestPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const { toast } = useToast();
 
@@ -50,6 +51,19 @@ const CreateTransferRequestPage = () => {
     useEffect(() => {
         fetchBranches();
     }, [fetchBranches]);
+
+    useEffect(() => {
+        const prefill = location.state?.prefill;
+        if (!prefill) return;
+
+        setData((prev) => ({
+            ...prev,
+            fromBranch: prefill.fromBranch ?? prev.fromBranch,
+            toBranch: prefill.toBranch ?? prev.toBranch,
+            items: Array.isArray(prefill.items) ? prefill.items.filter((item) => item.quantity > 0) : prev.items,
+        }));
+        navigate(location.pathname, { replace: true, state: null });
+    }, [location.state, location.pathname, navigate]);
 
     useEffect(() => {
         fetchProductsByBranch(data.fromBranch);

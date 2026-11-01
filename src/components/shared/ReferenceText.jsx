@@ -1,3 +1,4 @@
+import { useAuth } from "@/auth/UseAuth";
 import { useNavigate } from "react-router-dom";
 
 const REFERENCE_ROUTES = {
@@ -5,6 +6,15 @@ const REFERENCE_ROUTES = {
     DEL: "/home/deliveries",
     PROD: "/home/inventory",
     EMP: "/home/accounts",
+};
+
+const ROUTE_ROLES = {
+    "/home/requests": ["MANAGER", "OWNER", "STAFF"],
+    "/home/deliveries": ["MANAGER", "OWNER", "STAFF"],
+    "/home/inventory": ["MANAGER", "OWNER", "STAFF"],
+    "/home/products": ["OWNER"],
+    "/home/accounts": ["MANAGER", "OWNER", "ADMIN"],
+    "/home/archives": ["MANAGER", "OWNER", "ADMIN"],
 };
 
 const REFERENCE_PATTERN = new RegExp(`\\b(${Object.keys(REFERENCE_ROUTES).join("|")})-\\d+\\b`, "g");
@@ -24,11 +34,19 @@ export const referenceRoute = (reference, context = "") => {
     return `${base}?search=${encodeURIComponent(reference)}`;
 };
 
+export const canOpenRoute = (route, role) => {
+    if (!route) return false;
+    const path = route.split("?")[0];
+    const allowed = ROUTE_ROLES[path];
+    return !allowed || allowed.includes(String(role || "").toUpperCase());
+};
+
 export const ReferenceLink = ({ reference, context = "", className = "" }) => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const route = referenceRoute(reference, context);
 
-    if (!reference || reference === "N/A" || !route) {
+    if (!reference || reference === "N/A" || !canOpenRoute(route, user?.trueRole)) {
         return <span className={className}>{reference || "N/A"}</span>;
     }
 

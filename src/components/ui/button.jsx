@@ -21,7 +21,7 @@ const buttonVariants = cva(
         link: 
             "text-primary underline-offset-4 hover:underline",
         confirm: 
-            "bg-emerald-600 hover:bg-emerald-700 text-white font-bold",
+            "bg-emerald-600 hover:bg-emerald-700 text-white font-bold dark:bg-emerald-700 dark:hover:bg-emerald-800",
       },
       size: {
         default:
