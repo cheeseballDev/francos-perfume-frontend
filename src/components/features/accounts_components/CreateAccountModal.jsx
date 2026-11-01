@@ -14,7 +14,7 @@ const accountValidationSchema = {
     firstName: [isValid.required],
     lastName: [isValid.required],
     email: [isValid.required, isValid.email],
-    address: [isValid.minLength(3)],
+    address: [isValid.required, isValid.minLength(3)],
     contactNumber: [isValid.required, isValid.phone],
     branchLocation: [isValid.required],
     employeeRole: [isValid.required],

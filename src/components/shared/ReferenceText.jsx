@@ -9,15 +9,24 @@ const REFERENCE_ROUTES = {
 
 const REFERENCE_PATTERN = new RegExp(`\\b(${Object.keys(REFERENCE_ROUTES).join("|")})-\\d+\\b`, "g");
 
-export const referenceRoute = (reference) => {
+export const referenceRoute = (reference, context = "") => {
     const prefix = String(reference || "").split("-")[0];
-    const base = REFERENCE_ROUTES[prefix];
-    return base ? `${base}?search=${encodeURIComponent(reference)}` : null;
+    if (!REFERENCE_ROUTES[prefix]) return null;
+
+    if (/\barchived\b/i.test(context) && (prefix === "PROD" || prefix === "EMP")) {
+        return "/home/archives";
+    }
+
+    const base = /\brestored\b/i.test(context) && prefix === "PROD"
+        ? "/home/products"
+        : REFERENCE_ROUTES[prefix];
+
+    return `${base}?search=${encodeURIComponent(reference)}`;
 };
 
-export const ReferenceLink = ({ reference, className = "" }) => {
+export const ReferenceLink = ({ reference, context = "", className = "" }) => {
     const navigate = useNavigate();
-    const route = referenceRoute(reference);
+    const route = referenceRoute(reference, context);
 
     if (!reference || reference === "N/A" || !route) {
         return <span className={className}>{reference || "N/A"}</span>;
@@ -45,7 +54,7 @@ const ReferenceText = ({ text, className = "" }) => {
     let lastIndex = 0;
     String(text).replace(REFERENCE_PATTERN, (match, _prefix, offset) => {
         if (offset > lastIndex) parts.push(String(text).slice(lastIndex, offset));
-        parts.push(<ReferenceLink key={`${match}-${offset}`} reference={match} />);
+        parts.push(<ReferenceLink key={`${match}-${offset}`} reference={match} context={String(text)} />);
         lastIndex = offset + match.length;
         return match;
     });

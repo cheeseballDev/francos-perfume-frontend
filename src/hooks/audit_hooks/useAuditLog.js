@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/SupabaseClient";
-import { getAllAuditLogs, getOneAuditLogDetails } from "@/services/AuditLogService";
+import { getAllAuditLogs, getAuditLogFilters, getOneAuditLogDetails } from "@/services/AuditLogService";
+import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
@@ -17,6 +18,8 @@ export const useAuditLog = () => {
         totalPages: 1,
         totalEntries: 0,
     });
+
+    const [filterOptions, setFilterOptions] = useState([]);
 
     const { filter, updateFilter, resetFilter }= useFilter({
         search: '',
@@ -77,6 +80,23 @@ export const useAuditLog = () => {
         };
     }, [fetchAuditLogs]);
 
+    const fetchAuditLogFilters = useCallback(async () => {
+        try {
+            const data = await getAuditLogFilters();
+            const modules = Array.isArray(data) ? data : data?.modules ?? data?.module ?? [];
+            setFilterOptions(buildFilterOptions(
+                { module: modules.filter(Boolean) },
+                [{ key: "module", label: "Filter: Module", allLabel: "All Modules" }]
+            ));
+        } catch {
+            setFilterOptions([]);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchAuditLogFilters();
+    }, [fetchAuditLogFilters]);
+
     const fetchAuditLogDetails = useCallback(async (logId) => {
         try {
             const data = await getOneAuditLogDetails(logId);
@@ -92,6 +112,7 @@ export const useAuditLog = () => {
         asyncState, 
         pagination, 
         filter, 
+        filterOptions,
         fetchAuditLogs, 
         updateFilter,
         fetchAuditLogDetails

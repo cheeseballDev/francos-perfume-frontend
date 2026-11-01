@@ -1,7 +1,7 @@
 import { useAuth } from "@/auth/UseAuth";
-import { ReferenceLink } from "@/components/shared/ReferenceText";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DataTable from "@/components/shared/DataTable";
+import { ReferenceLink } from "@/components/shared/ReferenceText";
 import { Button } from "@/components/ui/button";
 import { useRequestDetails } from "@/hooks/request_hooks/useRequestDetails";
 import { patchApproveRequest, patchCancelRequest, patchRejectRequest } from "@/services/RequestService";
@@ -68,6 +68,10 @@ export default function RequestDetailsPage() {
     const allProductsApproved = Object.values(itemApprovals).length > 0 && 
     Object.values(itemApprovals).every((item) => item.isApproved);
 
+
+    const isOwner = user.branchLocation === "WAREHOUSE";
+
+
     const isPending = data.requestStatus === "PENDING";
 
     const handleRejectRequest = async () => {
@@ -80,7 +84,7 @@ export default function RequestDetailsPage() {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: `Failed to reject the request.${error}`,
+                description: `Failed to reject the request: ${error.response.data.message}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -111,7 +115,7 @@ export default function RequestDetailsPage() {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: `Failed to approve the request.\n${error}`,
+                description: `Failed to approve the request: ${error.response.data.message}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -130,7 +134,7 @@ export default function RequestDetailsPage() {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: `Failed to cancel the request.\n${error}`,
+                description: `Failed to cancel the request: ${error.response.data.message}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 

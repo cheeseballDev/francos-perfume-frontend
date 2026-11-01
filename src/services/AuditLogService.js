@@ -11,6 +11,11 @@ export const getAllAuditLogs = async (filter) => {
     return response.data;
     };
 
+export const getAuditLogFilters = async () => {
+    const response = await apiClient.get(`${PATH}/filters`);
+    return response.data;
+}
+
 export const getOneAuditLogDetails = async (logId) => {
     const response = await apiClient.get(`${PATH}/${logId}`);
     return response.data;

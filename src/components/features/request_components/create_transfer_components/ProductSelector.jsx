@@ -14,7 +14,7 @@ const ProductSelector = ({
     branchOptions,
 }) => {
     const selectedProductOption = productOptions.find(p => p.value === selectedProduct);
-    const availableQty = selectedProductOption?.availableQty ?? null;
+    const availableQty = selectedProductOption?.availableQty ?? 0;
 
     const fromBranchName = branchOptions?.find(
         b => b.value === fromBranch
@@ -93,7 +93,7 @@ const ProductSelector = ({
             <Button
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={handleAddProduct}
-                disabled={!selectedProduct || availableQty === 0 || quantity === 0}
+                disabled={!selectedProduct || hasNoStock || quantity < 1}
             >
                 Add Product
             </Button>

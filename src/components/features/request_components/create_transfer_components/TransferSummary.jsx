@@ -33,7 +33,7 @@ const TransferSummary = ({
             <h2 className="text-lg font-bold text-foreground">Transfer Request Summary</h2>
 
             {fromBranch && toBranch && (
-                <div className="bg-primary/30 border border-primary/50 rounded-lg p-3 text-center text-sm text-black">
+                <div className="bg-primary/30 border border-primary/50 rounded-lg p-3 text-center text-sm text-custom-text">
                     {isNotRelatedToBranchDirection ? (
                         <span>
                             The request will be a transfer from{' '}

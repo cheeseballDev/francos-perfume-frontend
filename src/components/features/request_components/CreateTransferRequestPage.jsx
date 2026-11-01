@@ -214,6 +214,7 @@ const CreateTransferRequestPage = () => {
                         onClear={() => setData(prev => ({ ...prev, fromBranch: null, toBranch: null }))}
                         branchOptions={branchOptions}
                     />
+
                     <ProductSelector
                         selectedProduct={selectedProduct}
                         setSelectedProduct={setSelectedProduct}
@@ -224,6 +225,7 @@ const CreateTransferRequestPage = () => {
                         fromBranch={data.fromBranch}
                         branchOptions={branchOptions}
                     />
+                    
                     <ProductList
                         products={data.items}
                         onRemove={handleRemoveProduct}

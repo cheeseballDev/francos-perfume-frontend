@@ -186,17 +186,11 @@ const DashboardHome = () => {
 
                     {/* BOTTOM GRIDS (Staff, Manager, Owner) */}
                     {userRole !== "ADMIN" && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            
-                            {/* Left Column */}
-                            <div className="grid-cols-2">
-
-                            </div>
-                            <div className="flex flex-col gap-6">
+                        <div className="grid grid-cols-2 lg:grid-cols-2 gap-6 mb-10">
                                 <DashboardPanel 
-                                    title="Pending Requests for Approval" 
-                                    actionText="View All Requests"
-                                    onAction={() => navigate('/home/requests')}
+                                title="Pending Requests for Approval" 
+                                actionText="View All Requests"
+                                onAction={() => navigate('/home/requests')}
                                 >
                                     {pendingApprovals?.pendingApprovalsList?.slice(0, 4).map((request, i) => (
                                         <RequestItem key={request.approvalId || i} request={request} />
@@ -206,11 +200,11 @@ const DashboardHome = () => {
                                         <p className="text-sm text-muted-foreground text-center mt-4">No pending requests.</p>
                                     )}
                                 </DashboardPanel>
-                                
+                            
                                 <DashboardPanel 
-                                    title="Pending Deliveries for Dispatch" 
-                                    actionText="View All Deliveries"
-                                    onAction={() => navigate('/home/deliveries')}
+                                title="Pending Deliveries for Dispatch" 
+                                actionText="View All Deliveries"
+                                onAction={() => navigate('/home/deliveries')}
                                 >
                                     {upcomingDeliveries?.upcomingDeliveriesList?.slice(0, 4).map((delivery, i) => (
                                         <DeliveryItem key={delivery.deliveryId || i} delivery={delivery} />
@@ -220,11 +214,6 @@ const DashboardHome = () => {
                                         <p className="text-sm text-muted-foreground text-center mt-4">No pending deliveries.</p>
                                     )}
                                 </DashboardPanel>
-                            </div>
-
-                            {/* Right Column */}
-                            
-                            <div className="flex flex-col gap-6">
                                 <DashboardPanel
                                     title={`Low Stock Items (${lowStockCount})`}
                                     actionText="View Inventory"
@@ -262,8 +251,6 @@ const DashboardHome = () => {
                                         )}
                                     </DashboardPanel>
                                 )}
-                            </div>
-                            
                         </div>
                     )}
 
