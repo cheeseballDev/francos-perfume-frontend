@@ -27,9 +27,9 @@ export const useTransaction = () => {
     });
 
     const TRANSACTION_FILTER_SCHEMA = [
-        { key: "branches", label: "Filter: Branches", allLabel: "All Branches" },
+        { key: "branches", label: "Filter: Branches", allLabel: "All Branches", multiple: false },
         { key: "employees", label: "Filter: Processed By", allLabel: "All Employees" },
-        { key: "paymentMethods", label: "Filter: Payment Method", allLabel: "All Payment Methods" },
+        { key: "paymentMethods", label: "Filter: Payment Method", allLabel: "All Payment Methods", multiple: false },
     ]
 
     const { filter, updateFilter, resetFilter } = useFilter({

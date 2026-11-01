@@ -21,7 +21,7 @@ export const cleanFilters = (filters) => {
 };
 
 export const buildFilterOptions = (rawFilters = {}, schema = []) => {
-    return schema.map(({ key, label, allLabel }) => {
+    return schema.map(({ key, label, allLabel, multiple = true }) => {
         const rawItems = rawFilters[key] || [];
         const itemOptions = rawItems.map((item) => ({
         label: formatLabel(String(item)),
@@ -31,6 +31,7 @@ export const buildFilterOptions = (rawFilters = {}, schema = []) => {
         return {
         key,
         label,
+        multiple,
         options: [
             { label: allLabel || `All ${label.replace("Filter: ", "")}s`, value: "" },
             ...itemOptions,

@@ -155,7 +155,7 @@ const DashboardHome = () => {
                             <DashboardPanel
                                 title="Recent Audit Logs" 
                                 actionText="View All" 
-                                onAction={() => navigate('/home/audit-log')}
+                                onAction={() => navigate('/home/audit')}
                                 className="min-h-[500px]"
                             >
                                 <p className="text-sm text-muted-foreground mb-4">All latest actions done by any user.</p>

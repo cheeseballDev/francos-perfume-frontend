@@ -3,6 +3,8 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
@@ -29,6 +31,7 @@ const FilterDropdown = ({ filter = {}, updateFilter, filterOptions, className = 
                 const selected = toSelection(filter[option.key]);
                 const selectedLabels = choices.filter((opt) => selected.includes(opt.value)).map((opt) => opt.label);
                 const groupName = option.label?.replace("Filter: ", "") ?? "";
+                const isMultiple = option.multiple !== false;
 
                 const display = selectedLabels.length === 0
                     ? allLabel
@@ -58,22 +61,35 @@ const FilterDropdown = ({ filter = {}, updateFilter, filterOptions, className = 
                         <DropdownMenuContent className="max-h-72 min-w-48" align="start">
                             <DropdownMenuItem
                                 disabled={selected.length === 0}
-                                onSelect={() => updateFilter(option.key, [])}
+                                onSelect={() => updateFilter(option.key, isMultiple ? [] : "")}
                                 className="font-medium"
                             >
                                 {allLabel}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {choices.map((opt) => (
-                                <DropdownMenuCheckboxItem
-                                    key={opt.value}
-                                    checked={selected.includes(opt.value)}
-                                    onCheckedChange={(checked) => toggle(opt.value, checked)}
-                                    onSelect={(event) => event.preventDefault()}
+                            {isMultiple ? (
+                                choices.map((opt) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={opt.value}
+                                        checked={selected.includes(opt.value)}
+                                        onCheckedChange={(checked) => toggle(opt.value, checked)}
+                                        onSelect={(event) => event.preventDefault()}
+                                    >
+                                        {opt.label}
+                                    </DropdownMenuCheckboxItem>
+                                ))
+                            ) : (
+                                <DropdownMenuRadioGroup
+                                    value={selected[0] ?? ""}
+                                    onValueChange={(value) => updateFilter(option.key, value)}
                                 >
-                                    {opt.label}
-                                </DropdownMenuCheckboxItem>
-                            ))}
+                                    {choices.map((opt) => (
+                                        <DropdownMenuRadioItem key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </DropdownMenuRadioItem>
+                                    ))}
+                                </DropdownMenuRadioGroup>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
