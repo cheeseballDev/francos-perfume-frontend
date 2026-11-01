@@ -69,10 +69,12 @@ export default function RequestDetailsPage() {
     Object.values(itemApprovals).every((item) => item.isApproved);
 
 
+
+    
     const isOwner = user.branchLocation === "WAREHOUSE";
-
-
     const isPending = data.requestStatus === "PENDING";
+
+    const canCancel = isPending && (isOwner || data.requesterId === user.employeeId);
 
     const handleRejectRequest = async () => {
         if (!remarks.trim()) return;
@@ -179,10 +181,10 @@ export default function RequestDetailsPage() {
                     )}
                 </div>
 
-                {isPending && (
+                {canCancel && (
                     <Button 
                         variant="destructive" 
-                        onClick={() => handleCancelRequest(requestId)}
+                        onClick={handleCancelRequest}
                     >
                         Cancel Request
                     </Button>
