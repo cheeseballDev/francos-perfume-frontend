@@ -1,4 +1,5 @@
 import { ImageUpload } from "@/components/shared";
+import SensitiveText from "@/components/shared/SensitiveText";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -245,7 +246,7 @@ const UserSettingsCard = ({ accountId }) => {
                                     error={errors.email}
                                 />
                             ) : (
-                                <p className="font-bold text-foreground py-2">{profileData?.email || 'N/A'}</p>
+                                <p className="font-bold text-foreground py-2"><SensitiveText value={profileData?.email} /></p>
                             )}
                         </div>
                         <div>

@@ -5,8 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
 const DELIVERY_FILTER_SCHEMA = [
-    { key: "fromBranches", label: "Filter: From Branch", allLabel: "All 'From Branch'" },
-    { key: "toBranches", label: "Filter: To Branch", allLabel: "All 'To Branch'" },
+    { key: "fromBranches", label: "Filter: From Branch", allLabel: "All 'From Branch'", multiple: false },
+    { key: "toBranches", label: "Filter: To Branch", allLabel: "All 'To Branch'", multiple: false },
     { key: "status", label: "Filter: Status", allLabel: "All Status" },
 ];
 

@@ -1,5 +1,6 @@
 import { SearchFilterBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
+import PaginationBar from "@/components/shared/PaginationBar";
 import { Button } from "@/components/ui/button";
 import { Loader2, Printer } from 'lucide-react';
 import { useState } from "react";
@@ -13,7 +14,9 @@ const BarcodeProductList = ({
     updateFilter, 
     fetchOneProductBarcode, 
     downloadAllProductBarcodes, 
-    downloadOneProductBarcode
+    downloadOneProductBarcode,
+    filter,
+    pagination,
 }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [isDownloading, setIsDownloading] = useState(false);
@@ -33,7 +36,6 @@ const BarcodeProductList = ({
         setSelectedProduct(row);
         const barcode = await fetchOneProductBarcode(row.productId);
         if (barcode) {
-            // only merge into the same product: the user may have clicked another row meanwhile
             setSelectedProduct(prev => prev?.productId === row.productId ? { ...prev, ...barcode } : prev);
         }
     }
@@ -59,7 +61,7 @@ const BarcodeProductList = ({
     const barcodeColumns = getBarcodeColumns(handleSingleDownload, downloadId);
 
     return (
-        <div className="flex flex-col h-full gap-4">
+        <div className="flex flex-col gap-4">
             <SearchFilterBar
                 searchValue={searchQuery}
                 onSearchChange={handleSearchChange}
@@ -81,12 +83,21 @@ const BarcodeProductList = ({
                 columns={barcodeColumns}
                 data={products}
                 keyField="productId"
-                // FIXED: Explicitly mapping the boolean into the asyncState object DataTable expects
                 asyncState={{ isLoading: isLoading, isFetching: false }} 
                 selectedItem={selectedProduct}
                 onRowClick={handleRowClick}
                 emptyMessage="No products found."
             />
+
+            <PaginationBar
+                pageCount={filter.pageCount}
+                pageSize={filter.pageSize}
+                totalPages={pagination.totalPages}
+                totalEntries={pagination.totalEntries}
+                updateFilter={updateFilter}
+            />
+
+
         </div>
     );
 };

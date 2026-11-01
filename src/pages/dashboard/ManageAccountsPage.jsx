@@ -11,6 +11,7 @@ import { useAccount } from "@/hooks/account_hooks/useAccount";
 import { useRowSelection } from "@/hooks/useRowSelection";
 import { Eye, Plus } from "lucide-react";
 import { useState } from "react";
+import { useUrlSearch } from "@/hooks/useUrlSearch";
 
 const ManageAccountsPage = () => {
     const { user } = useAuth();
@@ -30,6 +31,10 @@ const ManageAccountsPage = () => {
     } = useAccount();
 
     const [searchQuery, setSearchQuery] = useState(""); 
+    useUrlSearch((query) => {
+        setSearchQuery(query);
+        updateFilter('search', query);
+    });
     
     const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
     const [isAccountInfoModalOpen, setIsAccountInfoModalOpen] = useState(false);

@@ -1,6 +1,6 @@
-import { useAuth } from "@/auth/UseAuth";
 import { getSalesReport } from "@/services/TransactionService";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { DEFAULT_PERIOD, getPeriodRange } from "@/utils/periodUtils";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const REPORTS = {
     bestSellingByRevenue: [],
@@ -11,23 +11,12 @@ const REPORTS = {
 
 const withRank = (items) => (items ?? []).map((item, index) => ({ ...item, rank: index + 1 }));
 
-export const useReport = () => {
-    const { user } = useAuth(); 
+export const useReport = ({ initialPeriod = DEFAULT_PERIOD } = {}) => {
     const [reportData, setReportData] = useState(REPORTS);
     const [totalRevenue, setTotalRevenue] = useState(0);
+    const [period, setPeriod] = useState(initialPeriod);
 
-    const [filter, setFilter] = useState({
-        fromDate: "",
-        toDate: "",
-        branchIds: [],
-    });
-
-    useEffect(() => {
-        setFilter(prev => ({
-            ...prev,
-            branchIds: user.branchId,
-        }));
-    }, [user])
+    const filter = useMemo(() => ({ ...getPeriodRange(period), branchIds: [] }), [period]);
 
     const [asyncState, setAsyncState] = useState({
         isLoading: true,
@@ -36,8 +25,10 @@ export const useReport = () => {
     });
 
     const isFirstLoad = useRef(true);
+    const latestRequest = useRef(0);
 
     const fetchReport = useCallback(async () => {
+        const requestId = ++latestRequest.current;
 
         setAsyncState((prev) => ({
             ...prev,
@@ -47,6 +38,7 @@ export const useReport = () => {
 
         try {
             const data = await getSalesReport(filter);
+            if (requestId !== latestRequest.current) return;
 
             setReportData({
                 bestSellingByRevenue: withRank(data?.top10ByRevenue),
@@ -56,23 +48,20 @@ export const useReport = () => {
             });
             setTotalRevenue(data?.totalRevenue ?? 0);
         } catch (err) {
+            if (requestId !== latestRequest.current) return;
             setAsyncState((prev) => ({ ...prev, error: err }));
         } finally {
-            isFirstLoad.current = false;
-            setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false }));
+            if (requestId === latestRequest.current) {
+                isFirstLoad.current = false;
+                setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false }));
+            }
         }
-    }, []);
+    }, [filter]);
 
     useEffect(() => {
         const timer = setTimeout(fetchReport, 300);
         return () => clearTimeout(timer);
     }, [fetchReport]);
-
-    /*
-        filter,
-        updateFilter,
-        resetFilter,
-    */
 
     return {
         ...reportData,
@@ -80,5 +69,7 @@ export const useReport = () => {
         asyncState,
         refetch: fetchReport,
         filter,
+        period,
+        setPeriod,
     };
 };

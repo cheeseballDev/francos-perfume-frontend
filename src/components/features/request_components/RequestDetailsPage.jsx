@@ -1,6 +1,7 @@
 import { useAuth } from "@/auth/UseAuth";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DataTable from "@/components/shared/DataTable";
+import { ReferenceLink } from "@/components/shared/ReferenceText";
 import { Button } from "@/components/ui/button";
 import { useRequestDetails } from "@/hooks/request_hooks/useRequestDetails";
 import { patchApproveRequest, patchCancelRequest, patchRejectRequest } from "@/services/RequestService";
@@ -67,7 +68,13 @@ export default function RequestDetailsPage() {
     const allProductsApproved = Object.values(itemApprovals).length > 0 && 
     Object.values(itemApprovals).every((item) => item.isApproved);
 
+
+
+    
+    const isOwner = user.branchLocation === "WAREHOUSE";
     const isPending = data.requestStatus === "PENDING";
+
+    const canCancel = isPending && (isOwner || data.requesterId === user.employeeId);
 
     const handleRejectRequest = async () => {
         if (!remarks.trim()) return;
@@ -79,7 +86,7 @@ export default function RequestDetailsPage() {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: `Failed to reject the request.${error}`,
+                description: `Failed to reject the request: ${error.response.data.message}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -110,7 +117,7 @@ export default function RequestDetailsPage() {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: `Failed to approve the request.\n${error}`,
+                description: `Failed to approve the request: ${error.response.data.message}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -129,7 +136,7 @@ export default function RequestDetailsPage() {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: `Failed to cancel the request.\n${error}`,
+                description: `Failed to cancel the request: ${error.response.data.message}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -167,12 +174,17 @@ export default function RequestDetailsPage() {
                     <span className="px-3 py-1 bg-amber-500/10 text-amber-500 text-xs font-bold rounded-full uppercase">
                         {data.requestDirection}
                     </span>
+                    {data.deliveryDisplayId && data.deliveryDisplayId !== "N/A" && (
+                        <span className="text-sm text-muted-foreground">
+                            Delivery: <ReferenceLink reference={data.deliveryDisplayId} />
+                        </span>
+                    )}
                 </div>
 
-                {isPending && (
+                {canCancel && (
                     <Button 
                         variant="destructive" 
-                        onClick={() => handleCancelRequest(requestId)}
+                        onClick={handleCancelRequest}
                     >
                         Cancel Request
                     </Button>

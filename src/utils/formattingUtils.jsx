@@ -8,6 +8,11 @@ export const cleanFilters = (filters) => {
     const clean = {};
     Object.keys(filters).forEach((key) => {
         const val = filters[key];
+        if (Array.isArray(val)) {
+            const values = val.filter((item) => item !== null && item !== undefined && item !== "");
+            if (values.length > 0) clean[key] = values;
+            return;
+        }
         if (val !== null && val !== undefined && val !== "" && !Number.isNaN(val)) {
         clean[key] = val;
         }
@@ -16,7 +21,7 @@ export const cleanFilters = (filters) => {
 };
 
 export const buildFilterOptions = (rawFilters = {}, schema = []) => {
-    return schema.map(({ key, label, allLabel }) => {
+    return schema.map(({ key, label, allLabel, multiple = true }) => {
         const rawItems = rawFilters[key] || [];
         const itemOptions = rawItems.map((item) => ({
         label: formatLabel(String(item)),
@@ -26,6 +31,7 @@ export const buildFilterOptions = (rawFilters = {}, schema = []) => {
         return {
         key,
         label,
+        multiple,
         options: [
             { label: allLabel || `All ${label.replace("Filter: ", "")}s`, value: "" },
             ...itemOptions,
@@ -90,11 +96,11 @@ export const manilaDayStartUtc = (yyyyMMdd) => new Date(`${yyyyMMdd}T00:00:00.00
 export const manilaDayEndUtc = (yyyyMMdd) => new Date(`${yyyyMMdd}T23:59:59.999+08:00`).toISOString();
 
 // Keys whose picked date means "up to the end of that day"
-const END_OF_DAY_KEYS = new Set(["toDate", "dateTo", "endDate"]);
+const END_OF_DAY_KEYS = new Set(["toDate", "toDate", "endDate"]);
 
 /**
  * Turns every plain "yyyy-MM-dd" value under a key ending in "Date"/"date" (fromDate, toDate,
- * dateFrom, dateTo, expiryDate, ...) into a UTC ISO string. Other values are left alone.
+ * fromDate, toDate, expiryDate, ...) into a UTC ISO string. Other values are left alone.
  * Works on objects, arrays and URLSearchParams. Used by APIClient for params and bodies.
  */
 export const toUtcDateValues = (value, key = "") => {

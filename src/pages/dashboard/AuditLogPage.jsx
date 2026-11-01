@@ -3,9 +3,11 @@ import { useRowSelection } from "@/hooks/useRowSelection";
 import AuditLogDetails from "@/components/features/auditlogs_components/AuditLogDetails";
 import ExportAuditModal from "@/components/features/auditlogs_components/ExportAuditModal"; // Adjust path if you placed it elsewhere
 import AuditLogTableSkeleton from "@/components/loaders/AuditLogTableSkeleton";
+import { SearchFilterBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useAuditLog } from "@/hooks/audit_hooks/useAuditLog.js";
+import { useUrlSearch } from "@/hooks/useUrlSearch";
 import { Eye, FileDown } from "lucide-react";
 import { useState } from "react";
 
@@ -15,9 +17,23 @@ const AuditLogPage = () => {
     asyncState, 
     pagination, 
     filter,  
+    filterOptions,
     updateFilter,
     fetchAuditLogDetails
   } = useAuditLog();
+
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const handleSearchChange = (value) => {
+        const query = value?.target ? value.target.value : value;
+        setSearchQuery(query);
+        updateFilter('search', query);
+    };
+
+    useUrlSearch((query) => {
+        setSearchQuery(query);
+        updateFilter('search', query);
+    });
   
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [isAuditLogDetailsModalOpen, setIsAuditLogDetailsModalOpen] = useState(false);
@@ -40,6 +56,16 @@ const AuditLogPage = () => {
                 </div>
             </header>
         
+            <SearchFilterBar
+                searchValue={searchQuery}
+                onSearchChange={handleSearchChange}
+                searchPlaceholder="Search by log ID, employee ID or action..."
+                filter={filter}
+                updateFilter={updateFilter}
+                filterOptions={filterOptions}
+                className="mb-4"
+            />
+
             <div className="flex flex-col gap-12">
                 {asyncState?.isLoading ? (
                 <AuditLogTableSkeleton rowCount={10} />
@@ -50,9 +76,8 @@ const AuditLogPage = () => {
                     keyField="logId"
                     asyncState={asyncState}
                     pagination={pagination}
-                    // TODO: Add filters
-                    //filter={filter}
-                    //updateFilter={updateFilter}
+                    filter={filter}
+                    updateFilter={updateFilter}
                     selectedItem={selectedAuditLog}
                     onRowClick={handleRowClick}
                     onRowDoubleClick={(row) => { selectRow(row); setIsAuditLogDetailsModalOpen(true); }}

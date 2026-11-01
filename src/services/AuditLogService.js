@@ -11,13 +11,18 @@ export const getAllAuditLogs = async (filter) => {
     return response.data;
     };
 
+export const getAuditLogFilters = async () => {
+    const response = await apiClient.get(`${PATH}/filters`);
+    return response.data;
+}
+
 export const getOneAuditLogDetails = async (logId) => {
     const response = await apiClient.get(`${PATH}/${logId}`);
     return response.data;
 }
 
-export const getExcel = async (dateFrom, dateTo) => {
-    const params = cleanFilters({ dateFrom, dateTo }); 
+export const getExcel = async (fromDate, toDate) => {
+    const params = cleanFilters({ fromDate, toDate }); 
     const response = await apiClient.get(`${PATH}/excel`, {
         params,
         responseType: "blob",
@@ -25,8 +30,8 @@ export const getExcel = async (dateFrom, dateTo) => {
     return response;
 }
 
-export const getPdf = async (dateFrom, dateTo) => {
-    const params = cleanFilters({ dateFrom, dateTo });
+export const getPdf = async (fromDate, toDate) => {
+    const params = cleanFilters({ fromDate, toDate });
     const response = await apiClient.get(`${PATH}/pdf`, {
         params,
         responseType: "blob",

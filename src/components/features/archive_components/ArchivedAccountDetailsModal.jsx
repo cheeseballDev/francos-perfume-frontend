@@ -1,4 +1,5 @@
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import SensitiveText from '@/components/shared/SensitiveText';
 import DetailItem from '@/components/shared/DetailItem';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -72,7 +73,7 @@ const ArchivedAccountDetailsModal = ({ isOpen, onClose, selectedArchivedAcccount
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">
-                            <DetailItem label="Email" value={selectedArchivedAcccount.email || "N/A"}/>
+                            <DetailItem label="Email" value={<SensitiveText key={selectedArchivedAcccount.accountArchiveId} value={selectedArchivedAcccount.email} />}/>
                             <DetailItem label="Role" value={selectedArchivedAcccount.employeeRole || "N/A"} />
                         </div>
                     </div>

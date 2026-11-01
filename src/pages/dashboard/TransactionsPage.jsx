@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useTransaction } from '@/hooks/transaction_hooks/useTransaction';
 import { Eye, FileDown, Upload } from 'lucide-react';
 import { useState } from 'react';
+import { useUrlSearch } from "@/hooks/useUrlSearch";
 import ExportTransactionModal from "../../components/features/transactions_components/ExportTransactionModal";
 
 export default function TransactionsPage() {
@@ -28,6 +29,10 @@ export default function TransactionsPage() {
     } = useTransaction();
 
     const [searchQuery, setSearchQuery] = useState('');
+    useUrlSearch((query) => {
+        setSearchQuery(query);
+        updateFilter('search', query);
+    });
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [isTransactionDetailsModalOpen, setIsTransactionDetailsModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);

@@ -6,6 +6,7 @@ import { SearchFilterBar } from '@/components/shared';
 import PaginationBar from '@/components/shared/PaginationBar';
 import { Button } from '@/components/ui/button';
 import { useProduct } from '@/hooks/product_hooks/useProduct';
+import { useUrlSearch } from "@/hooks/useUrlSearch";
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../auth/UseAuth';
@@ -26,6 +27,10 @@ export default function ProductsPage() {
 
     const isOwner = user?.trueRole === 'OWNER';
     const [searchQuery, setSearchQuery] = useState('');
+    useUrlSearch((query) => {
+        setSearchQuery(query);
+        updateFilter('search', query);
+    });
 
     const [isCreateProductModalOpen, setIsCreateProductModalOpen] = useState(false);
     const [isEditProductModalOpen, setIsEditProductModalOpen] = useState(false);

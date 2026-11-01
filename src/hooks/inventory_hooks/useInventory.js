@@ -39,14 +39,15 @@ export const useInventory = () => {
     });
 
     const INVENTORY_FILTER_SCHEMA = [
-      { key: "productType", label: "Filter: Product Type", allLabel: "All Product Types" },
-      { key: "productGender", label: "Filter: Product Gender", allLabel: "All Product Genders" },
-      { key: "branch", label: "Filter: Branch", allLabel: "All Branches" },
+      { key: "productType", label: "Filter: Product Type", allLabel: "All Product Types", multiple: false },
+      { key: "productGender", label: "Filter: Product Gender", allLabel: "All Product Genders", multiple: false },
+      { key: "branch", label: "Filter: Branch", allLabel: "All Branches", multiple: false },
     ]
 
     const STOCK_FILTER_SCHEMA = {
         key: "stockStatus",
         label: "Filter: Stock Level",
+        multiple: false,
         options: [
             { label: "All Stock Levels", value: ""},
             { label: "Good", value: "GOOD" },
@@ -142,7 +143,7 @@ export const useInventory = () => {
             setFilterOptions([
                 ...buildFilterOptions(data, INVENTORY_FILTER_SCHEMA),
                 STOCK_FILTER_SCHEMA,
-        ]);
+            ]);
         } catch (err) {
             console.error("Filter load error:", err);
         }

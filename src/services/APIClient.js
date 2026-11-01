@@ -7,6 +7,7 @@ const apiClient = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
+    paramsSerializer: { indexes: null },
 });
 
 apiClient.interceptors.request.use(
@@ -21,9 +22,6 @@ apiClient.interceptors.request.use(
             config.headers['Content-Type'] = 'application/json';
         }
 
-        // The backend accepts UTC only: picked dates ("2026-10-31") are sent as the
-        // start/end of that day in Philippine time, in UTC. See toUtcDateValues.
-        if (config.params) config.params = toUtcDateValues(config.params);
         if (config.data && !(config.data instanceof FormData)) config.data = toUtcDateValues(config.data);
 
         if (config.url.includes("/auth/login")) {

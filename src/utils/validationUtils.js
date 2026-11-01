@@ -99,6 +99,12 @@ export const getPasswordConditions = ({
 export const allPasswordConditionsMet = (conditions) => conditions.every((c) => c.met);
 
 export const checkIfValid = (value, rules = []) => {
+    const isEmpty = value === null || value === undefined || String(value).trim() === '';
+
+    if (isEmpty) {
+        return rules.includes(isValid.required) ? isValid.required(value) : null;
+    }
+
     for (const rule of rules) {
         const error = rule(value);
         if (error) return error;
