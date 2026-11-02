@@ -1,7 +1,10 @@
+import apiClient from "@/services/APIClient";
 import { MODULES, canSwitchModule, hasAnyAccess, normalizeUser } from "@/utils/roleAccess";
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { LOGOUT_REASON_KEY } from "./authConstants";
+
+const SESSION_CHECK_MS = 30000;
 
 const loadFromSession = () => {
     const savedUser = localStorage.getItem('user');
@@ -58,6 +61,25 @@ export const AuthProvider = ({ children }) => {
         }, timeLeft);
 
         return () => clearTimeout(timer);
+    }, [user?.accessToken]);
+
+    useEffect(() => {
+        if (!user?.accessToken) return;
+
+        const checkSession = () => {
+            if (document.visibilityState !== "visible") return;
+            apiClient.get("/session/ping").catch(() => {});
+        };
+
+        const timer = setInterval(checkSession, SESSION_CHECK_MS);
+        document.addEventListener("visibilitychange", checkSession);
+        window.addEventListener("focus", checkSession);
+
+        return () => {
+            clearInterval(timer);
+            document.removeEventListener("visibilitychange", checkSession);
+            window.removeEventListener("focus", checkSession);
+        };
     }, [user?.accessToken]);
 
     const logout = (reason) => {

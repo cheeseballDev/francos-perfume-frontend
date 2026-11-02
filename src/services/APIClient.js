@@ -61,7 +61,8 @@ apiClient.interceptors.response.use(
             const isAuthCall = error.config?.url?.toLowerCase().startsWith("/auth/");
             const hadToken = Boolean(error.config?.headers?.Authorization);
             if (!isAuthCall && hadToken) {
-                window.dispatchEvent(new CustomEvent("session-expired"));
+                const revoked = String(error.response.headers?.["x-session-revoked"]).toLowerCase() === "true";
+                window.dispatchEvent(new CustomEvent("session-expired", { detail: revoked ? "revoked" : "expired" }));
             }
         }
         
