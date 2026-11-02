@@ -125,7 +125,6 @@ const App = () => {
                 <Route path="requests/create" element={<CreateTransferRequestPage />} />
                 <Route path="deliveries" element={<DeliveriesPage />} />
                 <Route path="deliveries/:deliveryId" element={<DeliveryDetailsPage />} />
-                <Route path="forecast" element={<ForecastPage />} />
                 {/* FIXED ROUTE TO MATCH BUTTON NAVIGATION */}
                 <Route path="deliveries/:deliveryId/confirm" element={<DeliveryConfirmationPage />} />
                 <Route path="barcode" element={<BarcodePage />} /> 
@@ -134,6 +133,7 @@ const App = () => {
               <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'OWNER']} />}>
                 <Route path="transactions" element={<TransactionsPage />} />
                 <Route path="reports" element={<ReportsPage />} />
+                <Route path="forecast" element={<ForecastPage />} />
               </Route>
 
               <Route element={<ProtectedRoute user={user} allowedRoles={['OWNER']} />}>

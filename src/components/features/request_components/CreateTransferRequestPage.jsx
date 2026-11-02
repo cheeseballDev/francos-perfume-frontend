@@ -1,3 +1,4 @@
+import { useAuth } from "@/auth/UseAuth";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast";
@@ -31,6 +32,9 @@ const CreateTransferRequestPage = () => {
     const location = useLocation();
 
     const { toast } = useToast();
+    const { user } = useAuth();
+
+    const isStaff = user.trueRole === "STAFF";
 
     const { 
         branchOptions,
@@ -40,6 +44,17 @@ const CreateTransferRequestPage = () => {
     } = useRequest();
     
     const [data, setData] = useState(INITIAL_DATA_STATE);
+
+    const isOwner = user?.trueRole === "OWNER";
+    const ownBranchId = Number(user?.branchId);
+    const isWarehouse = (b) => b.label.toUpperCase().includes("WAREHOUSE");
+
+    const toBranchOptions = branchOptions.filter((b) => {
+        if (b.value === data.fromBranch || isWarehouse(b)) return false;
+        if (isOwner || !data.fromBranch) return true;
+        return Number(data.fromBranch) === ownBranchId || Number(b.value) === ownBranchId;
+    });
+
     const [selectedProduct, setSelectedProduct] = useState('');
     const [quantity, setQuantity] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -220,13 +235,15 @@ const CreateTransferRequestPage = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
+                
                     <BranchSelector
                         fromBranch={data.fromBranch}
                         toBranch={data.toBranch}
-                        setFromBranch={(value) => setData(prev => ({ ...prev, fromBranch: value }))}
+                        setFromBranch={(value) => setData(prev => ({ ...prev, fromBranch: value, toBranch: null }))}
                         setToBranch={(value) => setData(prev => ({ ...prev, toBranch: value }))}
                         onClear={() => setData(prev => ({ ...prev, fromBranch: null, toBranch: null }))}
-                        branchOptions={branchOptions}
+                        fromBranchOptions={branchOptions}
+                        toBranchOptions={toBranchOptions}
                     />
 
                     <ProductSelector

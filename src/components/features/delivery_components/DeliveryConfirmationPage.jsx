@@ -62,7 +62,6 @@ const DeliveryConfirmationPage = () => {
     const [delivery, setDelivery] = useState(null);
     const [config, setConfig] = useState(null);
     const [remarks, setRemarks] = useState("");
-    const [expiryDate, setExpiryDate] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showErrors, setShowErrors] = useState(false);
 
@@ -173,7 +172,6 @@ const DeliveryConfirmationPage = () => {
         try {
             setIsSubmitting(true);
             const payload = {
-                expiryDate: toUtcNoonIso(expiryDate || todayLocal()),
                 items: items.map((item) => {
                     const receipt = itemReceipts[rowKey(item)] || {};
                     return {

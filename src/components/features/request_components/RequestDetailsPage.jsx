@@ -3,6 +3,7 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DataTable from "@/components/shared/DataTable";
 import { ReferenceLink } from "@/components/shared/ReferenceText";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useRequestDetails } from "@/hooks/request_hooks/useRequestDetails";
 import { patchApproveRequest, patchCancelRequest, patchRejectRequest } from "@/services/RequestService";
 import { canUserApproveRequest } from "@/utils/requestAuthorizationUtils";
@@ -16,6 +17,7 @@ import { requestedProductsColumns } from "./request_detail_components/RequestedP
 
 export default function RequestDetailsPage() {
 
+    const { toast } = useToast();
     const { user } = useAuth();
 
     const { requestId } = useParams();
@@ -68,13 +70,10 @@ export default function RequestDetailsPage() {
     const allProductsApproved = Object.values(itemApprovals).length > 0 && 
     Object.values(itemApprovals).every((item) => item.isApproved);
 
-
-
-    
     const isOwner = user.branchLocation === "WAREHOUSE";
     const isPending = data.requestStatus === "PENDING";
 
-    const canCancel = isPending && (isOwner || data.requesterId === user.employeeId);
+    const canCancel = isPending && (isOwner || data.requestorEmployeeId === user.employeeId);
 
     const handleRejectRequest = async () => {
         if (!remarks.trim()) return;
@@ -95,7 +94,6 @@ export default function RequestDetailsPage() {
             setIsSubmitting(false);
         }
     };
-
     const handleApproveRequest = async () => {
         try {
             setIsSubmitting(true);
@@ -128,22 +126,38 @@ export default function RequestDetailsPage() {
     };
 
     const handleCancelRequest = async () => {
-        try {
-            setIsSubmitting(true);
-            await patchCancelRequest(requestId);
-            navigate("/home/requests");
-        } catch (error) {
-            setConfig({
-                isAlert: true,
-                title: "Action Failed",
-                description: `Failed to cancel the request: ${error.response.data.message}`,
-                confirmVariant: "destructive",
-                confirmText: "Acknowledge",
-                onConfirm: () => setConfig(null) 
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
+        setConfig({
+            title: "Are you sure you want to cancel this request?",
+            description:
+                "This will mark the request as cancelled and cannot be undone. Are you sure you want to proceed?",
+            confirmVariant: "destructive",
+            confirmText: "Yes, Cancel Request",
+            onConfirm: async () => {
+                try {
+                    setIsSubmitting(true);
+                    await patchCancelRequest(requestId);
+
+                    toast({
+                        title: "Success",
+                        description: "Request cancelled successfully.",
+                    });
+
+                    navigate("/home/requests");
+
+                    } catch (error) {
+                        toast({
+                            title: "Cancel Request Failed",
+                            description: `An error occurred while canceling the request.\n${error.response?.data}`,
+                            variant: "destructive",
+                            duration: 5000
+                        });   
+
+                    } finally {
+                        setIsSubmitting(false);
+                        setConfig(null);
+                }
+            } 
+        });
     };
 
     if (!selectedRequest) {

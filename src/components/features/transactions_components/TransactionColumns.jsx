@@ -28,13 +28,23 @@ export const transactionColumns = [
     },
     {
         header: "Amount",
-        className: "text-right",
         cellClassName: "font-semibold tabular-nums",
         render: (row) => {
             const amount = Number(row.amount ?? 0);
             return (
                 <span className={amount < 0 ? "text-red-600 dark:text-red-400" : "text-foreground"}>
                     {formatPeso(amount)}
+                </span>
+            )
+        }
+    },
+    {
+        header: "Payment Method",
+        cellClassName: "font-semibold tabular-nums",
+        render: (row) => {
+            return (
+                <span className="text-foreground">
+                    {formatLabel(row.paymentMethod) || "N/A"}
                 </span>
             )
         }

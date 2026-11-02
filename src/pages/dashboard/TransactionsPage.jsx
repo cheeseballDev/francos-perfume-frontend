@@ -1,5 +1,4 @@
 import { useAuth } from '@/auth/UseAuth';
-import { useRowSelection } from "@/hooks/useRowSelection";
 import ImportTransactionModal from '@/components/features/transactions_components/ImportTransactionModal';
 import { transactionColumns } from '@/components/features/transactions_components/TransactionColumns';
 import TransactionDetailsModal from '@/components/features/transactions_components/TransactionDetailsModal';
@@ -8,15 +7,18 @@ import { SearchFilterBar } from '@/components/shared';
 import DataTable from '@/components/shared/DataTable';
 import { Button } from '@/components/ui/button';
 import { useTransaction } from '@/hooks/transaction_hooks/useTransaction';
+import { useRowSelection } from "@/hooks/useRowSelection";
+import { useUrlSearch } from "@/hooks/useUrlSearch";
 import { Eye, FileDown, Upload } from 'lucide-react';
 import { useState } from 'react';
-import { useUrlSearch } from "@/hooks/useUrlSearch";
 import ExportTransactionModal from "../../components/features/transactions_components/ExportTransactionModal";
 
 export default function TransactionsPage() {
     const { user } = useAuth();
 
+    const isStaff = user.trueRole === "STAFF";
     const isOwner = user.trueRole === "OWNER";
+    const isManager = user.trueRole === "MANAGER";
 
     const { 
         transactions,
@@ -52,7 +54,9 @@ export default function TransactionsPage() {
         selectRow,
     } = useRowSelection("salesOrderId", fetchTransactionDetails);
 
-
+    const visibleFilterOptions = Array.isArray(filterOptions)
+        ? filterOptions.filter((option) => isOwner || option.key !== "branches")
+        : [];
 
     return (
         <>
@@ -69,7 +73,7 @@ export default function TransactionsPage() {
                     onSearchChange={handleSearchChange}
                     filter={filter}
                     updateFilter={updateFilter}
-                    filterOptions={filterOptions}
+                    filterOptions={visibleFilterOptions}
                 />
 
                 {asyncState?.isLoading ? (
@@ -96,7 +100,7 @@ export default function TransactionsPage() {
                         Export Transactions
                     </Button>
 
-                    {isOwner &&
+                    {!isStaff && 
                         <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
                             <Upload className='h-4 w-4 mr-2' />
                             Import Transactions

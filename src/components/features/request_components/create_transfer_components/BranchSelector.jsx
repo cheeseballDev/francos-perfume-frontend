@@ -2,7 +2,7 @@ import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
-const BranchSelector = ({ fromBranch, toBranch, setFromBranch, setToBranch, onClear, branchOptions }) => {
+const BranchSelector = ({ fromBranch, toBranch, setFromBranch, setToBranch, onClear, fromBranchOptions = [], toBranchOptions = [] }) => {
 
     return (
         <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
@@ -12,16 +12,14 @@ const BranchSelector = ({ fromBranch, toBranch, setFromBranch, setToBranch, onCl
                 <FormSelect
                     label="Source Branch (From)"
                     onChange={(value) => setFromBranch(value)}
-                    options={branchOptions}
+                    options={fromBranchOptions}
                     placeholder= "Select source branch..."
                 />
                 <FormSelect
                     label="Destination Branch (To)"
                     onChange={(value) => setToBranch(value)}
-                    options={branchOptions.filter(b => 
-                        b.value !== fromBranch && !b.label.includes('WAREHOUSE')
-                    )}
-                    placeholder="Select destination branch..."
+                    options={toBranchOptions}
+                    placeholder={fromBranch ? "Select destination branch..." : "Select source branch first..."}
                 />
             </div>
 

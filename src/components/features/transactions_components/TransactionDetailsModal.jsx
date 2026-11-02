@@ -4,6 +4,7 @@ import { formatDateTimeForTable } from '@/utils/formattingUtils';
 
 const TransactionDetailsModal = ({ isOpen, onClose, selectedTransaction }) => {
     if (!isOpen || !selectedTransaction) return null;
+    console.log(selectedTransaction);
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -29,8 +30,11 @@ const TransactionDetailsModal = ({ isOpen, onClose, selectedTransaction }) => {
                         <DetailItem label="Payment Method" value={selectedTransaction.paymentMethod || "N/A"}/>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-3 gap-6">
                         <DetailItem label="Discount Applied" value={selectedTransaction.discountName || "N/A"}/>
+                        {selectedTransaction.paymentMethod === "GCASH" && (
+                            <DetailItem label="GCash Reference Number" value={selectedTransaction.referenceNumber || "N/A"}/>
+                        )}
                     </div>
 
                     <div className="space-y-2">

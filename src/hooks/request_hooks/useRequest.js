@@ -4,6 +4,12 @@ import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
+const REQUEST_FILTER_SCHEMA = [
+    { key: "fromBranch", label: "Filter: From Branch", allLabel: "All 'From Branch'", multiple: false },
+    { key: "toBranch", label: "Filter: To Branch", allLabel: "All 'To Branch'", multiple: false },
+    { key: "requestStatus", label: "Filter: Status", allLabel: "All Statuses" },
+]
+
 export const useRequest = () => {
 
     const isFirstLoad = useRef(true);
@@ -42,11 +48,11 @@ export const useRequest = () => {
         pageSize: 10,
     })
 
-    const [filterOptions, setFilterOptions] = useState([]);
-
-    const REQUEST_FILTER_SCHEMA = [
-        { key: "requestStatus", label: "Filter: Status", allLabel: "All Statuses" },
-    ]
+    const [filterOptions, setFilterOptions] = useState({
+        fromBranches: [],
+        toBranches: [],
+        status: [],
+    });
 
     const fetchRequests = useCallback(async () => {
         if (isFirstLoad.current) {

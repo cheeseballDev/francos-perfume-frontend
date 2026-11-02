@@ -42,6 +42,7 @@ const ProductSelector = ({
                         selectedProduct={selectedProduct}
                         setSelectedProduct={setSelectedProduct}
                         placeholder="Select product..."
+                        showStock={!isWarehouse}
                     />
                 </div>
 

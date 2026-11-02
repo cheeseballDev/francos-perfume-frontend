@@ -7,6 +7,7 @@ const SearchableProductSelect = ({
     selectedProduct,
     setSelectedProduct,
     placeholder = "Select product...",
+    showStock = false,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -63,6 +64,13 @@ const SearchableProductSelect = ({
         };
     }, [isOpen]);
 
+    const stockText = (option) => {
+        if (!showStock || option.availableQty === undefined) return null;
+        const qty = Number(option.availableQty) || 0;
+        if (qty <= 0) return <span className="text-xs text-destructive shrink-0">Out of stock</span>;
+        return <span className="text-xs text-muted-foreground shrink-0">{qty} left in stock</span>;
+    };
+
     return (
         <div className="relative w-full" ref={triggerRef}>
             <div
@@ -84,11 +92,9 @@ const SearchableProductSelect = ({
                         onFocus={handleOpen}
                     />
 
-                    {!isOpen && selectedOption && (
-                        <div 
-                            className="absolute left-6 right-2 text-sm text-foreground truncate pointer-events-none bg-background font-normal"
-                        >
-                            {selectedOption.label}
+                     {!isOpen && selectedOption && (
+                        <div className="absolute left-6 right-2 flex items-center justify-between gap-2 text-sm text-foreground pointer-events-none bg-background font-normal">
+                            <span className="truncate">{selectedOption.label}</span>
                         </div>
                     )}
                 </div>
@@ -108,7 +114,7 @@ const SearchableProductSelect = ({
                         filteredOptions.map((option) => (
                             <div
                                 key={option.value}
-                                className={`px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors ${
+                                className={`flex items-center justify-between gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors ${
                                     selectedProduct === option.value ? 'bg-accent font-medium' : ''
                                 }`}
                                 onMouseDown={(e) => {
@@ -118,7 +124,8 @@ const SearchableProductSelect = ({
                                     setIsOpen(false);
                                 }}
                             >
-                                {option.label}
+                                <span className="truncate">{option.label}</span>
+                                {stockText(option)}
                             </div>
                         ))
                     ) : (
