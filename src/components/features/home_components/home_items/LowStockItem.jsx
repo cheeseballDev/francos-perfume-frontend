@@ -12,11 +12,13 @@ const LowStockItem = ({ item }) => {
                     <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
-                    <p className="text-sm font-bold text-foreground">{item?.productName || "Unknown Product"}</p>
+                    <p className="text-sm font-bold text-foreground">{item?.productName || item?.productDisplayId || "Unknown Product"}</p>
                     <p className="text-xs text-muted-foreground">
                         {item?.branchName || "Branch"} · <span className={`font-semibold ${stock.textClass}`}>{item?.quantity || 0} units left</span>
                     </p>
-                    <p className="text-[10px] text-muted-foreground">BATCH: {item?.batchCode || "N/A"} • EXP: {formatDateForTable(item?.expiryDate)}</p>
+                    {(item?.batchCode || item?.expiryDate) && (
+                        <p className="text-[10px] text-muted-foreground">BATCH: {item?.batchCode || "N/A"} • EXP: {formatDateForTable(item?.expiryDate)}</p>
+                    )}
                 </div>
             </div>
             {stock.label && (

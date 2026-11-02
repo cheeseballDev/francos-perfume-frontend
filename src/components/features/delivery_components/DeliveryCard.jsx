@@ -1,4 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
+import { ReferenceLink } from "@/components/shared/ReferenceText";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Eye, ShoppingCart, Truck, XCircle } from "lucide-react";
@@ -32,9 +33,7 @@ const DeliveryCard = ({
     const renderActions = () => {
         if (!isInbound) {
             const isPendingDispatch = deliveryStatus === "PENDING" || deliveryStatus === "PENDING DISPATCH";
-            const canCancel = deliveryStatus !== "IN TRANSIT" && deliveryStatus !== "COMPLETED" && deliveryStatus !== "CANCELLED";
-
-            return (
+            const canCancel = isPendingDispatch;
                 <div className="flex flex-col sm:flex-row gap-2 mt-3">
                     {isPendingDispatch && (
                         <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => onMarkInTransit(delivery.deliveryId)}>
@@ -43,14 +42,13 @@ const DeliveryCard = ({
                     )}
                     {canCancel && (
                         <Button variant="destructive" className="flex-1" onClick={() => onCancelRequest(delivery.deliveryId)}>
-                            <XCircle size={15} className="mr-2" /> Cancel Request
+                            <XCircle size={15} className="mr-2" /> Cancel Delivery
                         </Button>
                     )}
                     <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleViewDetails}>
                         <Eye size={15} className="mr-2" /> View Details
                     </Button>
                 </div>
-            );
         }
 
         if (isInbound) {
@@ -96,8 +94,8 @@ const DeliveryCard = ({
                             <StatusBadge status={delivery.deliveryStatus} />
                         </div>
                         {delivery.requestDisplayId && (
-                            <p className="text-xs italic text-muted-foreground mt-0.5">
-                                {delivery.requestDisplayId}
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                Request: <ReferenceLink reference={delivery.requestDisplayId} />
                             </p>
                         )}
                         <p className="text-sm text-muted-foreground">{route}</p>

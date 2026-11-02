@@ -1,3 +1,4 @@
+import { cleanFilters } from "@/utils/formattingUtils.jsx";
 import apiClient from "./APIClient";
 
 const PATH = "/KPI";
@@ -26,12 +27,12 @@ export const getUpcomingDeliveries = async () => {
     return response.data;
 }
 
-export const getTotalRevenue = async () => {
-    const response = await apiClient.get(`${PATH}/revenue/total`);
+export const getTotalRevenue = async (range = {}) => {
+    const response = await apiClient.get(`${PATH}/revenue/total`, { params: cleanFilters(range) });
     return response.data;
 }
 
-export const getRecentTransactions = async () => {
-    const response = await apiClient.get(`${PATH}/transaction/recent`);
+export const getRecentTransactions = async (range = {}) => {
+    const response = await apiClient.get(`${PATH}/transaction/recent`, { params: cleanFilters(range) });
     return response.data;
 }

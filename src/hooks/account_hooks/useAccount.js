@@ -40,9 +40,9 @@ export const useAccount = () => {
 
     const ACCOUNT_FILTER_SCHEMA = [
         { key: "employeeRole", label: "Filter: Role", allLabel: "All Roles" },
-        { key: "accountStatus", label: "Filter: Status", allLabel: "All Statuses" },
+        { key: "accountStatus", label: "Filter: Status", allLabel: "All Statuses", multiple: false },
         { key: "branchLocation", label: "Filter: Branch", allLabel: "All Branches" },
-        { key: "employeeShift", label: "Filter: Shift", allLabel: "All Shifts" },
+        { key: "employeeShift", label: "Filter: Shift", allLabel: "All Shifts", multiple: false},
     ]
 
     const fetchAllAccounts = useCallback(async () => {

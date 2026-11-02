@@ -1,4 +1,5 @@
 import StatusBadge from "@/components/shared/StatusBadge";
+import { ReferenceLink } from "@/components/shared/ReferenceText";
 import { normalizeStatus } from "@/utils/statusUtils";
 
 // The backend reports the stage as "APPROVED" once nothing is pending,
@@ -9,6 +10,11 @@ export const requestColumns = [
     {
         header: "Request ID",
         accessorKey: "requestDisplayId"
+    },
+    {
+        id: 'delivery',
+        header: 'Delivery ID',
+        render: (row) => <ReferenceLink reference={row?.deliveryDisplayId} />
     },
     {
         id: 'route',

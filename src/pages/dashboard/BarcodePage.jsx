@@ -6,17 +6,18 @@ import { useState } from "react";
 export default function BarcodePage() {
     const { 
         products, 
-        asyncState, // FIXED: Correctly extracting asyncState
+        asyncState,
         updateFilter, 
         fetchOneProductBarcode, 
         downloadOneProductBarcode, 
-        downloadAllProductBarcodes, 
+        downloadAllProductBarcodes,
+        filter,
+        pagination,
     } = useProduct();
     
     const [selectedProduct, setSelectedProduct] = useState(null);
 
-    // FIXED: Combines both loading and fetching states so it stays perfectly smooth
-    const isBusy = asyncState?.isLoading || asyncState?.isFetching;
+    const isBusy = asyncState?.isLoading;
 
     return (
         <div className="bg-background font-montserrat flex flex-col relative animate-fade-in h-full">
@@ -25,17 +26,19 @@ export default function BarcodePage() {
                 <p className="text-muted-foreground text-sm">Create, view, and manage product barcodes.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-7 flex flex-col bg-card rounded-lg border border-border shadow-sm p-4 overflow-hidden">
                     <BarcodeProductList 
                         setSelectedProduct={setSelectedProduct} 
                         selectedProduct={selectedProduct}
                         products={products}
-                        isLoading={isBusy} // FIXED: Passed the correct loading boolean down
+                        isLoading={isBusy}
                         updateFilter={updateFilter}
                         fetchOneProductBarcode={fetchOneProductBarcode}
                         downloadAllProductBarcodes={downloadAllProductBarcodes}
                         downloadOneProductBarcode={downloadOneProductBarcode}
+                        filter={filter}
+                        pagination={pagination}
                     />
                 </div>
 

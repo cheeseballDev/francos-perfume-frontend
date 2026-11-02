@@ -1,4 +1,6 @@
 import { formatDateTimeForTable, formatLabel } from "@/utils/formattingUtils";
+import ReferenceText from "@/components/shared/ReferenceText";
+import { parseAuditChanges } from "./AuditLogChanges";
 
 export const auditLogColumns = [
     {
@@ -16,7 +18,17 @@ export const auditLogColumns = [
     },
     {
         header: "Action",
-        accessorKey: "logAction"
+        accessorKey: "logAction",
+        render: (row) => (
+            <span className="inline-flex items-center gap-2">
+                <ReferenceText text={row.logAction} />
+                {parseAuditChanges(row).length > 0 && (
+                    <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded border border-border text-muted-foreground">
+                        {parseAuditChanges(row).length} {parseAuditChanges(row).length === 1 ? "change" : "changes"}
+                    </span>
+                )}
+            </span>
+        )
     },
     {
         header: "Done By",

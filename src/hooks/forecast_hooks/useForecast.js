@@ -1,16 +1,6 @@
-import { postForecastRevenue, postForecastStocks, postForecastStocksAI } from "@/services/ForecastService";
+import { postForecastRevenue, postForecastStocks } from "@/services/ForecastService";
 import { getRequestFilters } from "@/services/RequestService";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-// Both endpoints take the same request and return the same StockForeacastResultDTO,
-// so the engine only decides which URL is called.
-const fetchForecastStock = (dto) => postForecastStocks(dto);     // ML.NET  -> POST /Forecasting/stocks
-const fetchForecastStockAI = (dto) => postForecastStocksAI(dto); // Gemini  -> POST /Forecasting/ai
-
-const STOCK_FETCHERS = {
-    ML: fetchForecastStock,
-    AI: fetchForecastStockAI,
-};
 
 const buildStockRequest = ({ year, month, productId, branchId }) => ({
     year,
@@ -46,15 +36,12 @@ export const useForecast = () => {
 
     const [forecastData, setForecastData] = useState({
         stocks: null,
-        stocksEngine: null, // "ML" | "AI" — which engine produced `stocks`
         revenue: null,
     });
 
     const [branchOptions, setBranchOptions] = useState([]);
     const [productOptions, setProductOptions] = useState([]);
 
-    // Only the newest click is allowed to write results (prevents a slow
-    // Gemini response from overwriting a newer ML.NET one, or vice versa)
     const latestRequest = useRef(0);
 
     useEffect(() => {
@@ -72,39 +59,37 @@ export const useForecast = () => {
     }, []);
 
     /**
-     * Runs the stock forecast with the chosen engine and the revenue forecast.
+     * Runs the ML.NET stock forecast and the revenue forecast.
      * One failing does not throw away the other.
      *
-     * @returns {{ ok: boolean, error: string | null }}
+     * @returns {{ ok: boolean, stocksOk: boolean, error: string | null }}
      */
     const fetchForecast = useCallback(async (dto) => {
         if (!dto.branchId || !dto.productId) {
-            return { ok: false, error: "Select a branch and a product first." };
+            return { ok: false, stocksOk: false, error: "Select a branch and a product first." };
         }
 
-        const engine = dto.engine === "AI" ? "AI" : "ML";
         const requestId = ++latestRequest.current;
 
         setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
 
         const [stockResult, revenueResult] = await Promise.allSettled([
-            STOCK_FETCHERS[engine](buildStockRequest(dto)),
+            postForecastStocks(buildStockRequest(dto)),
             postForecastRevenue(buildRevenueRequest(dto)),
         ]);
 
         if (requestId !== latestRequest.current) {
-            return { ok: false, error: null }; 
+            return { ok: false, stocksOk: false, error: null };
         }
 
         setForecastData({
             stocks: stockResult.status === "fulfilled" ? stockResult.value : null,
-            stocksEngine: stockResult.status === "fulfilled" ? engine : null,
             revenue: revenueResult.status === "fulfilled" ? revenueResult.value : null,
         });
 
         const errors = [];
         if (stockResult.status === "rejected") {
-            errors.push(`${engine === "AI" ? "Gemini" : "ML.NET"} stock forecast: ${getErrorMessage(stockResult.reason)}`);
+            errors.push(`Stock forecast: ${getErrorMessage(stockResult.reason)}`);
         }
         if (revenueResult.status === "rejected") {
             errors.push(`Revenue forecast: ${getErrorMessage(revenueResult.reason)}`);
@@ -113,7 +98,7 @@ export const useForecast = () => {
         const error = errors.length ? errors.join(" | ") : null;
         setAsyncState((prev) => ({ ...prev, isFetching: false, error }));
 
-        return { ok: !error, error };
+        return { ok: !error, stocksOk: stockResult.status === "fulfilled", error };
     }, []);
 
     return {

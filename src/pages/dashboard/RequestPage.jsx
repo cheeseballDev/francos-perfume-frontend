@@ -4,9 +4,10 @@ import { requestColumns } from "@/components/features/request_components/Request
 import RequestTableSkeleton from "@/components/loaders/RequestTableSkeleton";
 import { SearchFilterBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
+import StatusCard from "@/components/shared/StatusCard";
 import { Button } from "@/components/ui/button";
 import { useRequest } from "@/hooks/request_hooks/useRequest";
-import { ArrowDownLeft, ArrowUpRight, Eye, ListFilter, Plus } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, CheckCircle, Clock, Eye, ListFilter, Plus, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -15,6 +16,7 @@ const RequestPage = () => {
     const { user } = useAuth();
     const {
         requests,
+        requestCounts,
         asyncState,
         pagination,
         filter,
@@ -81,6 +83,34 @@ const RequestPage = () => {
                 >
                     <Plus className="w-4 h-4"/> New Transfer
                 </Button>
+        </div>
+
+        <div className="grid grid-flow-col gap-4 mb-6">
+            <StatusCard
+                title="Pending Approval"
+                Icon={Clock}
+                color="text-amber-500"
+                mainValue={requestCounts.pending}
+                subText={user?.trueRole === "OWNER"
+                    ? "Across all branches"
+                    : `${requestCounts.pendingInbound} inbound, ${requestCounts.pendingOutbound} outbound`}
+            />
+            <StatusCard
+                title="Pending Dispatch"
+                Icon={Truck}
+                color="text-blue-500"
+                mainValue={requestCounts.pendingDispatch}
+                subText={user?.trueRole === "OWNER"
+                    ? "Across all branches"
+                    : `${requestCounts.pendingDispatchInbound} inbound, ${requestCounts.pendingDispatchOutbound} outbound`}
+            />
+            <StatusCard
+                title="Completed Requests"
+                Icon={CheckCircle}
+                color="text-emerald-500"
+                mainValue={requestCounts.completed}
+                subText="Transfers completed"
+            />
         </div>
 
         <div className="w-full justify-between items-center gap-3 mb-2 grid grid-cols-3">

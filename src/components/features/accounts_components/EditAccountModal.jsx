@@ -27,7 +27,7 @@ const getAccountFormData = (account) => ({
 const accountValidationSchema = {
     firstName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
     lastName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
-    address: [isValid.minLength(3)],
+    address: [isValid.required, isValid.minLength(3)],
     email: [isValid.required, isValid.email],
     contactNumber: [isValid.phone],
     branchLocation: [isValid.required],

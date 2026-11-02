@@ -1,5 +1,6 @@
 import { useAuth } from "@/auth/UseAuth";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import { ReferenceLink } from "@/components/shared/ReferenceText";
 import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
@@ -25,7 +26,7 @@ export default function DeliveryDetailsPage() {
                 setSelectedDelivery(response.data);
             }
         } catch (error) {
-            console.error("Failed to fetch delivery details:", error);
+            console.error("Failed to fetch delivery details:", error.response.data.message);
         }
     }, [deliveryId, fetchDeliveryDetails]);
 
@@ -60,8 +61,8 @@ export default function DeliveryDetailsPage() {
                 try {
                     await postDispatchDelivery(deliveryId);
                     await loadDeliveryData();
-                } catch (err) {
-                    console.error("Failed to mark as in transit:", err);
+                } catch (error) {
+                    console.error("Failed to mark as in transit:", error.response.data.message);
                 } finally {
                     setConfig(null);
                 }
@@ -70,18 +71,18 @@ export default function DeliveryDetailsPage() {
         });
     };
 
-    const handleCancelRequest = () => {
+    const handleCancelDelivery = () => {
         setConfig({
-            title: "Cancel this request?",
-            description: "This cannot be undone. The request will be terminated.",
-            confirmText: "Cancel Request",
+            title: "Cancel this delivery?",
+            description: "This cannot be undone. The delivery will be cancelled.",
+            confirmText: "Cancel Delivery",
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
                     await postCancelDelivery(deliveryId);
                     navigate("/home/deliveries");
-                } catch (err) {
-                    console.error("Failed to cancel delivery:", err);
+                } catch (error) {
+                    console.error("Failed to cancel delivery:", error.response.data.message);
                 } finally {
                     setConfig(null);
                 }
@@ -90,17 +91,17 @@ export default function DeliveryDetailsPage() {
         });
     };
 
-    const handleAcceptRequest = () => {
+    const handleAcceptDelivery = () => {
         setConfig({
-            title: "Accept this delivery request?",
+            title: "Accept this delivery delivery?",
             description: "You are confirming that you accept this inbound delivery.",
-            confirmText: "Accept Request",
+            confirmText: "Accept Delivery",
             onConfirm: async () => {
                 try {
                     await postReceiveDelivery(deliveryId, { accepted: true });
                     await loadDeliveryData();
-                } catch (err) {
-                    console.error("Failed to accept delivery:", err);
+                } catch (error) {
+                    console.error("Failed to accept delivery:", error.response.data.message);
                 } finally {
                     setConfig(null);
                 }
@@ -109,18 +110,18 @@ export default function DeliveryDetailsPage() {
         });
     };
 
-    const handleRejectRequest = () => {
+    const handleRejectDelivery = () => {
         setConfig({
             title: "Reject this delivery request?",
-            description: "This will notify the source branch that the request has been rejected.",
+            description: "This will notify the source branch that the delivery has been rejected.",
             confirmText: "Reject Request",
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
                     await postReceiveDelivery(deliveryId, { accepted: false });
                     navigate("/home/deliveries");
-                } catch (err) {
-                    console.error("Failed to reject delivery:", err);
+                } catch (error) {
+                    console.error("Failed to reject delivery:", error.response.data.message);
                 } finally {
                     setConfig(null);
                 }
@@ -146,7 +147,7 @@ export default function DeliveryDetailsPage() {
                             </Button>
                         )}
                         {canCancel && (
-                            <Button variant="destructive" className="w-full" onClick={handleCancelRequest}>
+                            <Button variant="destructive" className="w-full" onClick={handleCancelDelivery}>
                                 <XCircle className="w-4 h-4 mr-2" /> Cancel Request
                             </Button>
                         )}
@@ -164,10 +165,10 @@ export default function DeliveryDetailsPage() {
                     <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
                         <h2 className="text-base font-bold text-foreground">Required Action</h2>
                         <p className="text-xs text-muted-foreground">Accept or reject this inbound request.</p>
-                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={handleAcceptRequest}>
+                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={handleAcceptDelivery}>
                             <CheckCircle className="w-4 h-4 mr-2" /> Accept Request
                         </Button>
-                        <Button variant="destructive" className="w-full" onClick={handleRejectRequest}>
+                        <Button variant="destructive" className="w-full" onClick={handleRejectDelivery}>
                             <XCircle className="w-4 h-4 mr-2" /> Reject Request
                         </Button>
                     </div>
@@ -211,6 +212,11 @@ export default function DeliveryDetailsPage() {
                 }`}>
                     {selectedDelivery.direction}
                 </span>
+                {selectedDelivery.requestDisplayId && (
+                    <span className="text-sm text-muted-foreground">
+                        Request: <ReferenceLink reference={selectedDelivery.requestDisplayId} />
+                    </span>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

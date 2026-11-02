@@ -1,4 +1,5 @@
 import { formatDateTimeForTable, formatLabel } from "@/utils/formattingUtils";
+import SensitiveText from "@/components/shared/SensitiveText";
 
 export const archivedProductColumns = [
     {
@@ -31,7 +32,8 @@ export const archivedAccountColumns = [
     },
     {
         header: "Email",
-        accessorKey: "email"
+        accessorKey: "email",
+        render: (row) => <SensitiveText value={row.email} />
     },
     {
         header: "Role",

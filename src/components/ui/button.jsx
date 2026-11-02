@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: 
-            "bg-primary text-primary-foreground hover:bg-primary/80 cursor-pointer",
+            "bg-primary text-primary-foreground hover:bg-primary/80 cursor-pointer dark:bg-primary/70 dark:hover:bg-primary/90",
         outline:
             "border-border bg-background shadow-xs hover:bg-muted hover: cursor-pointer text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
@@ -21,7 +21,7 @@ const buttonVariants = cva(
         link: 
             "text-primary underline-offset-4 hover:underline",
         confirm: 
-            "bg-emerald-600 hover:bg-emerald-700 text-white font-bold",
+            "bg-emerald-600 hover:bg-emerald-700 text-white font-bold dark:bg-emerald-700 dark:hover:bg-emerald-800",
       },
       size: {
         default:

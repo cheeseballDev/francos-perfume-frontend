@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const PaginationBar = ({ pageCount, pageSize, totalPages, totalEntries, updateFilter }) => {
   return (
-        <div className="flex justify-between items-center mt-auto pt-6 pb-2 text-sm text-muted-foreground">
+        <div className="flex justify-between items-center mt-auto pt-2 pb-2 text-sm text-muted-foreground">
           {/* FIXED: Replaced text-gray-400 with text-muted-foreground */}
           <p>
             Showing {((pageCount - 1) * pageSize) + 1} to {Math.min(pageCount * pageSize, totalEntries)} of {totalEntries} entries

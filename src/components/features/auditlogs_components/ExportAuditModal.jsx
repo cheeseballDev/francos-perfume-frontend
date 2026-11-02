@@ -13,8 +13,8 @@ import { useEffect, useState } from "react";
 
 const ExportAuditModal = ({ isOpen, onClose }) => {
   const [selectedFormat, setSelectedFormat] = useState(null);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [fromDate, setfromDate] = useState("");
+  const [toDate, settoDate] = useState("");
   const [isExporting, setIsExporting] = useState(false);
 
   const { exportExcel, exportPdf } = useExportAudit();
@@ -22,8 +22,8 @@ const ExportAuditModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       setSelectedFormat(null);
-      setDateFrom("");
-      setDateTo("");
+      setfromDate("");
+      settoDate("");
       setIsExporting(false);
     }
   }, [isOpen]);
@@ -35,9 +35,9 @@ const ExportAuditModal = ({ isOpen, onClose }) => {
     
     try {
       if (selectedFormat === 'pdf') {
-        await exportPdf(dateFrom, dateTo);
+        await exportPdf(fromDate, toDate);
       } else if (selectedFormat === 'xlsx') {
-        await exportExcel(dateFrom, dateTo);
+        await exportExcel(fromDate, toDate);
       }
       
       onClose(); 
@@ -96,16 +96,16 @@ const ExportAuditModal = ({ isOpen, onClose }) => {
                 <Label>Date From:</Label>
                 <Input
                   type="date" 
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
+                  value={fromDate}
+                  onChange={(e) => setfromDate(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-2">
                 <Label>Date To:</Label>
                 <Input
                   type="date" 
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
+                  value={toDate}
+                  onChange={(e) => settoDate(e.target.value)}
                 />
               </div>
             </div>

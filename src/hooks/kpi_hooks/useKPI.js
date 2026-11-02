@@ -1,8 +1,9 @@
 import { supabase } from "@/lib/SupabaseClient";
 import { getInventoryStockCount, getLowStockKPI, getPendingApprovals, getRecentTransactions, getTotalRevenue, getUpcomingDeliveries } from "@/services/KPIService";
+import { DEFAULT_PERIOD, getPeriodRange } from "@/utils/periodUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export const useKPI = () => {
+export const useKPI = ({ period = DEFAULT_PERIOD } = {}) => {
     const isFirstLoad = useRef(true);
 
     const [asyncState, setAsyncState] = useState({
@@ -23,6 +24,7 @@ export const useKPI = () => {
     });
 
     const fetchAllKPIs = useCallback(async (isBackground = false) => {
+        const range = getPeriodRange(period);
         if (!isBackground && isFirstLoad.current) {
             setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
         } else {
@@ -42,8 +44,8 @@ export const useKPI = () => {
                 getInventoryStockCount(),
                 getPendingApprovals(),
                 getUpcomingDeliveries(),
-                getTotalRevenue(),
-                getRecentTransactions(),
+                getTotalRevenue(range),
+                getRecentTransactions(range),
             ]);
 
             setKpiData({
@@ -58,12 +60,11 @@ export const useKPI = () => {
             isFirstLoad.current = false;
             
         } catch (err) {
-            console.error("Failed to load KPIs:", err);
             setAsyncState((prev) => ({ ...prev, error: err }));
         } finally {
             setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false }));
         }
-    }, []);
+    }, [period]);
 
     const debounceTimer = useRef(null);
 

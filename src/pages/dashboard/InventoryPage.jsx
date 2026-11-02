@@ -2,6 +2,7 @@ import InventoryTable from "@/components/features/inventory_components/Inventory
 import TableSkeleton from "@/components/loaders/TableSkeleton";
 import { formatDateForInput, formatDateForTable } from "@/utils/formattingUtils";
 import { useState } from "react";
+import { useUrlSearch } from "@/hooks/useUrlSearch";
 import EditBatchModal from "../../components/features/inventory_components/EditBatchModal";
 import SearchFilterBar from "../../components/shared/SearchFilterBar";
 import { useInventory } from "../../hooks/inventory_hooks/useInventory";
@@ -19,6 +20,10 @@ const InventoryPage = () => {
     } = useInventory();
     
     const [searchQuery, setSearchQuery] = useState(""); 
+    useUrlSearch((query) => {
+        setSearchQuery(query);
+        updateFilter('search', query);
+    });
     const [isEditBatchModalOpen, setIsEditBatchModalOpen] = useState(false);
     const [selectedBatch, setSelectedBatch] = useState(null);
     const [batchMap, setBatchMap] = useState({});

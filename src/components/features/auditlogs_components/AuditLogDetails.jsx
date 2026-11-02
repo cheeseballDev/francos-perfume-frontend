@@ -1,4 +1,6 @@
 import DetailItem from '@/components/shared/DetailItem';
+import ReferenceText from '@/components/shared/ReferenceText';
+import AuditLogChanges from './AuditLogChanges';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { formatDateTimeForTable } from '@/utils/formattingUtils';
 
@@ -29,8 +31,10 @@ const AuditLogDetails = ({ isOpen, onClose, selectedAuditLog }) => {
 
                     <div className="grid grid-cols-2 gap-6">
                         <DetailItem label="Module" value={selectedAuditLog.logModule || "N/A"} />
-                        <DetailItem label="Action" value={selectedAuditLog.logAction || "N/A"} />
+                        <DetailItem label="Action" value={selectedAuditLog.logAction ? <ReferenceText text={selectedAuditLog.logAction} /> : "N/A"} />
                     </div>
+
+                    <AuditLogChanges log={selectedAuditLog} />
                 </div>
             </DialogContent>
         </Dialog>
