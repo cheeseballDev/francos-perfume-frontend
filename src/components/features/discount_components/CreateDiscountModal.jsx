@@ -4,72 +4,80 @@ import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/use-toast';
+import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useState } from 'react';
-import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 
-const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscount }) => {
+const DISCOUNT_TYPE_OPTIONS = [
+    { label: "Fixed", value: "FIXED" },
+    { label: "Percentage", value: "PERCENTAGE" },
+];
+
+const EMPTY_DISCOUNT = {
+    discountPrefix: '',
+    discountName: '',
+    discountType: 'FIXED',
+    discountPercent: '',
+    discountAmount: '',
+};
+
+const CreateDiscountModal = ({ isOpen, onClose, createDiscount }) => {
     const [config, setConfig] = useState(null);
-    const [data, setData] = useState({});
+    const [data, setData] = useState(EMPTY_DISCOUNT);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!isOpen) return null;
 
-    const isDirty = Object.values(data || {}).some((value) => value !== "" && value !== null && value !== undefined);
-    const discardAndClose = () => {
-        setData({});
+    const isPercent = data.discountType === 'PERCENTAGE';
+    const valueField = isPercent ? 'discountPercent' : 'discountAmount';
+
+    const isDirty = Boolean(data.discountPrefix || data.discountName || data.discountPercent || data.discountAmount);
+
+    const resetAndClose = () => {
+        setData(EMPTY_DISCOUNT);
         setErrors({});
         onClose();
     };
+
     const dismissGuard = guardDismiss({
         isBusy: isSubmitting,
         isDirty,
-        onDirty: () => setConfig(discardChangesConfig(discardAndClose)),
+        onDirty: () => setConfig(discardChangesConfig(resetAndClose)),
     });
-
-    const isPercent = data.discountType === 'PERCENTAGE';
-
-    const discountTypeOptionData = filterOptions.find(option => option.key === "discountType")?.options || [];
 
     const discountValidationSchema = {
         discountPrefix: [isValid.required, isValid.prefix],
         discountName: [isValid.required],
-        discountPercent: [isValid.numbersOnly],
-        discountAmount: [isValid.numbersOnly],
         discountType: [isValid.required],
-        ...(isPercent 
-            ? { discountPercent: [isValid.required, isValid.decimalNumber] }
-            : { discountAmount: [isValid.required, isValid.decimalNumber] }
-        )
+        [valueField]: [isValid.required, isValid.decimalNumber],
     };
-
-    const discountTypeOptions = discountTypeOptionData.filter(
-        (option) => option.value !== "" && option.value !== "__all__"
-    );
 
     const handleChange = (field, value) => {
         setData((prev) => ({ ...prev, [field]: value }));
-    
         if (errors[field]) {
-            setErrors((prev) => ({...prev, [field]: null }));
+            setErrors((prev) => ({ ...prev, [field]: null }));
+        }
+    };
+
+    const handlePrefixChange = (value) => {
+        if (value === '' || /^[a-zA-Z]*$/.test(value)) {
+            handleChange('discountPrefix', value.toUpperCase());
         }
     };
 
     const handleTypeChange = (selectedType) => {
-        setData((prev) => ({
-            ...prev,
-            discountType: selectedType,
-            discountPercent: '',
-            discountAmount: ''
-        }));
+        setData((prev) => ({ ...prev, discountType: selectedType, discountPercent: '', discountAmount: '' }));
+        setErrors((prev) => ({ ...prev, discountType: null, discountPercent: null, discountAmount: null }));
+    };
 
-        setErrors((prev) => ({
-            ...prev,
-            discountType: null,
-            discountPercent: null,
-            discountAmount: null
-        }));
+    const handleValueChange = (raw) => {
+        if (raw === '') {
+            handleChange(valueField, '');
+            return;
+        }
+        const maxLimit = isPercent ? 100 : 9999;
+        handleChange(valueField, Math.min(maxLimit, Math.max(0, Number(raw))));
     };
 
     const handleSave = () => {
@@ -80,9 +88,11 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
         }
 
         const payload = {
-            ...data,
-            discountPercent: Number(data.discountPercent) || 0,
-            discountAmount: Number(data.discountAmount) || 0,
+            discountPrefix: data.discountPrefix.trim(),
+            discountName: data.discountName.trim(),
+            discountType: data.discountType,
+            discountPercent: isPercent ? Number(data.discountPercent) : 0,
+            discountAmount: isPercent ? 0 : Number(data.discountAmount),
         };
 
         setConfig({
@@ -93,53 +103,63 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
                 try {
                     setIsSubmitting(true);
                     await createDiscount(payload);
-
                     toast({
                         title: "Success",
                         description: "Discount created successfully.",
                     });
-
-                    onClose();
+                    setConfig(null);
+                    resetAndClose();
                 } catch (error) {
+                    const message = error.response?.data?.message || error.response?.data || error.message;
                     toast({
                         title: "Creation Failed",
-                        description: `An error occurred while creating the discount.\n${error.response?.data}`,
+                        description: `An error occurred while creating the discount.\n${message}`,
                         variant: "destructive",
                         duration: 5000
                     });
+                    setConfig(null);
                 } finally {
                     setIsSubmitting(false);
-                    setConfig(null);
-                    setData(null);
                 }
-            } 
+            }
         });
     };
 
     return (
         <>
-            <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <Dialog
+                open={isOpen}
+                onOpenChange={(open) => {
+                    if (open || isSubmitting) return;
+                    if (isDirty) {
+                        setConfig(discardChangesConfig(resetAndClose));
+                        return;
+                    }
+                    resetAndClose();
+                }}>
                 <DialogContent
-            className="sm:max-w-3xl"
-            onPointerDownOutside={dismissGuard}
-            onEscapeKeyDown={dismissGuard}
-        >
+                    className="sm:max-w-3xl"
+                    onPointerDownOutside={dismissGuard}
+                    onEscapeKeyDown={dismissGuard}
+                >
                     <DialogHeader>
                         <DialogTitle>Create Discount</DialogTitle>
                     </DialogHeader>
 
                     <div className="grid grid-cols-2 gap-4 py-4">
-                        <FormField 
+                        <FormField
                             label="Discount Prefix"
                             maxLength={3}
-                            onChange={e => handleChange('discountPrefix', e.target.value)}
+                            value={data.discountPrefix}
+                            onChange={e => handlePrefixChange(e.target.value)}
                             placeholder="ABC... (MUST BE 3 LETTERS ONLY)"
                             error={errors.discountPrefix}
                         />
 
-                        <FormField 
+                        <FormField
                             label="Discount Name"
                             maxLength={25}
+                            value={data.discountName}
                             onChange={e => handleChange('discountName', e.target.value)}
                             placeholder="Enter discount name here..."
                             error={errors.discountName}
@@ -149,54 +169,37 @@ const CreateDiscountModal = ({ isOpen, onClose, filterOptions = [], createDiscou
                     <div className="grid grid-cols-2 gap-6 mb-6">
                         <FormSelect
                             label="Discount Type"
-                            value={data.discountType ?? ''}
-                            onChange={(value) => handleTypeChange(value)}
-                            options={discountTypeOptions}
+                            value={data.discountType}
+                            onChange={handleTypeChange}
+                            options={DISCOUNT_TYPE_OPTIONS}
                             placeholder="Select discount type..."
                             error={errors.discountType}
                         />
 
-                        <FormField 
+                        <FormField
                             label={isPercent ? "Discount Percentage (%)" : "Discount Amount (₱)"}
                             type="number"
                             step={isPercent ? "1" : "0.01"}
-                            value={isPercent ? (data.discountPercent || '') : (data.discountAmount || '')}
-                            onChange={e => {
-                                const val = e.target.value;
-                                const field = isPercent ? 'discountPercent' : 'discountAmount';
-                                const maxLimit = isPercent ? 100 : 9999;
-                                if (val === "") {
-                                    handleChange(field, "");
-                                    return;
-                                }
-
-                                const clampedValue = Math.min(maxLimit, Math.max(0, Number(val)));
-                                handleChange(field, clampedValue);
-                            }}
+                            value={data[valueField]}
+                            onChange={e => handleValueChange(e.target.value)}
                             placeholder={isPercent ? "e.g. 10 (for 10%)" : "e.g. 50.00"}
-                            error={isPercent ? errors.discountPercent : errors.discountAmount}
+                            error={errors[valueField]}
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-6 mb-8">
-                        <Button 
-                            variant="outline"
-                            onClick={onClose}
-                        >
+                        <Button variant="outline" onClick={resetAndClose} disabled={isSubmitting}>
                             Cancel
                         </Button>
 
-                        <Button 
-                            onClick={handleSave} 
-                            disabled={isSubmitting}
-                        >
+                        <Button onClick={handleSave} disabled={isSubmitting}>
                             {isSubmitting ? "Saving..." : "Save Changes"}
                         </Button>
                     </div>
                 </DialogContent>
             </Dialog>
 
-            <ConfirmDialog 
+            <ConfirmDialog
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}

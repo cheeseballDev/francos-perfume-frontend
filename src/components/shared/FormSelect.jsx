@@ -1,7 +1,7 @@
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
-const FormSelect = ({ label, value, onChange, options = [], placeholder, disabled}) => {
+const FormSelect = ({ label, value, onChange, options = [], placeholder, disabled, error }) => {
     return (
         <div className="flex flex-col gap-2">
       {label && <Label>{label}</Label>}
@@ -30,6 +30,7 @@ const FormSelect = ({ label, value, onChange, options = [], placeholder, disable
           })}
         </SelectContent>
       </Select>
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
     )
 }

@@ -1,12 +1,19 @@
+import { supabase } from "@/lib/SupabaseClient";
 import { deleteDiscount, getAllDiscounts, getDiscountDetails, getDiscountFilters, patchToggleDiscountStatus, patchUpdateDiscountDetails, postAddNewDiscount } from "@/services/DiscountService";
 import { buildFilterOptions } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
-export const useDiscounts = () => {;
+const DISCOUNT_FILTER_SCHEMA = [
+    { key: "discountStatus", label: "Filter: Status", allLabel: "All Status" },
+    { key: "discountType", label: "Filter: Type", allLabel: "All Types" },
+];
+
+export const useDiscounts = () => {
     const [discounts, setDiscounts] = useState([]);
     const isFirstLoad = useRef(true);
-    
+    const fetchRef = useRef(null);
+
     const [asyncState, setAsyncState] = useState({
         isLoading: true,
         isFetching: false,
@@ -23,12 +30,7 @@ export const useDiscounts = () => {;
         discountType: [],
     });
 
-    const DISCOUNT_FILTER_SCHEMA = [
-        { key: "discountStatus", label: "Filter: Status", allLabel: "All Status" },
-        { key: "discountType", label: "Filter: Type", allLabel: "All Types"}
-    ]
-
-    const { filter, updateFilter, resetFilter } = useFilter({
+    const { filter, updateFilter } = useFilter({
         search: '',
         fromDate: '',
         toDate: '',
@@ -39,53 +41,72 @@ export const useDiscounts = () => {;
     });
 
     const fetchAllDiscounts = useCallback(async () => {
-      if (isFirstLoad.current) {
-        setAsyncState((prev) => ({ ...prev, isLoading: true, error: null }));
-      } else {
-        setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
-      }
+        setAsyncState((prev) => ({
+            ...prev,
+            [isFirstLoad.current ? "isLoading" : "isFetching"]: true,
+            error: null,
+        }));
 
-      try {
-        const data = await getAllDiscounts(filter);
-        isFirstLoad.current = false;
-        setDiscounts(data.data);
-        setPagination({
-            totalPages: data.totalDiscountPages || 0,
-            totalEntries: data.totalDiscounts || 0,
-        });
-      } catch (err) {
-        setAsyncState((prev) => ({ ...prev, error: err }));
-      } finally {
-        setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
-      }
-
+        try {
+            const data = await getAllDiscounts(filter);
+            isFirstLoad.current = false;
+            setDiscounts(data.data);
+            setPagination({
+                totalPages: data.totalDiscountPages || 0,
+                totalEntries: data.totalDiscounts || 0,
+            });
+        } catch (err) {
+            setAsyncState((prev) => ({ ...prev, error: err }));
+        } finally {
+            setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false }));
+        }
     }, [filter]);
 
     useEffect(() => {
-    const timer = setTimeout(() => {
-        fetchAllDiscounts();
-    }, 0);
-    return () => clearTimeout(timer);
+        fetchRef.current = fetchAllDiscounts;
     }, [fetchAllDiscounts]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchAllDiscounts();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [fetchAllDiscounts]);
+
+    useEffect(() => {
+        let refreshTimer;
+
+        const channel = supabase
+            .channel(`discounts-changes-${Math.random().toString(36).slice(2)}`)
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "discounts" },
+                () => {
+                    clearTimeout(refreshTimer);
+                    refreshTimer = setTimeout(() => fetchRef.current?.(), 300);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            clearTimeout(refreshTimer);
+            supabase.removeChannel(channel);
+        };
+    }, []);
 
     const fetchDiscount = async (id) => {
         try {
-            const data = getDiscountDetails(id);
-            return data;
+            return await getDiscountDetails(id);
         } catch (err) {
-            setAsyncState({ error: err })
+            setAsyncState((prev) => ({ ...prev, error: err }));
         }
-    }
+    };
 
     const createDiscount = async (dto) => {
-        try {
-            const data = await postAddNewDiscount(dto);
-            await fetchAllDiscounts();
-            return data;
-        } catch (err) {
-            setAsyncState({ error: err })
-        }
-    }
+        const data = await postAddNewDiscount(dto);
+        await fetchAllDiscounts();
+        return data;
+    };
 
     const updateDiscount = async (id, dto) => {
         try {
@@ -93,31 +114,28 @@ export const useDiscounts = () => {;
             await fetchAllDiscounts();
             return data;
         } catch (err) {
-            setAsyncState({ error: err});
+            setAsyncState((prev) => ({ ...prev, error: err }));
         }
-    }
+    };
 
     const removeDiscount = async (id) => {
         try {
             await deleteDiscount(id);
+            await fetchAllDiscounts();
         } catch (err) {
-            setAsyncState({ error: err })
+            setAsyncState((prev) => ({ ...prev, error: err }));
         }
-    }
+    };
 
     const toggleStatus = useCallback(async (id) => {
         try {
             await patchToggleDiscountStatus(id);
-            fetchAllDiscounts();
-            setAsyncState((prev) => ({ ...prev, isLoading: false, error: null }));
+            await fetchAllDiscounts();
         } catch (err) {
-            setAsyncState((prev) => ({ ...prev, isLoading: false, error: err }));
-        } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false }));
+            setAsyncState((prev) => ({ ...prev, error: err }));
         }
     }, [fetchAllDiscounts]);
 
-    // FIXED: Stripped asyncState to prevent Skeleton removal
     const fetchDiscountFilters = useCallback(async () => {
         try {
             const data = await getDiscountFilters();
@@ -131,9 +149,8 @@ export const useDiscounts = () => {;
         fetchDiscountFilters();
     }, [fetchDiscountFilters]);
 
-        
-    return { 
-        discounts, 
+    return {
+        discounts,
         asyncState,
         pagination,
         filter,
@@ -145,4 +162,4 @@ export const useDiscounts = () => {;
         toggleStatus,
         updateDiscount,
     };
-}
+};
