@@ -19,6 +19,11 @@ export const requestedProductsColumns = ( itemApprovals, handleApproveToggle, ha
         accessorKey: "isApproved",
         header: "Approve?",
         render: (row) => {
+            
+            if (row.itemStatus === "REJECTED") {
+                return <span className="text-xs text-muted-foreground">Rejected</span>;
+            }
+
             const itemId = row.requestItemId;
             const approvalState = itemApprovals[itemId];
 
