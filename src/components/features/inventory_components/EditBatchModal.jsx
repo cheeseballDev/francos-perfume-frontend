@@ -4,8 +4,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Check, Minus, Plus, X } from "lucide-react";
 import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
+import { Check, Minus, Plus, X } from "lucide-react";
 import { useState } from "react";
 
 const getBatchFormData = (batch) => ({
@@ -131,7 +131,7 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
                     value={data.quantity}
                     onChange={(e) => {
                         const val = Number(e.target.value);
-                        handleChange('quantity', Math.min(99, Math.max(0, val)));
+                        handleChange('quantity', Math.min(999, Math.max(0, val)));
                     }}
                     min={0}
                     max={99}
