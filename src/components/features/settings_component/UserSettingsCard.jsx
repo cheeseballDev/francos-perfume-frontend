@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useAccount } from "@/hooks/account_hooks/useAccount";
 import { deleteImage } from "@/services/ImageService";
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import EditAccountPasswordModal from './EditAccountPasswordModal';
-import { getAPIError } from "@/utils/apiErrorUtils";
 
 const INITIAL_FORM_STATE = {
     firstName: '',
@@ -241,7 +241,7 @@ const UserSettingsCard = ({ accountId }) => {
                             {isEditing ? (
                                 <Input 
                                     name="email" 
-                                    maxLength={30}
+                                    maxLength={50}
                                     value={data.email} 
                                     onChange={(e) => handleChange('email', e.target.value)} 
                                     error={errors.email}
@@ -255,7 +255,7 @@ const UserSettingsCard = ({ accountId }) => {
                             {isEditing ? (
                                 <Input 
                                     name="contactNumber" 
-                                    maxLength={30}
+                                    maxLength={11}
                                     value={data.contactNumber} 
                                     onChange={e => {
                                             const numericString = e.target.value.replace(/[^\d+]/g, '');

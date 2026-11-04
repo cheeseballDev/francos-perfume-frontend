@@ -233,7 +233,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
           <div className="grid grid-cols-2 gap-6 mb-6">
             <FormField 
               label="Email"
-              maxLength={30}
+              maxLength={50}
               value={data.email}
               onChange={e => handleChange('email', e.target.value)}
               placeholder="Enter email here..."

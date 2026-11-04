@@ -6,10 +6,10 @@ import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useEffect, useState } from 'react';
-import { getAPIError } from "@/utils/apiErrorUtils";
 
 const accountValidationSchema = {
     firstName: [isValid.required],
@@ -208,7 +208,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
             <FormField 
                 label="Email"
                 value={data.email || ''}
-                maxLength={30}
+                maxLength={50}
                 onChange={e => handleChange('email', e.target.value)}
                 placeholder="Enter email here..."
                 error={errors.email}
