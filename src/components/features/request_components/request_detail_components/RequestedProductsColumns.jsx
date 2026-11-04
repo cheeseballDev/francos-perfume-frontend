@@ -46,14 +46,15 @@ export const requestedProductsColumns = ( itemApprovals, handleApproveToggle, ha
                 return <span className="text-xs text-muted-foreground">—</span>;
             }
 
-
-            <input
-                type="number"
-                disabled={!itemApprovals[row.requestItemId]?.isApproved}
-                value={itemApprovals[row.requestItemId]?.approvedQty ?? row.requestedQty}
-                onChange={(e) => handleQtyChange(row.requestItemId, e.target.value)}
-                className="w-20 px-2 py-1 border border-input bg-transparent text-foreground rounded text-center tabular-nums focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:bg-muted"
-            />
+            return (
+                <input
+                    type="number"
+                    disabled={!itemApprovals[row.requestItemId]?.isApproved}
+                    value={itemApprovals[row.requestItemId]?.approvedQty ?? row.requestedQty}
+                    onChange={(e) => handleQtyChange(row.requestItemId, e.target.value)}
+                    className="w-20 px-2 py-1 border border-input bg-transparent text-foreground rounded text-center tabular-nums focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:bg-muted"
+                />
+            );
         },
     },
 ];

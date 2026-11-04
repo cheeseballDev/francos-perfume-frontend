@@ -67,8 +67,12 @@ export default function RequestDetailsPage() {
             }));
     };
     
-    const allProductsApproved = Object.values(itemApprovals).length > 0 && 
-    Object.values(itemApprovals).every((item) => item.isApproved);
+    const activeItems = (data.items || []).filter((item) => item.itemStatus !== "REJECTED");
+    const approvedItemCount = activeItems.filter(
+        (item) => itemApprovals[item.requestItemId]?.isApproved === true
+    ).length;
+    const anyProductApproved = approvedItemCount > 0;
+    const allProductsApproved = activeItems.length > 0 && approvedItemCount === activeItems.length;
 
     const isOwner = user.branchLocation === "WAREHOUSE";
     const isPending = data.requestStatus === "PENDING";
@@ -237,6 +241,7 @@ export default function RequestDetailsPage() {
                     <RequestApprovalActions
                         user={user}
                         allProductsApproved={allProductsApproved}
+                        anyProductApproved={anyProductApproved}
                         remarks={remarks}
                         setRemarks={setRemarks}
                         handleApproveRequest={handleApproveRequest}
