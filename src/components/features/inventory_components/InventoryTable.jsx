@@ -7,6 +7,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
+import { useAuth } from "@/auth/UseAuth";
 import PaginationBar from "@/components/shared/PaginationBar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,9 @@ import { useState } from "react";
 import perfumePlaceholder from "../../../assets/FrancoPerfumeLogo.png";
 
 const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProduct, batchMap, setBatchMap, filter, updateFilter, handleOpenEditBatchModal}) => {
+    const { user } = useAuth();
+    const canEditBranch = (branchId) =>
+        user?.trueRole === "OWNER" || Number(branchId) === Number(user?.branchId);
 
     const [expandedRows, setExpandedRows] = useState({});
     
@@ -128,13 +132,17 @@ const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProdu
                                 <TableCell className="text-foreground">{formatDateForTable(batch.expiryDate)}</TableCell>
                                 <TableCell className="text-center text-foreground tabular-nums">{batch.quantity || 0}</TableCell>
                                 <TableCell className="text-right pr-4">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="h-7 text-xs flex items-center gap-1.5 ml-auto"
-                                    onClick={() => handleOpenEditBatchModal(batch, product)}>
-                                    <Edit size={12} /> Edit Batch
-                                  </Button>
+                                  {canEditBranch(product.branchId) ? (
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="h-7 text-xs flex items-center gap-1.5 ml-auto"
+                                      onClick={() => handleOpenEditBatchModal(batch, product)}>
+                                      <Edit size={12} /> Edit Batch
+                                    </Button>
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">View only</span>
+                                  )}
                                 </TableCell>
                               </TableRow>
                               ))}
