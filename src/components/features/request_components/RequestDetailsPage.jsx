@@ -103,9 +103,9 @@ export default function RequestDetailsPage() {
                     remarks: remarks || "N/A",
                     productId: item.productId,
                     requestedItemId: item.requestItemId,
-                    isApproved: approvalState?.isApproved ?? true,
-                    requestedItemQty: approvalState?.isApproved 
-                        ? (approvalState?.approvedQty ?? item.requestedQty) 
+                    isApproved: approvalState?.isApproved === true,
+                    requestedItemQty: approvalState?.isApproved === true
+                        ? (approvalState.approvedQty || item.requestedQty)
                         : 0,
                 };
             });

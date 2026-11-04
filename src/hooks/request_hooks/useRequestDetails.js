@@ -16,10 +16,10 @@ export const useRequestDetails = (requestId) => {
             const data = await getRequestDetails(requestId);
             if (data) {
                 setSelectedRequest(data);
-                
                 if (isInitial) {
+                    const items = data?.data?.items ?? [];
                     const initialApprovals = {};
-                    (data.items || []).forEach((item) => {
+                    items.forEach((item) => {
                         initialApprovals[item.requestItemId] = {
                             isApproved: true,
                             approvedQty: item.requestedQty,
