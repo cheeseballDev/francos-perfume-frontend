@@ -82,7 +82,7 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
             />
 
             <div className="space-y-2">
-                {allProductsApproved && (
+                {anyProductApproved && (
                     <Button
                         onClick={() => handleApproveRequest(requestId)}
                         className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
