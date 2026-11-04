@@ -3,7 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { canUserApproveRequest } from "@/utils/requestAuthorizationUtils";
 import { Check, X } from "lucide-react";
 
-export const RequestApprovalActions = ({ user, allProductsApproved, remarks, setRemarks, handleApproveRequest, handleRejectRequest, selectedRequest, isSubmitting }) => {
+export const RequestApprovalActions = ({ user, allProductsApproved, anyProductApproved, remarks, setRemarks, handleApproveRequest, handleRejectRequest, selectedRequest, isSubmitting }) => {
 
     const isAuthorized = canUserApproveRequest(user, selectedRequest);
 
@@ -87,7 +87,8 @@ export const RequestApprovalActions = ({ user, allProductsApproved, remarks, set
                         onClick={() => handleApproveRequest(requestId)}
                         className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
                     >
-                        <Check className="w-4 h-4 mr-2" /> Approve Request
+                        <Check className="w-4 h-4 mr-2" />
+                        {allProductsApproved ? "Approve Request" : "Approve Ticked Items Only"}
                     </Button>
                 )}
                 <Button
