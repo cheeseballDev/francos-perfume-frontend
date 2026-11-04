@@ -12,6 +12,7 @@ import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@
 import { ArrowDownLeft, ArrowUpRight, Clock, ListFilter } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { getAPIError } from "@/utils/apiErrorUtils";
 const DeliveriesPage = () => {
     const {
         deliveries,
@@ -88,7 +89,7 @@ const DeliveriesPage = () => {
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: `Failed to mark as in transit.\n${error.response?.data}`,
+                        description: `Failed to mark as in transit.\n${getAPIError(error)}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
@@ -123,7 +124,7 @@ const DeliveriesPage = () => {
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: `Failed to cancel the delivery request.\n${error.response?.data}`,
+                        description: `Failed to cancel the delivery request.\n${getAPIError(error)}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
@@ -157,7 +158,7 @@ const DeliveriesPage = () => {
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: `Failed to accept the delivery request.\n${error.response?.data}`,
+                        description: `Failed to accept the delivery request.\n${getAPIError(error)}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 
@@ -192,7 +193,7 @@ const DeliveriesPage = () => {
                     setConfig({
                         isAlert: true,
                         title: "Action Failed",
-                        description: `Failed to reject the delivery request.\n${error.response?.data}`,
+                        description: `Failed to reject the delivery request.\n${getAPIError(error)}`,
                         confirmVariant: "destructive",
                         confirmText: "Acknowledge",
                         onConfirm: () => setConfig(null) 

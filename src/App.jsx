@@ -78,7 +78,7 @@ const App = () => {
     }, []);
 
     useEffect(() => {
-        const handleSessionExpired = (event) => logout(event?.detail === "revoked" ? "revoked" : "expired");
+        const handleSessionExpired = (event) => logout(["revoked", "idle"].includes(event?.detail) ? event.detail : "expired");
 
         window.addEventListener('session-expired', handleSessionExpired);
 

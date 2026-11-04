@@ -1,6 +1,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { postCheckout } from "@/services/PointOfSaleService";
 import { useState } from "react";
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 export const useCheckout = (cart, appliedDiscountId) => {
     const { toast } = useToast();
@@ -28,7 +29,7 @@ export const useCheckout = (cart, appliedDiscountId) => {
         } catch (error) {
             toast({
                 title: "Checkout Failed!",
-                description: `An error occurred during checkout. Please contact your administrators.\n${error.response?.data}`,
+                description: `An error occurred during checkout. Please contact your administrators.\n${getAPIError(error)}`,
                 variant: "destructive",
                 duration: 5000
             });

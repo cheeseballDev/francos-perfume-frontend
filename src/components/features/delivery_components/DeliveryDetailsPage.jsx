@@ -2,12 +2,14 @@ import { useAuth } from "@/auth/UseAuth";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { ReferenceLink } from "@/components/shared/ReferenceText";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
 import { ArrowLeft, CheckCircle, Loader2, Truck, XCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DeliveryInformation from "./DeliveryInformation";
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 export default function DeliveryDetailsPage() {
     const { deliveryId } = useParams();
@@ -15,7 +17,18 @@ export default function DeliveryDetailsPage() {
     const { fetchDeliveryDetails } = useDelivery();
 
     const [selectedDelivery, setSelectedDelivery] = useState(null);
+    const [loadError, setLoadError] = useState(null);
     const [config, setConfig] = useState(null);
+    const { toast } = useToast();
+
+    const showActionError = (title, error) => {
+        toast({
+            title,
+            description: getAPIError(error),
+            variant: "destructive",
+            duration: 5000,
+        });
+    };
 
     const { user } = useAuth();
 
@@ -24,9 +37,10 @@ export default function DeliveryDetailsPage() {
             const response = await fetchDeliveryDetails(deliveryId);
             if (response) {
                 setSelectedDelivery(response.data);
+                setLoadError(null);
             }
         } catch (error) {
-            console.error("Failed to fetch delivery details:", error.response.data.message);
+            setLoadError(getAPIError(error, "The delivery could not be loaded."));
         }
     }, [deliveryId, fetchDeliveryDetails]);
 
@@ -34,6 +48,22 @@ export default function DeliveryDetailsPage() {
         if (!deliveryId) return;
         loadDeliveryData();
     }, [deliveryId, fetchDeliveryDetails, loadDeliveryData]);
+
+    if (!selectedDelivery && loadError) {
+        return (
+            <div className="flex flex-col gap-4 items-center justify-center min-h-screen p-6 font-montserrat text-center">
+                <XCircle className="h-10 w-10 text-destructive" />
+                <p className="font-semibold text-foreground">Couldn't load this delivery</p>
+                <p className="text-sm text-muted-foreground max-w-md">{loadError}</p>
+                <div className="flex gap-3">
+                    <Button variant="outline" onClick={() => navigate("/home/deliveries")}>
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Deliveries
+                    </Button>
+                    <Button onClick={loadDeliveryData}>Try Again</Button>
+                </div>
+            </div>
+        );
+    }
 
     if (!selectedDelivery) {
         return (
@@ -62,7 +92,7 @@ export default function DeliveryDetailsPage() {
                     await postDispatchDelivery(deliveryId);
                     await loadDeliveryData();
                 } catch (error) {
-                    console.error("Failed to mark as in transit:", error.response.data.message);
+                    showActionError("Mark as In Transit Failed", error);
                 } finally {
                     setConfig(null);
                 }
@@ -82,7 +112,7 @@ export default function DeliveryDetailsPage() {
                     await postCancelDelivery(deliveryId);
                     navigate("/home/deliveries");
                 } catch (error) {
-                    console.error("Failed to cancel delivery:", error.response.data.message);
+                    showActionError("Cancel Delivery Failed", error);
                 } finally {
                     setConfig(null);
                 }
@@ -101,7 +131,7 @@ export default function DeliveryDetailsPage() {
                     await postReceiveDelivery(deliveryId, { accepted: true });
                     await loadDeliveryData();
                 } catch (error) {
-                    console.error("Failed to accept delivery:", error.response.data.message);
+                    showActionError("Accept Delivery Failed", error);
                 } finally {
                     setConfig(null);
                 }
@@ -121,7 +151,7 @@ export default function DeliveryDetailsPage() {
                     await postReceiveDelivery(deliveryId, { accepted: false });
                     navigate("/home/deliveries");
                 } catch (error) {
-                    console.error("Failed to reject delivery:", error.response.data.message);
+                    showActionError("Reject Delivery Failed", error);
                 } finally {
                     setConfig(null);
                 }

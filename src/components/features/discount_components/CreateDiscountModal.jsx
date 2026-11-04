@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useState } from 'react';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const DISCOUNT_TYPE_OPTIONS = [
     { label: "Fixed", value: "FIXED" },
@@ -110,7 +111,7 @@ const CreateDiscountModal = ({ isOpen, onClose, createDiscount }) => {
                     setConfig(null);
                     resetAndClose();
                 } catch (error) {
-                    const message = error.response?.data?.message || error.response?.data || error.message;
+                    const message = getAPIError(error);
                     toast({
                         title: "Creation Failed",
                         description: `An error occurred while creating the discount.\n${message}`,

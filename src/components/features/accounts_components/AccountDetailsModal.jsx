@@ -11,6 +11,7 @@ import { formatLabel } from "@/utils/formattingUtils";
 import { Archive, Edit, KeyRound, MinusSquareIcon, PlusSquareIcon } from "lucide-react";
 import { useState } from "react";
 import logo from '../../../assets/FrancoPerfumeLogo.png';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const AccountInfoModal = ({
     isOpen,
@@ -60,7 +61,7 @@ const AccountInfoModal = ({
                 } catch (error) {
                     toast({
                         title: "Reset Password Failed",
-                        description: `An error occurred while resetting the password of the account.\n${error.response?.data}`,
+                        description: `An error occurred while resetting the password of the account.\n${getAPIError(error)}`,
                         variant: "destructive",
                         duration: 5000
                     });   
@@ -100,8 +101,8 @@ const AccountInfoModal = ({
                     toast({
                         title: "Reset Password Failed",
                         description: isActive 
-                        ? `An error occurred while deactivating the account.\n${error.response?.data}`
-                        : `An error occurred while reactivating the account.\n${error.response?.data}`,
+                        ? `An error occurred while deactivating the account.\n${getAPIError(error)}`
+                        : `An error occurred while reactivating the account.\n${getAPIError(error)}`,
                         variant: "destructive",
                         duration: 5000
                     });
@@ -135,7 +136,7 @@ const AccountInfoModal = ({
                 } catch (error) {
                     toast({
                         title: "Account Archiving Failed",
-                        description: `An error occurred while archiving the account.\n${error.response?.data}`,
+                        description: `An error occurred while archiving the account.\n${getAPIError(error)}`,
                         variant: "destructive",
                         duration: 5000
                     });

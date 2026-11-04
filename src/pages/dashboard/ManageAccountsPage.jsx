@@ -41,6 +41,18 @@ const ManageAccountsPage = () => {
     const [isEditAccountModalOpen, setIsEditAccountModalOpen] = useState(false);
 
     const role = user?.trueRole;
+    const isManager = role === "MANAGER";
+    const HIDDEN_ROLES_FOR_MANAGER = ["ADMIN", "OWNER"];
+
+    const visibleFilterOptions = !Array.isArray(filterOptions) ? [] : !isManager ? filterOptions : filterOptions.map((group) => {
+        if (group.key === "employeeRole") {
+            return { ...group, options: group.options.filter((o) => o.value === "" || !HIDDEN_ROLES_FOR_MANAGER.includes(String(o.value).toUpperCase())) };
+        }
+        if (group.key === "branchLocation") {
+            return { ...group, options: group.options.filter((o) => o.value === "" || !String(o.value).toUpperCase().includes("WAREHOUSE")) };
+        }
+        return group;
+    });
 
     const {
         selected: selectedAccount,
@@ -69,7 +81,7 @@ const ManageAccountsPage = () => {
         onSearchChange={handleSearchChange}
         filter={filter}
         updateFilter={updateFilter}
-        filterOptions={filterOptions}
+        filterOptions={visibleFilterOptions}
         className="mb-8"
         actions={role !== 'MANAGER' && (
           <Button

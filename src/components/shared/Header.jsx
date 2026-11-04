@@ -5,6 +5,7 @@ import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import NotificationDropdown from './NotificationDropdown';
 import ProfileDropdown from './ProfileDropdown';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const Header = () => {
     const { user } = useAuth();
@@ -18,7 +19,7 @@ const Header = () => {
             setCurrentDate(formatDateForTable(new Date()));
             setUserLocation(user.branchLocation);
         } catch (error) {
-            setUserLocation(`Error loading location\n${error.response?.data}`);
+            setUserLocation(`Error loading location\n${getAPIError(error)}`);
         }
     }, [user.branchLocation]);
 

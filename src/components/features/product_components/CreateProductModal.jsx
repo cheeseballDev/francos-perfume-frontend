@@ -10,6 +10,7 @@ import { discardChangesConfig, guardDismiss } from '@/utils/modalUtils';
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { Check } from 'lucide-react';
 import { useState } from 'react';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const productValidationSchema = {
     productName: [isValid.required],
@@ -93,7 +94,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
         } catch (error) {
             toast({
                 title: "Creation Failed",
-                description: `An error occurred while creating the product.\n${error.response?.data}`,
+                description: `An error occurred while creating the product.\n${getAPIError(error)}`,
                 variant: "destructive",
                 duration: 5000
             });

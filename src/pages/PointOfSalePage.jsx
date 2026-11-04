@@ -12,6 +12,7 @@ import { useTheme } from '@/theme/useTheme';
 import { openReceiptTab } from '@/utils/receiptWindowUtil';
 import { Loader2, Moon, PackageSearch, ShoppingCart, Sun } from 'lucide-react';
 import { useState } from 'react';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const PointOfSalePage = () => {
     const { 
@@ -98,7 +99,7 @@ const PointOfSalePage = () => {
         setConfig({
             isAlert: true,
             title: "Checkout Failed",
-            description: `An error occurred during checkout.\n${error.response?.data}`,
+            description: `An error occurred during checkout.\n${getAPIError(error)}`,
             confirmVariant: "destructive",
             confirmText: "Acknowledge",
             onConfirm: () => setConfig(null)
@@ -132,9 +133,7 @@ const PointOfSalePage = () => {
             setConfig({
                 isAlert: true,
                 title: "Scan Failed",
-                description: typeof error?.response?.data === 'string' && error.response.data
-                    ? `${error.response.data} (barcode "${barcode}")`
-                    : `Product with barcode "${barcode}" not found or invalid.`,
+                description: `${getAPIError(error, "Product not found or invalid.")} (barcode "${barcode}")`,
                 confirmVariant: "destructive",
                 confirmText: "OK",
                 onConfirm: () => setConfig(null)

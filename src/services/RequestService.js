@@ -31,7 +31,6 @@ export const patchRejectRequest = async (requestId, remarks) => {
 
 export const getRequestFilters = async () => {
     const response = await apiClient.get(`${PATH}/filters`);
-    console.log(response);
     return response.data;
 };
 

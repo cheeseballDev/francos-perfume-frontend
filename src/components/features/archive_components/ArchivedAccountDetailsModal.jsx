@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/components/ui/use-toast';
 import { formatDateTimeForTable } from '@/utils/formattingUtils';
 import { useState } from 'react';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const ArchivedAccountDetailsModal = ({ isOpen, onClose, selectedArchivedAcccount, restoreArchivedAccount, setSelectedArchivedAccount }) => {
     const { toast } = useToast();
@@ -34,7 +35,7 @@ const ArchivedAccountDetailsModal = ({ isOpen, onClose, selectedArchivedAcccount
             } catch (error) {
                 toast({
                     title: "Update Failed",
-                    description: `An error occurred while restoring the account.\n${error.response?.data}`,
+                    description: `An error occurred while restoring the account.\n${getAPIError(error)}`,
                     variant: "destructive",
                     duration: 5000
                 });

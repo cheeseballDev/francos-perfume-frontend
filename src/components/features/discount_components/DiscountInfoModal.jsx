@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/components/ui/use-toast";
 import { Edit, KeyRound, MinusSquareIcon, PlusSquareIcon } from "lucide-react";
 import { useState } from "react";
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const DiscountInfoModal = ({
     isOpen,
@@ -50,7 +51,7 @@ const DiscountInfoModal = ({
                 } catch (error) {
                     toast({
                         title: "Deletion Failed",
-                        description: `An error occurred while deleting the discount.\n${error.response?.data}`,
+                        description: `An error occurred while deleting the discount.\n${getAPIError(error)}`,
                         variant: "destructive",
                         duration: 5000
                     });
@@ -90,8 +91,8 @@ const DiscountInfoModal = ({
                     toast({
                         title: "Reset Password Failed",
                         description: isActive 
-                        ? `An error occurred while deactivating the discount.\n${error.response?.data}`
-                        : `An error occurred while reactivating the discount.\n${error.response?.data}`,
+                        ? `An error occurred while deactivating the discount.\n${getAPIError(error)}`
+                        : `An error occurred while reactivating the discount.\n${getAPIError(error)}`,
                         variant: "destructive",
                         duration: 5000
                     });

@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useEffect, useState } from 'react';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const accountValidationSchema = {
     firstName: [isValid.required],
@@ -126,7 +127,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
             } catch (error) {
                 toast({
                     title: "Creation Failed",
-                    description:`An error occurred while creating the account.\n${error.response?.data}`,
+                    description:`An error occurred while creating the account.\n${getAPIError(error)}`,
                     variant: "destructive",
                     duration: 5000
                 });

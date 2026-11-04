@@ -14,6 +14,7 @@ import { RequestApprovalActions } from "./request_detail_components/RequestAppro
 import RequestInformation from "./request_detail_components/RequestInformation";
 import RequestTimeline from "./request_detail_components/RequestTimeline";
 import { requestedProductsColumns } from "./request_detail_components/RequestedProductsColumns";
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 export default function RequestDetailsPage() {
 
@@ -74,7 +75,7 @@ export default function RequestDetailsPage() {
     const anyProductApproved = approvedItemCount > 0;
     const allProductsApproved = activeItems.length > 0 && approvedItemCount === activeItems.length;
 
-    const isOwner = user.branchLocation === "WAREHOUSE";
+    const isOwner = user?.trueRole === "OWNER";
     const isPending = data.requestStatus === "PENDING";
 
     const canCancel = isPending && (isOwner || data.requestorEmployeeId === user.employeeId);
@@ -89,7 +90,7 @@ export default function RequestDetailsPage() {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: `Failed to reject the request: ${error.response.data.message}`,
+                description: `Failed to reject the request: ${getAPIError(error)}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -119,7 +120,7 @@ export default function RequestDetailsPage() {
             setConfig({
                 isAlert: true,
                 title: "Action Failed",
-                description: `Failed to approve the request: ${error.response.data.message}`,
+                description: `Failed to approve the request: ${getAPIError(error)}`,
                 confirmVariant: "destructive",
                 confirmText: "Acknowledge",
                 onConfirm: () => setConfig(null) 
@@ -151,7 +152,7 @@ export default function RequestDetailsPage() {
                     } catch (error) {
                         toast({
                             title: "Cancel Request Failed",
-                            description: `An error occurred while canceling the request.\n${error.response?.data}`,
+                            description: `An error occurred while canceling the request.\n${getAPIError(error)}`,
                             variant: "destructive",
                             duration: 5000
                         });   

@@ -9,6 +9,7 @@ import { useExportReport } from "@/hooks/transaction_hooks/useExportReport";
 import { formatPeriodRange, getPeriodOption } from "@/utils/periodUtils";
 import { FileDown, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const ReportsPage = () => {
     const { toast } = useToast();
@@ -40,7 +41,7 @@ const ReportsPage = () => {
         } catch (error) {
             toast({
                 title: "Download Failed",
-                description: `An error occurred while downloading the list.\n${error.response?.data}`,
+                description: `An error occurred while downloading the list.\n${getAPIError(error)}`,
                 variant: "destructive",
                 duration: 5000
             });

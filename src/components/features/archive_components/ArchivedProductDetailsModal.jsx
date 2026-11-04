@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/components/ui/use-toast';
 import { formatDateTimeForTable } from '@/utils/formattingUtils';
 import { useState } from 'react';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const ArchivedProductDetailsModal = ({ isOpen, onClose, selectedArchivedProduct, restoreArchivedProduct, setSelectedArchivedProduct}) => {
     const { toast } = useToast();
@@ -33,7 +34,7 @@ const ArchivedProductDetailsModal = ({ isOpen, onClose, selectedArchivedProduct,
             } catch (error) {
                 toast({
                     title: "Update Failed",
-                    description: `An error occurred while restoring the product.\n${error.response?.data}`,
+                    description: `An error occurred while restoring the product.\n${getAPIError(error)}`,
                     variant: "destructive",
                     duration: 5000
                 });

@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { Check, Minus, Plus, X } from "lucide-react";
 import { useState } from "react";
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const getBatchFormData = (batch) => ({
     batchDisplayId: batch?.batchDisplayId,
@@ -61,7 +62,7 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
         } catch (error) {
             toast({
                 title: "Update Failed",
-                description: `An error occurred while updating the batch.\n${error.response?.data}`,
+                description: `An error occurred while updating the batch.\n${getAPIError(error)}`,
                 variant: "destructive",
                 duration: 5000
             });

@@ -26,10 +26,10 @@ const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
         <div className="flex p-8 gap-8">
           
           <div className="flex-1 bg-muted/50 text-foreground p-6 rounded-lg text-sm leading-relaxed flex flex-col justify-center text-center tracking-wider font-medium">
-            <p><bold>RETURNS</bold></p>
+            <p><strong>RETURNS</strong></p>
             <p>Defective, fake, or expired items are repaired, replaced, or refunded with the receipt. Opened, used, or non-defective perfumes cannot be returned.</p>
             <br />
-            <p><bold>DISCOUNTS</bold></p>
+            <p><strong>DISCOUNTS</strong></p>
             <p>One discount per transaction. Senior/PWD customers may choose either their Senior/PWD discount or the shop's current discount.</p>
           </div>
 

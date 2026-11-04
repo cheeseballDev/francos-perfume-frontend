@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useEffect, useState } from 'react';
 import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const getDiscountFormData = (discount) => {
   if (!discount) {
@@ -131,7 +132,7 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
             } catch (error) {
                 toast({
                     title: "Update Failed",
-                    description: `An error occurred while updating the discount.\n${error.response?.data}`,
+                    description: `An error occurred while updating the discount.\n${getAPIError(error)}`,
                     variant: "destructive",
                     duration: 5000
                 });

@@ -11,6 +11,7 @@ import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { Archive, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const getProductFormData = (product) => ({
     productName: product?.productName || "",
@@ -102,7 +103,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
         } catch (error) {
             toast({
                 title: "Update Failed",
-                description: `An error occurred while updating the product.\n${error.response?.data}`,
+                description: `An error occurred while updating the product.\n${getAPIError(error)}`,
                 variant: "destructive",
                 duration: 5000
             });
@@ -132,7 +133,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
                 } catch (error) {
                     toast({
                         title: "Product Archiving Failed",
-                        description: `An error occurred while archiving the product.\n${error.response?.data}`,
+                        description: `An error occurred while archiving the product.\n${getAPIError(error)}`,
                         variant: "destructive",
                         duration: 10000
                     });

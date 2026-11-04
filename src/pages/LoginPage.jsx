@@ -13,6 +13,7 @@ import OtpVerification from './OtpVerification';
 const LOGOUT_MESSAGES = {
     expired: "Your session has expired. Please log in again.",
     revoked: "Your account was changed by an administrator. Please log in again.",
+    idle: "You were logged out after a period of inactivity. Please log in again.",
 };
 
 const readLogoutReason = () => {

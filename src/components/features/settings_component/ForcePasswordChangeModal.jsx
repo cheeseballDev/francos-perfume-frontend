@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { allPasswordConditionsMet, getPasswordConditions } from "@/utils/validationUtils";
 import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { useState } from "react";
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const ForcePasswordChangeModal = ({ isOpen, onClose, onSuccess, oldPassword, firstName, lastName }) => {
     const { toast } = useToast();
@@ -40,7 +41,7 @@ const ForcePasswordChangeModal = ({ isOpen, onClose, onSuccess, oldPassword, fir
         } catch (error) {
             toast({
                 title: "Update Password Failed",
-                description: `An error occurred while updating the password.\n${error.response?.data}`,
+                description: `An error occurred while updating the password.\n${getAPIError(error)}`,
                 variant: "destructive",
                 duration: 5000
             });

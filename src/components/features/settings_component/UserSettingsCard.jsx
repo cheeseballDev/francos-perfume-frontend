@@ -9,6 +9,7 @@ import { isValid, validateForm } from "@/utils/validationUtils";
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import EditAccountPasswordModal from './EditAccountPasswordModal';
+import { getAPIError } from "@/utils/apiErrorUtils";
 
 const INITIAL_FORM_STATE = {
     firstName: '',
@@ -133,7 +134,7 @@ const UserSettingsCard = ({ accountId }) => {
         } catch (error) {
             toast({
                 title: "Update Failed",
-                description: `An error occurred while updating profile details.\n${error.response?.data}`,
+                description: `An error occurred while updating profile details.\n${getAPIError(error)}`,
                 variant: "destructive",
             });
         } finally {
