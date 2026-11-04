@@ -10,7 +10,7 @@ import { useClock } from '@/hooks/useClock';
 import { getScanBarcode } from '@/services/PointOfSaleService';
 import { useTheme } from '@/theme/useTheme';
 import { openReceiptTab } from '@/utils/receiptWindowUtil';
-import { Loader2, Moon, ShoppingCart, Sun } from 'lucide-react';
+import { Loader2, Moon, PackageSearch, ShoppingCart, Sun } from 'lucide-react';
 import { useState } from 'react';
 
 const PointOfSalePage = () => {
@@ -25,6 +25,7 @@ const PointOfSalePage = () => {
 
     const { 
         cart, 
+        getCartQty,
         handleAddToCart, 
         handleRemoveFromCart, 
         handleClearCart, 
@@ -105,17 +106,35 @@ const PointOfSalePage = () => {
         }
     };
 
+    const showStockAlert = (message) => setConfig({
+        isAlert: true,
+        title: "Not Enough Stock",
+        description: message,
+        confirmVariant: "destructive",
+        confirmText: "OK",
+        onConfirm: () => setConfig(null)
+    });
+
+    const addToCartWithStockCheck = (product, quantity, availableStock) => {
+        const error = handleAddToCart(product, quantity, availableStock);
+        if (error) showStockAlert(error);
+    };
+
+    const hasActiveFilters = Boolean(filter.search || filter.productType?.length || filter.productGender?.length);
+
     useBarcodeScanner({
         onScanSuccess: async (barcode) => {
             const data = await getScanBarcode(barcode);
-
-            handleAddToCart(data, 1);
+            const listed = products.find(p => p.productId === data.productId);
+            addToCartWithStockCheck(data, 1, data.productQty ?? listed?.productQty);
         },
         onScanError: (error, barcode) => {
             setConfig({
                 isAlert: true,
                 title: "Scan Failed",
-                description: `Product with barcode "${barcode}" not found or invalid.`,
+                description: typeof error?.response?.data === 'string' && error.response.data
+                    ? `${error.response.data} (barcode "${barcode}")`
+                    : `Product with barcode "${barcode}" not found or invalid.`,
                 confirmVariant: "destructive",
                 confirmText: "OK",
                 onConfirm: () => setConfig(null)
@@ -154,6 +173,18 @@ const PointOfSalePage = () => {
                         <Loader2 className="h-10 w-10 animate-spin text-primary" />
                             Loading products...
                     </div>
+                ) : products.length === 0 ? (
+                    <div className="flex flex-col gap-3 h-full items-center justify-center text-center text-muted-foreground">
+                        <PackageSearch className="h-12 w-12 opacity-60" />
+                        <p className="font-semibold text-foreground">
+                            {hasActiveFilters ? "No products match your filters" : "No products in stock"}
+                        </p>
+                        <p className="text-sm">
+                            {hasActiveFilters
+                                ? "Try a different search, type or gender, or clear the filters."
+                                : "This branch has no products with stock available for sale."}
+                        </p>
+                    </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {products.map(product => (
@@ -165,12 +196,20 @@ const PointOfSalePage = () => {
                             gender={product.productGender}
                             imageUrl={product.productImageUrl}
                         
-                        onAddToCart={() => setSelectedProduct({
-                            ...product, 
-                            name: product.productName,
-                            price: product.productPrice,
-                            productId: product.productId
-                        })}
+                        onAddToCart={() => {
+                            const remaining = product.productQty - getCartQty(product.productId);
+                            if (remaining <= 0) {
+                                showStockAlert(`All ${product.productQty} ${product.productName} in stock are already in the order.`);
+                                return;
+                            }
+                            setSelectedProduct({
+                                ...product,
+                                productQty: remaining,
+                                name: product.productName,
+                                price: product.productPrice,
+                                productId: product.productId
+                            });
+                        }}
                         />
                     ))}
                     </div>
@@ -266,7 +305,7 @@ const PointOfSalePage = () => {
             isOpen={!!selectedProduct} 
             product={selectedProduct} 
             onClose={() => setSelectedProduct(null)} 
-            onAdd={handleAddToCart} 
+            onAdd={(product, quantity) => addToCartWithStockCheck(product, quantity, product.productQty + getCartQty(product.productId))} 
         />
         <DiscountModal 
             isOpen={showDiscountModal} 

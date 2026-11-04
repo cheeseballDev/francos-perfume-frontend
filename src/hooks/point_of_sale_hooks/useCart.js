@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export const useCart = () => {
     const [cart, setCart] = useState([]);
@@ -6,31 +6,52 @@ export const useCart = () => {
     const [appliedDiscountId, setAppliedDiscountId] = useState(0);
     const [appliedDiscountType, setAppliedDiscountType] = useState('PERCENTAGE');
 
-    const handleAddToCart = (product, quantity) => {
-        setCart(prev => {
-            const existing = prev.find(item => item.productId === product.productId);
-            if (existing) {
-                return prev.map(item =>
-                    item.productId === product.productId
-                        ? { ...item, cartQty: item.cartQty + quantity }
-                        : item
-                );
+    const cartRef = useRef(cart);
+
+    const updateCart = (next) => {
+        cartRef.current = next;
+        setCart(next);
+    };
+
+    const getCartQty = (productId) =>
+        cartRef.current.find(item => item.productId === productId)?.cartQty ?? 0;
+
+    const handleAddToCart = (product, quantity, availableStock) => {
+        const stock = Number(availableStock ?? product.productQty);
+        const inCart = getCartQty(product.productId);
+
+        if (Number.isFinite(stock)) {
+            if (stock <= 0) {
+                return `${product.productName} is out of stock.`;
             }
-            return [...prev, {
+            if (inCart + quantity > stock) {
+                return `Only ${stock} ${product.productName} in stock and ${inCart} already in the order.`;
+            }
+        }
+
+        const current = cartRef.current;
+        const existing = current.find(item => item.productId === product.productId);
+        updateCart(existing
+            ? current.map(item =>
+                item.productId === product.productId
+                    ? { ...item, cartQty: item.cartQty + quantity }
+                    : item
+            )
+            : [...current, {
                 productId: product.productId,
                 name: product.productName,
                 price: product.productPrice,
                 cartQty: quantity,
-            }];
-        });
+            }]);
+        return null;
     };
 
     const handleRemoveFromCart = (productId) => {
-        setCart(prev => prev.filter(item => item.productId !== productId));
+        updateCart(cartRef.current.filter(item => item.productId !== productId));
     };
 
     const handleClearCart = () => {
-        setCart([]);
+        updateCart([]);
         setAppliedDiscountValue(0);
         setAppliedDiscountId(0);
     };
@@ -44,6 +65,7 @@ export const useCart = () => {
 
     return {
         cart,
+        getCartQty,
         handleAddToCart,
         handleRemoveFromCart,
         handleClearCart,

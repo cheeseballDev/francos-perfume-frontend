@@ -39,6 +39,13 @@ export const getPdf = async (fromDate, toDate) => {
     return response;
 }
 
+export const getImportTemplate = async () => {
+    const response = await apiClient.get(`${PATH}/excel/template`, {
+        responseType: "blob",
+    });
+    return response;
+}
+
 export const postUploadExcel = async (file) => {
     const formData = new FormData();
     formData.append('file', file); 

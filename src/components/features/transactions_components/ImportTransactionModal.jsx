@@ -2,8 +2,8 @@ import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { postUploadExcel } from '@/services/TransactionService';
-import { FileSpreadsheet, Upload, X } from 'lucide-react';
+import { getImportTemplate, postUploadExcel } from '@/services/TransactionService';
+import { Download, FileSpreadsheet, Upload, X } from 'lucide-react';
 import { guardDismiss } from '@/utils/modalUtils';
 import { useRef, useState } from 'react';
 
@@ -15,6 +15,31 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [config, setConfig] = useState(null);
+    const [importErrors, setImportErrors] = useState([]);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const handleDownloadTemplate = async () => {
+        setIsDownloading(true);
+        try {
+            const response = await getImportTemplate();
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'Offline Sales Template.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch {
+            toast({
+                title: 'Download Failed',
+                description: 'The template could not be downloaded. Check your connection and try again.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsDownloading(false);
+        }
+    };
 
     const handleFileSelect = (selectedFile) => {
         if (!selectedFile) return;
@@ -34,6 +59,7 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
             return;
         }
 
+        setImportErrors([]);
         setFile(selectedFile);
     };
 
@@ -56,6 +82,7 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
     const handleRemoveFile = (e) => {
         e.stopPropagation();
         setFile(null);
+        setImportErrors([]);
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
@@ -64,22 +91,28 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
 
         setConfig({
             title: 'Import Transactions?',
-            description: `This will import transactions from "${file.name}". Duplicate entries may be created if the file was already imported.`,
+            description: `This will import the new sales in "${file.name}". Rows that already have a Sales Order ID are skipped, and nothing is imported if any row has a problem.`,
             confirmText: 'Import',
             onConfirm: async () => {
                 setIsSubmitting(true);
                 try {
-                    await postUploadExcel(file);
+                    const result = await postUploadExcel(file);
                     toast({
                         title: 'Import Successful',
-                        description: 'Transactions have been imported successfully.',
+                        description: result?.message || 'Transactions have been imported successfully.',
                     });
                     setFile(null);
+                    setImportErrors([]);
+                    setConfig(null);
                     onClose();
                 } catch (error) {
+                    const data = error.response?.data;
+                    const errors = Array.isArray(data?.errors) ? data.errors : [];
+                    setImportErrors(errors);
+                    setConfig(null);
                     toast({
                         title: 'Import Failed',
-                        description: `An error occurred while importing.\n${error.response?.data}`,
+                        description: data?.message || (typeof data === 'string' ? data : 'An error occurred while importing.'),
                         variant: 'destructive',
                         duration: 5000
                     });
@@ -89,7 +122,7 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
             },
             onCancel: () => {
                 setIsSubmitting(false);
-                onClose(); 
+                setConfig(null);
             }
         });
     };
@@ -97,6 +130,7 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
     const handleClose = () => {
         if (isSubmitting) return;
         setFile(null);
+        setImportErrors([]);
         onClose();
     };
 
@@ -116,8 +150,13 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
 
                     <div className="py-4 space-y-4">
                         <p className="text-sm text-muted-foreground">
-                            Upload an Excel file (.xlsx or .xls) to import transaction records.
+                            Upload the offline sales template or an exported transaction file. Only rows without a Sales Order ID are added as new sales.
                         </p>
+
+                        <Button variant="outline" className="w-full" onClick={handleDownloadTemplate} disabled={isDownloading || isSubmitting}>
+                            <Download className="h-4 w-4 mr-2" />
+                            {isDownloading ? 'Downloading...' : 'Download offline sales template'}
+                        </Button>
 
                         <div
                             onClick={handleClickUpload}
@@ -174,6 +213,19 @@ const ImportTransactionModal = ({ isOpen, onClose }) => {
                                 </>
                             )}
                         </div>
+
+                        {importErrors.length > 0 && (
+                            <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 max-h-48 overflow-y-auto">
+                                <p className="text-sm font-semibold text-destructive mb-2">
+                                    Nothing was imported. Fix these rows and upload the file again:
+                                </p>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    {importErrors.map((message, index) => (
+                                        <li key={index} className="text-xs text-destructive">{message}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
