@@ -35,36 +35,25 @@ export default function RequestDetailsPage() {
 
     const data = selectedRequest?.data || {};
 
-    const handleApproveToggle = (requestItemId, isApproved) => {
-        setItemApprovals((prev) => {
-            const requestedQty = data.items?.find((item) => item.requestItemId === requestItemId)?.requestedQty || 0;
+    const getRequestedQty = (requestItemId) =>
+        data.items?.find((item) => item.requestItemId === requestItemId)?.requestedQty || 0;
 
-            return {
-                ...prev,
-                [requestItemId]: {
-                    ...prev[requestItemId],
-                    isApproved,
-                    approvedQty: isApproved ? (prev[requestItemId]?.approvedQty || requestedQty) : 0,
-                },
-            };
-        });
+    const handleApproveToggle = (requestItemId, isApproved) => {
+        const requestedQty = getRequestedQty(requestItemId);
+        setItemApprovals((prev) => ({
+            ...prev,
+            [requestItemId]: { isApproved, approvedQty: isApproved ? requestedQty : 0 },
+        }));
     };
 
-    const handleQtyChange = (requestItemId, approvedQty) => {
-        const requestedQty = data.items.find(
-            item => item.requestItemId === requestItemId
-        ).requestedQty || 0;
-
-        const maximumQtyAllowed = Math.min(approvedQty, requestedQty);
-    
-        setItemApprovals((prev) => ({
-                ...prev,
-                [requestItemId]: { 
-                    ...prev[requestItemId]  , 
-                    approvedQty: maximumQtyAllowed,
-                    isApproved: maximumQtyAllowed > 0
-                },
-            }));
+    const handleQtyChange = (requestItemId, value) => {
+        const requestedQty = getRequestedQty(requestItemId);
+        const parsed = parseInt(value, 10);
+        const approvedQty = Math.min(requestedQty, Math.max(1, Number.isNaN(parsed) ? 1 : parsed));
+        setItemApprovals((prev) => {
+            if (prev[requestItemId]?.isApproved === false) return prev;
+            return { ...prev, [requestItemId]: { isApproved: true, approvedQty } };
+        });
     };
     
     const allProductsApproved = Object.values(itemApprovals).length > 0 && 
@@ -99,13 +88,14 @@ export default function RequestDetailsPage() {
             setIsSubmitting(true);
             const payload = (data.items || []).map((item) => {
             const approvalState = itemApprovals[item.requestItemId];
-            return {
+            const isApproved = approvalState ? approvalState.isApproved === true : true;
+                return {
                     remarks: remarks || "N/A",
                     productId: item.productId,
                     requestedItemId: item.requestItemId,
-                    isApproved: approvalState?.isApproved ?? true,
-                    requestedItemQty: approvalState?.isApproved 
-                        ? (approvalState?.approvedQty ?? item.requestedQty) 
+                    isApproved,
+                    requestedItemQty: isApproved
+                        ? Math.min(item.requestedQty, Math.max(1, approvalState?.approvedQty ?? item.requestedQty))
                         : 0,
                 };
             });

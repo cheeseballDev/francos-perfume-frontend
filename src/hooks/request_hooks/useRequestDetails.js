@@ -17,16 +17,15 @@ export const useRequestDetails = (requestId) => {
             if (data) {
                 setSelectedRequest(data);
                 
-                if (isInitial) {
-                    const initialApprovals = {};
+                setItemApprovals((prev) => {
+                    const next = isInitial ? {} : { ...prev };
                     (data.items || []).forEach((item) => {
-                        initialApprovals[item.requestItemId] = {
-                            isApproved: true,
-                            approvedQty: item.requestedQty,
-                        };
+                        if (!next[item.requestItemId]) {
+                            next[item.requestItemId] = { isApproved: true, approvedQty: item.requestedQty };
+                        }
                     });
-                    setItemApprovals(initialApprovals);
-                }
+                    return next;
+                });
             }
         } catch (err) {
             setError(err);
