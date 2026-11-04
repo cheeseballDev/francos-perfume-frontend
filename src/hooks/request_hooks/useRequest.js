@@ -5,9 +5,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
 const REQUEST_FILTER_SCHEMA = [
-    { key: "fromBranch", label: "Filter: From Branch", allLabel: "All 'From Branch'", multiple: false },
-    { key: "toBranch", label: "Filter: To Branch", allLabel: "All 'To Branch'", multiple: false },
+    { key: "fromBranches", label: "Filter: From Branch", allLabel: "All 'From Branch'", multiple: false },
+    { key: "toBranches", label: "Filter: To Branch", allLabel: "All 'To Branch'", multiple: false },
     { key: "requestStatus", label: "Filter: Status", allLabel: "All Statuses" },
+    { key: "stages", label: "Filter: Stage", allLabel: "All Stages" },
 ]
 
 export const useRequest = () => {
@@ -43,6 +44,9 @@ export const useRequest = () => {
         fromDate: '',
         toDate: '',
         requestStatus: '',
+        fromBranches: '',
+        toBranches: '',
+        stages: '',
         direction: '',
         pageCount: 1,
         pageSize: 10,
@@ -52,6 +56,7 @@ export const useRequest = () => {
         fromBranches: [],
         toBranches: [],
         status: [],
+        stages: [],
     });
 
     const fetchRequests = useCallback(async () => {
@@ -124,9 +129,9 @@ export const useRequest = () => {
     }, [fetchRequests]);
 
     // FIXED: Removed asyncState overrides
-    const fetchRequestFilters = useCallback(async (branchId = null) => {
+    const fetchRequestFilters = useCallback(async () => {
         try {
-            const data = await getRequestFilters(branchId);
+            const data = await getRequestFilters();
             setFilterOptions(buildFilterOptions(data, REQUEST_FILTER_SCHEMA));
             return data;
         } catch (err) {

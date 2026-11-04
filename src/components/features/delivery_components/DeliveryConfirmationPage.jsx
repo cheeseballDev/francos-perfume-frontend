@@ -18,10 +18,12 @@ const REASON_OPTIONS = [
 
 const rowKey = (item) => String(item.requestItemId ?? item.deliveryItemId ?? item.productId);
 
+/*
 const todayLocal = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
+*/
 
 const toUtcNoonIso = (dateString) => new Date(`${dateString}T12:00:00Z`).toISOString();
 
@@ -181,6 +183,7 @@ const DeliveryConfirmationPage = () => {
                     };
                 }),
             };
+            console.log(payload);
 
             await postReceiveDelivery(deliveryId, payload);
             setConfig(null);
