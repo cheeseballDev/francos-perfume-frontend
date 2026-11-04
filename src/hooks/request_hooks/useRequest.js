@@ -8,7 +8,7 @@ const REQUEST_FILTER_SCHEMA = [
     { key: "fromBranches", label: "Filter: From Branch", allLabel: "All 'From Branch'", multiple: false },
     { key: "toBranches", label: "Filter: To Branch", allLabel: "All 'To Branch'", multiple: false },
     { key: "requestStatus", label: "Filter: Status", allLabel: "All Statuses" },
-    { key: "stages", label: "Filter: Stage", allLabel: "All Stages" },
+    { key: "stage", label: "Filter: Stage", allLabel: "All Stages" },
 ]
 
 export const useRequest = () => {
@@ -46,7 +46,7 @@ export const useRequest = () => {
         requestStatus: '',
         fromBranches: '',
         toBranches: '',
-        stages: '',
+        stage: '',
         direction: '',
         pageCount: 1,
         pageSize: 10,
@@ -55,8 +55,8 @@ export const useRequest = () => {
     const [filterOptions, setFilterOptions] = useState({
         fromBranches: [],
         toBranches: [],
-        status: [],
-        stages: [],
+        requestStatus: [],
+        stage: [],
     });
 
     const fetchRequests = useCallback(async () => {
