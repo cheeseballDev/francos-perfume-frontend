@@ -15,6 +15,12 @@ const RETURNED_ITEM_TONES = {
     DISCARD: TONES.danger,
 };
 
+export const returnedItemForReason = (reason) => {
+    if (reason === "HIDDEN DEFECT") return "DISCARD";
+    if (reason === "CHANGE OF MIND") return "RETURN TO STOCK";
+    return "";
+};
+
 export const reasonLabel = (value) =>
     REASON_OPTIONS.find((option) => option.value === value)?.label ?? value ?? "N/A";
 
@@ -28,7 +34,7 @@ export const tierRank = (tier) => (String(tier ?? "").toUpperCase() === "PREMIUM
 export const SHOP_POLICY = [
     "The perfume is inspected in front of the customer: spray test, cracks and other defects.",
     "Returns are accepted on the day of purchase only.",
-    "Accepted reasons: change of mind or a hidden defect, both subject to inspection for defects or missing liquid.",
+    "Accepted reasons: change of mind (the perfume goes back to inventory) or a hidden defect (the perfume is discarded), both subject to inspection.",
     "Exchange for another scent only. Strictly no refunds.",
     "Classic is exchanged for any Classic, male or female. The customer pays the difference to move up to a Premium scent.",
 ];

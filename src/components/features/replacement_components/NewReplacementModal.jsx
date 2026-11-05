@@ -14,15 +14,13 @@ import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { openReceiptTab } from "@/utils/receiptWindowUtil";
 import { AlertTriangle, Check, Loader2, Search, ShieldCheck, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { REASON_OPTIONS, RETURNED_ITEM_OPTIONS, SHOP_POLICY, reasonLabel, returnedItemLabel, tierRank } from "./replacementOptions";
+import { REASON_OPTIONS, SHOP_POLICY, reasonLabel, returnedItemForReason, returnedItemLabel, tierRank } from "./replacementOptions";
 
 const EMPTY_FORM = {
     salesOrderDetailId: null,
     quantity: 1,
     replacementProductId: null,
     reason: "",
-    returnedItemAction: "",
-    inspected: false,
     remarks: "",
 };
 
@@ -96,18 +94,27 @@ const NewReplacementModal = ({ isOpen, onClose, onSaved }) => {
         && quantity >= 1
         && quantity <= maxQty
         && form.reason
-        && form.returnedItemAction
-        && form.inspected
         && isPaymentValid
         && !isSubmitting
     );
 
     const isDirty = salesOrderInput.trim() !== "" || sale !== null;
-    const dismissGuard = guardDismiss({
+    const guardClose = guardDismiss({
         isBusy: isSubmitting || isLooking,
         isDirty,
         onDirty: () => setConfig(discardChangesConfig(onClose)),
     });
+
+    const dismissGuard = (event) => {
+        const target = event?.detail?.originalEvent?.target ?? event?.target;
+        if (target instanceof Element && target.closest("[data-searchable-dropdown]")) {
+            event.preventDefault();
+            return;
+        }
+        guardClose(event);
+    };
+
+    const returnedItemAction = returnedItemForReason(form.reason);
 
     const handleFormChange = (field, value) => {
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -180,14 +187,6 @@ const NewReplacementModal = ({ isOpen, onClose, onSaved }) => {
         handleFormChange("quantity", Math.max(1, Math.min(maxQty || 1, next)));
     };
 
-    const handleReasonChange = (value) => {
-        setForm((prev) => ({
-            ...prev,
-            reason: value,
-            returnedItemAction: prev.returnedItemAction || (value === "HIDDEN DEFECT" ? "DISCARD" : "RETURN TO STOCK"),
-        }));
-    };
-
     const handleCashChange = (value) => {
         if (value === "") {
             setPayment((prev) => ({ ...prev, amountPaid: "" }));
@@ -206,8 +205,6 @@ const NewReplacementModal = ({ isOpen, onClose, onSaved }) => {
                 replacementProductId: form.replacementProductId,
                 quantity,
                 reason: form.reason,
-                returnedItemAction: form.returnedItemAction,
-                inspected: form.inspected,
                 remarks: form.remarks.trim() || null,
                 paymentMethod: needsPayment ? payment.method : null,
                 amountPaid: needsPayment && payment.method === "CASH" ? cashReceived : 0,
@@ -248,7 +245,7 @@ const NewReplacementModal = ({ isOpen, onClose, onSaved }) => {
 
         setConfig({
             title: "Process this replacement?",
-            description: `${selectedItem.productName} ×${quantity} will be replaced with ${selectedProduct.productName}. ${reasonLabel(form.reason)}; the returned perfume: ${returnedItemLabel(form.returnedItemAction).toLowerCase()}. ${paymentText} This can't be undone.`,
+            description: `${selectedItem.productName} ×${quantity} will be replaced with ${selectedProduct.productName}. ${reasonLabel(form.reason)}; the returned perfume: ${returnedItemLabel(returnedItemAction).toLowerCase()}. ${paymentText} This can't be undone.`,
             confirmText: "Process",
             cancelText: "Go back",
             confirmVariant: "success",
@@ -381,6 +378,7 @@ const NewReplacementModal = ({ isOpen, onClose, onSaved }) => {
                                                 setSelectedProduct={handleSelectProduct}
                                                 placeholder={tierRank(selectedItem.tier) === 2 ? "Search Premium perfumes..." : "Search Classic or Premium perfumes..."}
                                                 showStock
+                                                inline
                                             />
                                             <p className="text-xs text-muted-foreground">
                                                 {tierRank(selectedItem.tier) === 2
@@ -404,23 +402,31 @@ const NewReplacementModal = ({ isOpen, onClose, onSaved }) => {
                                 )}
 
                                 {selectedItem && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                                         <FormSelect
                                             label="Reason"
                                             value={form.reason}
-                                            onChange={handleReasonChange}
+                                            onChange={(value) => handleFormChange("reason", value)}
                                             options={REASON_OPTIONS}
                                             placeholder="Select reason"
                                             disabled={isFormLocked}
                                         />
-                                        <FormSelect
-                                            label="Returned perfume"
-                                            value={form.returnedItemAction}
-                                            onChange={(value) => handleFormChange("returnedItemAction", value)}
-                                            options={RETURNED_ITEM_OPTIONS}
-                                            placeholder="Select what happens to it"
-                                            disabled={isFormLocked}
-                                        />
+                                        <div className="flex flex-col gap-2">
+                                            <Label>Returned perfume</Label>
+                                            <p className={`text-sm font-medium rounded-md border px-3 py-2 ${
+                                                returnedItemAction === "DISCARD"
+                                                    ? "border-destructive/40 bg-destructive/10 text-destructive"
+                                                    : returnedItemAction
+                                                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                                                        : "border-border text-muted-foreground"
+                                            }`}>
+                                                {returnedItemAction === "DISCARD"
+                                                    ? "Discarded (hidden defect)"
+                                                    : returnedItemAction
+                                                        ? "Returned to inventory (change of mind)"
+                                                        : "Set by the reason"}
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
 
@@ -435,21 +441,6 @@ const NewReplacementModal = ({ isOpen, onClose, onSaved }) => {
                                             onChange={(e) => handleFormChange("remarks", e.target.value)}
                                         />
                                     </div>
-                                )}
-
-                                {selectedItem && (
-                                    <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={form.inspected}
-                                            disabled={isFormLocked}
-                                            onChange={(e) => handleFormChange("inspected", e.target.checked)}
-                                            className="w-5 h-5 mt-0.5 accent-emerald-600 cursor-pointer disabled:cursor-not-allowed"
-                                        />
-                                        <span className="text-sm text-foreground">
-                                            The returned perfume was inspected in front of the customer (spray test, cracks, defects and missing liquid).
-                                        </span>
-                                    </label>
                                 )}
 
                                 {selectedItem && selectedProduct && (

@@ -8,6 +8,7 @@ const SearchableProductSelect = ({
     setSelectedProduct,
     placeholder = "Select product...",
     showStock = false,
+    inline = false,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -104,10 +105,13 @@ const SearchableProductSelect = ({
                 />
             </div>
 
-            {isOpen && createPortal(
+            {isOpen && (inline ? (content) => content : (content) => createPortal(content, document.body))(
                 <div
                     ref={dropdownRef}
-                    style={dropdownStyle}
+                    data-searchable-dropdown=""
+                    style={inline
+                        ? { position: "absolute", top: "100%", left: 0, right: 0, marginTop: 4, zIndex: 50 }
+                        : { ...dropdownStyle, pointerEvents: "auto" }}
                     className="bg-popover text-popover-foreground border border-border rounded-md shadow-lg max-h-60 overflow-y-auto"
                 >
                     {filteredOptions.length > 0 ? (
@@ -133,8 +137,7 @@ const SearchableProductSelect = ({
                             No products found
                         </div>
                     )}
-                </div>,
-                document.body
+                </div>
             )}
         </div>
     );
