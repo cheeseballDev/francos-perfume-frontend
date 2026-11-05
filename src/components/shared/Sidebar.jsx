@@ -8,6 +8,7 @@ import {
     HandHelping,
     LayoutDashboard,
     Logs,
+    RefreshCcw,
     ShoppingBag,
     SquareText,
     Tag,
@@ -112,6 +113,13 @@ const Sidebar = () => {
           <Link to="/home/transactions" className={getTabClass("/home/transactions")}>
             <FileClock size={24} />
             <p className="text-base">Transactions List</p>
+          </Link>
+        )}
+
+        {hasManagementAccess && (
+          <Link to="/home/replacements" className={getTabClass("/home/replacements")}>
+            <RefreshCcw size={24} />
+            <p className="text-base">Replacements</p>
           </Link>
         )}
 

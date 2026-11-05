@@ -30,6 +30,7 @@ export const useTransaction = () => {
         { key: "branches", label: "Filter: Branches", allLabel: "All Branches", multiple: false },
         { key: "employees", label: "Filter: Processed By", allLabel: "All Employees" },
         { key: "paymentMethods", label: "Filter: Payment Method", allLabel: "All Payment Methods", multiple: false },
+        { key: "transactionTypes", label: "Filter: Transaction Type", allLabel: "All Transaction Types", multiple: false },
     ]
 
     const { filter, updateFilter, resetFilter } = useFilter({
@@ -39,6 +40,7 @@ export const useTransaction = () => {
         branches: '',
         employees: '',
         paymentMethods: '',
+        transactionTypes: '',
         pageCount: 1,
         pageSize: 10,
     })
@@ -83,6 +85,13 @@ export const useTransaction = () => {
             .on(
                 "postgres_changes",
                 { event: "INSERT", schema: "public", table: "sales_order" }, 
+                () => {
+                    fetchTransactions();
+                }
+            )
+            .on(
+                "postgres_changes",
+                { event: "INSERT", schema: "public", table: "product_replacement" },
                 () => {
                     fetchTransactions();
                 }

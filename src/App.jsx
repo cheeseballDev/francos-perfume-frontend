@@ -9,7 +9,7 @@ import CreateTransferRequestPage from './components/features/request_components/
 import RequestDetailsPage from './components/features/request_components/RequestDetailsPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import FaqPage from './pages/dashboard/FaqPage';
-import { AccountsPage, ArchivesPage, AuditLogPage, BarcodePage, DeliveriesPage, DiscountPage, ForecastPage, ForgotPasswordPage, HomePage, InventoryPage, LoginPage, PointOfSalePage, ProductsPage, ReportsPage, RequestPage, TransactionsPage, UserSettingsPage } from './pages/dashboard/index.js';
+import { AccountsPage, ArchivesPage, AuditLogPage, BarcodePage, DeliveriesPage, DiscountPage, ForecastPage, ForgotPasswordPage, HomePage, InventoryPage, LoginPage, PointOfSalePage, ProductsPage, ReplacementsPage, ReportsPage, RequestPage, TransactionsPage, UserSettingsPage } from './pages/dashboard/index.js';
 import { MODULES, canUsePos, modulePath } from './utils/roleAccess';
 
 const ProtectedRoute = ({ user, allowedRoles }) => {
@@ -132,6 +132,7 @@ const App = () => {
 
               <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'OWNER']} />}>
                 <Route path="transactions" element={<TransactionsPage />} />
+                <Route path="replacements" element={<ReplacementsPage />} />
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="forecast" element={<ForecastPage />} />
               </Route>

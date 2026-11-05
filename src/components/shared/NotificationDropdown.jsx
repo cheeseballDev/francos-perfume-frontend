@@ -40,7 +40,9 @@ const NotificationDropdown = () => {
             const notificationType = (item.type);
             const referenceId = item.referenceId;
 
-            if (notificationType.includes('DELIVERY')) {
+            if (notificationType.includes('REPLACEMENT')) {
+                navigate('/home/replacements');
+            } else if (notificationType.includes('DELIVERY')) {
                 navigate(referenceId ? `/home/deliveries/${referenceId}` : '/home/deliveries');
             } else if (notificationType.includes('REQUEST')) {
                 navigate(referenceId ? `/home/requests/${referenceId}` : '/home/requests');

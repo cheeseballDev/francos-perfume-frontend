@@ -11,6 +11,7 @@ export { default as HomePage } from './HomePage';
 export { default as InventoryPage } from './InventoryPage';
 export { default as AccountsPage } from './ManageAccountsPage';
 export { default as ProductsPage } from './ProductsPage';
+export { default as ReplacementsPage } from './ReplacementsPage';
 export { default as ReportsPage } from './ReportsPage';
 export { default as RequestPage } from './RequestPage';
 export { default as TransactionsPage } from './TransactionsPage';

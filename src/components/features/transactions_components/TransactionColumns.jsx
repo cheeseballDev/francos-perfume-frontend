@@ -1,4 +1,10 @@
 import { formatDateTimeForTable, formatLabel, formatPeso } from "@/utils/formattingUtils";
+import { TONES } from "@/utils/statusUtils";
+
+const TRANSACTION_TYPES = {
+    REPLACED: { label: "Replaced", tone: TONES.partial },
+    "UPGRADE PAYMENT": { label: "Upgrade payment", tone: TONES.outbound },
+};
 
 export const transactionColumns = [
     {
@@ -16,6 +22,21 @@ export const transactionColumns = [
         header: "Sales Order ID",
         accessorKey: "salesOrderDisplayId",
         cellClassName: "font-medium"
+    },
+    {
+        header: "Type",
+        render: (row) => {
+            const type = TRANSACTION_TYPES[row.transactionType];
+            if (!type) return <span className="text-muted-foreground">Sale</span>;
+            return (
+                <span
+                    title={row.replacesSalesOrderDisplayId ? `For ${row.replacesSalesOrderDisplayId}` : undefined}
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-md border text-xs font-semibold whitespace-nowrap ${type.tone}`}
+                >
+                    {type.label}
+                </span>
+            );
+        },
     },
     {
         header: "Perfume Sold",

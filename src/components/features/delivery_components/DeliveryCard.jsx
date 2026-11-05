@@ -33,7 +33,7 @@ const DeliveryCard = ({
         if (!isInbound) {
             const isPendingDispatch = deliveryStatus === "PENDING" || deliveryStatus === "PENDING DISPATCH";
             const canCancel = isPendingDispatch;
-            return(
+            return (
                 <div className="flex flex-col sm:flex-row gap-2 mt-3">
                     {isPendingDispatch && (
                         <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => onMarkInTransit(delivery.deliveryId)}>

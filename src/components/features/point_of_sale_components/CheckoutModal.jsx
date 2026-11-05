@@ -27,7 +27,7 @@ const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
           
           <div className="flex-1 bg-muted/50 text-foreground p-6 rounded-lg text-sm leading-relaxed flex flex-col justify-center text-center tracking-wider font-medium">
             <p><strong>RETURNS</strong></p>
-            <p>Defective, fake, or expired items are repaired, replaced, or refunded with the receipt. Opened, used, or non-defective perfumes cannot be returned.</p>
+            <p>Same-day exchange only, with the receipt. The perfume is inspected in front of the customer. Change of mind or hidden defects are exchanged for another scent: Classic for any Classic, or pay the difference for a Premium. Strictly no refunds.</p>
             <br />
             <p><strong>DISCOUNTS</strong></p>
             <p>One discount per transaction. Senior/PWD customers may choose either their Senior/PWD discount or the shop's current discount.</p>

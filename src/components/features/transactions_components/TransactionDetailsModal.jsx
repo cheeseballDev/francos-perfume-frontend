@@ -1,6 +1,16 @@
 import DetailItem from '@/components/shared/DetailItem';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { formatDateTimeForTable } from '@/utils/formattingUtils';
+import { formatDateTimeForTable, formatPeso } from '@/utils/formattingUtils';
+
+const REASON_LABELS = {
+    "CHANGE OF MIND": "Change of mind",
+    "HIDDEN DEFECT": "Hidden defect",
+};
+
+const RETURNED_ITEM_LABELS = {
+    "RETURN TO STOCK": "returned to inventory",
+    DISCARD: "discarded",
+};
 
 const TransactionDetailsModal = ({ isOpen, onClose, selectedTransaction }) => {
     if (!isOpen || !selectedTransaction) return null;
@@ -35,6 +45,9 @@ const TransactionDetailsModal = ({ isOpen, onClose, selectedTransaction }) => {
                         {selectedTransaction.paymentMethod === "GCASH" && (
                             <DetailItem label="GCash Reference Number" value={selectedTransaction.referenceNumber || "N/A"}/>
                         )}
+                        {selectedTransaction.replacesSalesOrderDisplayId && (
+                            <DetailItem label="Upgrade Payment For" value={selectedTransaction.replacesSalesOrderDisplayId}/>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -54,6 +67,27 @@ const TransactionDetailsModal = ({ isOpen, onClose, selectedTransaction }) => {
                             )}
                         </div>
                     </div>
+
+                    {Array.isArray(selectedTransaction.replacements) && selectedTransaction.replacements.length > 0 && (
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-semibold text-foreground">Replacements</h3>
+                            <div className="border rounded-md divide-y divide-border bg-card overflow-hidden">
+                                {selectedTransaction.replacements.map((item) => (
+                                    <div key={item.replacementDisplayId} className="flex flex-col gap-1 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                                        <span className="text-foreground">
+                                            <span className="font-medium">{item.originalProductName} ×{item.quantity}</span>
+                                            {" → "}
+                                            <span className="font-medium">{item.replacementProductName}</span>
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                            {item.replacementDisplayId} · {REASON_LABELS[item.reason] ?? item.reason} · {RETURNED_ITEM_LABELS[item.returnedItemAction] ?? item.returnedItemAction}
+                                            {Number(item.priceDifference) > 0 && ` · paid ${formatPeso(item.priceDifference)} (${item.upgradeSalesOrderDisplayId})`}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>
