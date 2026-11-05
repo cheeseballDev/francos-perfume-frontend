@@ -125,11 +125,16 @@
 .sidebar-scroll {
   direction: rtl;
   overflow-y: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-custom-gray) transparent;
 }
 
 .sidebar-scroll > * {
   direction: ltr;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 8px;
 }
 
 .sidebar-scroll::-webkit-scrollbar-track {
@@ -137,13 +142,13 @@
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
-  background-color: transparent;
+  background-color: var(--color-custom-gray);
   border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  opacity: 0.6;
 }
 
 .sidebar-scroll:hover::-webkit-scrollbar-thumb {
-  background-color: var(--color-custom-gray);
-  scrollbar-width: auto;
-  border: 2px solid transparent;
-  background-clip: padding-box; 
+  background-color: var(--color-custom-black);
 }

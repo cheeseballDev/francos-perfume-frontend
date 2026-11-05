@@ -14,7 +14,7 @@ const StatusCard = ({
     <div 
         onClick={onClick}
         className={`bg-card text-card-foreground border border-border rounded-2xl p-6 h-full flex flex-col justify-between shadow-sm transition-all duration-300 ${
-            onClick ? "cursor-pointer hover:scale-105 hover:shadow-md" : "hover:scale-105"
+            onClick ? "cursor-pointer hover:-translate-y-1 hover:shadow-lg" : "hover:-translate-y-1 hover:shadow-md"
         }`}
     >
         <div>

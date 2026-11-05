@@ -69,8 +69,8 @@ const RequestPage = () => {
     };
 
     return (
-        <div className="flex flex-col h-full animate-fade-in relative font-montserrat">
-        <div className="flex justify-between items-end mb-6">
+        <div className="flex flex-col min-h-full animate-fade-in relative font-montserrat">
+            <div className="flex justify-between items-end mb-6">
 
             <div>
                 <h1 className="text-3xl font-bold text-foreground mb-1 leading-none tracking-tight">Requests</h1>

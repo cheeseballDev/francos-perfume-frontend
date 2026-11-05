@@ -27,7 +27,7 @@ const DataTable = ({
 
   return (
     <div className="bg-card border border-border rounded-lg shadow-sm flex flex-col mb-4 overflow-hidden">
-      <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-hidden">  
         <Table>
           <TableHeader>
             <TableRow>

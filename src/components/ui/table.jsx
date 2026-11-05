@@ -7,7 +7,7 @@ function Table({
   ...props
 }) {
   return (
-    <div data-slot="table-container" className="relative w-full overflow-x-auto">
+    <div data-slot="table-container" className="relative w-full overflow-x-auto overflow-y-hidden">
       <table
         data-slot="table"
         className={cn("w-full caption-bottom text-sm", className)}
@@ -111,6 +111,6 @@ function TableCaption({
 }
 
 export {
-  Table, TableBody, TableCaption, TableCell, TableFooter,
-  TableHead, TableHeader, TableRow
+    Table, TableBody, TableCaption, TableCell, TableFooter,
+    TableHead, TableHeader, TableRow
 };
