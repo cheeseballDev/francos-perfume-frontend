@@ -18,14 +18,13 @@ const DeliveryCard = ({
 
     const isInbound = delivery.direction === "INBOUND";
 
-
     const deliveryStatus = delivery.deliveryStatus;
     const deliveryId = delivery.deliveryDisplayId;
     const route = `From ${delivery.fromBranchName} To ${delivery.toBranchName}`;
     const productCount = delivery.itemCount || 0;
     const unitCount = delivery.totalUnits || 0;
     const isSameDestination = user?.branchLocation === delivery.toBranchName;
-    
+
     const handleViewDetails = () => {
         navigate(`/home/deliveries/${delivery.deliveryId}`);
     };
@@ -34,6 +33,7 @@ const DeliveryCard = ({
         if (!isInbound) {
             const isPendingDispatch = deliveryStatus === "PENDING" || deliveryStatus === "PENDING DISPATCH";
             const canCancel = isPendingDispatch;
+            return(
                 <div className="flex flex-col sm:flex-row gap-2 mt-3">
                     {isPendingDispatch && (
                         <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => onMarkInTransit(delivery.deliveryId)}>
@@ -49,6 +49,7 @@ const DeliveryCard = ({
                         <Eye size={15} className="mr-2" /> View Details
                     </Button>
                 </div>
+            );
         }
 
         if (isInbound) {
