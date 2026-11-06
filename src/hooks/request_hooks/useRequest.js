@@ -27,6 +27,7 @@ export const useRequest = () => {
     });
     const [branchOptions, setBranchOptions] = useState([]);
     const [productOptions, setProductOptions] = useState([]);
+    const latestProductBranch = useRef(null);
    
     const [asyncState, setAsyncState] = useState({
         isLoading: true,
@@ -157,13 +158,12 @@ export const useRequest = () => {
     }, []);
 
     const fetchProductsByBranch = useCallback(async (branchId) => {
-        if (!branchId) {
-            setProductOptions([]);
-            return;
-        }
+        latestProductBranch.current = branchId;
+        setProductOptions([]);
+        if (!branchId) return;
         try {
             const raw = await getRequestFilters(branchId);
-            if (!raw) return;
+            if (!raw || latestProductBranch.current !== branchId) return;
             setProductOptions((raw.products || []).map(p => ({
                 value: p.productId,
                 label: p.productName,

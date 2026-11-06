@@ -81,6 +81,7 @@ const CreateTransferRequestPage = () => {
     }, [location.state, location.pathname, navigate]);
 
     useEffect(() => {
+        setSelectedProduct('');
         fetchProductsByBranch(data.fromBranch);
     }, [data.fromBranch, fetchProductsByBranch]);
 
@@ -239,9 +240,11 @@ const CreateTransferRequestPage = () => {
                     <BranchSelector
                         fromBranch={data.fromBranch}
                         toBranch={data.toBranch}
-                        setFromBranch={(value) => setData(prev => ({ ...prev, fromBranch: value, toBranch: null }))}
+                        setFromBranch={(value) => setData(prev => (
+                            prev.fromBranch === value ? prev : { ...prev, fromBranch: value, toBranch: null, items: [] }
+                        ))}
                         setToBranch={(value) => setData(prev => ({ ...prev, toBranch: value }))}
-                        onClear={() => setData(prev => ({ ...prev, fromBranch: null, toBranch: null }))}
+                        onClear={() => setData(prev => ({ ...prev, fromBranch: null, toBranch: null, items: [] }))}
                         fromBranchOptions={branchOptions}
                         toBranchOptions={toBranchOptions}
                     />

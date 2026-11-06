@@ -29,8 +29,10 @@ export const patchRejectRequest = async (requestId, remarks) => {
     return response.data;
 };
 
-export const getRequestFilters = async () => {
-    const response = await apiClient.get(`${PATH}/filters`);
+export const getRequestFilters = async (branchId = null) => {
+    const response = await apiClient.get(`${PATH}/filters`, {
+        params: branchId ? { branchId } : undefined,
+    });
     return response.data;
 };
 
