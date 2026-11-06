@@ -102,6 +102,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
             });
 
             onClose();
+            setSelectedProduct(null);
         } catch (error) {
             toast({
                 title: "Update Failed",

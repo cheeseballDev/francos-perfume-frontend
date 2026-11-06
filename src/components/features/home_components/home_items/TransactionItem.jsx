@@ -2,12 +2,12 @@ import { formatDateTimeForTable, formatPeso } from "@/utils/formattingUtils";
 
 const TransactionItem = ({ transaction }) => {
     const amount = Number(transaction?.totalAmount ?? 0);
-    const itemCount = transaction?.itemCount ?? transaction?.items?.length ?? 0;
+    const itemCount = transaction?.totalItemsCount ?? 0;
 
     return (
         <div className="flex justify-between items-center gap-3 p-3 border-b border-border last:border-0">
             <div>
-                <p className="text-xs font-bold text-foreground uppercase">ID: {transaction?.salesOrderDisplayId}</p>
+                <p className="text-xs font-bold text-foreground uppercase">ID: {transaction?.salesOrderId}</p>
                 <p className="text-sm text-foreground">
                     {itemCount} {itemCount === 1 ? "item" : "items"} purchased
                 </p>

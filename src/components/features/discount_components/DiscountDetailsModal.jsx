@@ -46,6 +46,7 @@ const DiscountInfoModal = ({
                     });
 
                     onClose();
+                    setSelectedDiscount(null);
 
                 } catch (error) {
                     toast({
@@ -84,6 +85,7 @@ const DiscountInfoModal = ({
                     });
 
                     onClose();
+                    setSelectedDiscount(null);
 
                 } catch (error) {
                     toast({

@@ -15,6 +15,7 @@ const ROUTE_ROLES = {
     "/home/products": ["OWNER"],
     "/home/accounts": ["MANAGER", "OWNER", "ADMIN"],
     "/home/archives": ["OWNER", "ADMIN"],
+    "/home/archives?section=products": ["OWNER"],
 };
 
 const REFERENCE_PATTERN = new RegExp(`\\b(${Object.keys(REFERENCE_ROUTES).join("|")})-\\d+\\b`, "g");
@@ -23,7 +24,11 @@ export const referenceRoute = (reference, context = "") => {
     const prefix = String(reference || "").split("-")[0];
     if (!REFERENCE_ROUTES[prefix]) return null;
 
-    if (/\barchived\b/i.test(context) && (prefix === "PROD" || prefix === "EMP")) {
+    if (/\barchived\b/i.test(context) && prefix === "PROD") {
+        return "/home/archives?section=products";
+    }
+
+    if (/\barchived\b/i.test(context) && prefix === "EMP") {
         return "/home/archives";
     }
 
@@ -37,7 +42,7 @@ export const referenceRoute = (reference, context = "") => {
 export const canOpenRoute = (route, role) => {
     if (!route) return false;
     const path = route.split("?")[0];
-    const allowed = ROUTE_ROLES[path];
+    const allowed = ROUTE_ROLES[route] ?? ROUTE_ROLES[path];
     return !allowed || allowed.includes(String(role || "").toUpperCase());
 };
 

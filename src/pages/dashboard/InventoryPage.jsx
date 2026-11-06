@@ -68,6 +68,12 @@ const InventoryPage = () => {
         }
         
         setIsEditBatchModalOpen(false);
+        setSelectedBatch(null);
+    };
+
+    const handleCloseEditBatchModal = () => {
+        setIsEditBatchModalOpen(false);
+        setSelectedBatch(null);
     };
 
     const handleSearchChange = (value) => {
@@ -120,7 +126,7 @@ const InventoryPage = () => {
       <EditBatchModal
         key={selectedBatch?.batchId}
         isOpen={isEditBatchModalOpen}
-        onClose={() => setIsEditBatchModalOpen(false)}
+        onClose={handleCloseEditBatchModal}
         selectedBatch={selectedBatch}
         handleSaveBatchWrapper={handleSaveBatchWrapper}
       />  

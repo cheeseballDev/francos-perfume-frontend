@@ -238,7 +238,7 @@ const DashboardHome = () => {
                                 {/* Transactions Panel (Manager / Owner Only) */}
                                 {(userRole === "MANAGER" || userRole === "OWNER") && (
                                     <DashboardPanel 
-                                        title={`Recent Transactions (${getPeriodOption(kpiPeriod).label})`} 
+                                        title={`Recent Transactions`} 
                                         actionText="View All Transactions"
                                         onAction={() => navigate('/home/transactions')} 
                                     >

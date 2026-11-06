@@ -57,6 +57,7 @@ const AccountInfoModal = ({
                 });
 
                 onClose();
+                setSelectedAccount(null);
 
                 } catch (error) {
                     toast({
@@ -95,6 +96,7 @@ const AccountInfoModal = ({
                     });
 
                     onClose();
+                    setSelectedAccount(null);
 
                 } catch (error) {
                     toast({
@@ -130,6 +132,7 @@ const AccountInfoModal = ({
                     });
 
                     onClose();
+                    setSelectedAccount(null);
 
                 } catch (error) {
                     toast({

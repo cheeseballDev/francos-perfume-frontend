@@ -1,3 +1,4 @@
+import { useAuth } from "@/auth/UseAuth";
 import { archivedAccountColumns, archivedProductColumns } from "@/components/features/archive_components/ArchiveColumns";
 import { useRowSelection } from "@/hooks/useRowSelection";
 import ArchivedAccountDetailsModal from "@/components/features/archive_components/ArchivedAccountDetailsModal";
@@ -10,7 +11,76 @@ import { useProductArchive } from "@/hooks/archive_hooks/useProductArchive";
 import { Eye } from "lucide-react";
 import { useState } from "react";
 
+const ProductArchivesSection = () => {
+    const {
+        archivedProducts,
+        asyncState: productAsyncState,
+        pagination: productPagination,
+        filter: productFilter,
+        updateFilter: updateProductFilter,
+        fetchArchivedProduct,
+        restoreArchivedProduct,
+    } = useProductArchive();
+
+    const isProductsLoading = productAsyncState?.loading || productAsyncState?.isLoading;
+
+    const [isArchivedProductDetailsModalOpen, setIsArchivedProductDetailsModalOpen] = useState(false);
+
+    const {
+        selected: selectedArchivedProduct,
+        setSelected: setSelectedArchivedProduct,
+        toggleRow: handleProductRowClick,
+        selectRow: selectProductRow,
+    } = useRowSelection("productArchiveId", fetchArchivedProduct);
+
+    return (
+        <>
+            <section>
+                <h2 className="text-2xl font-bold text-foreground mb-6">Products Archives</h2>
+
+                {isProductsLoading ? (
+                    <ProductArchiveSkeleton rowCount={3} />
+                    ) : (
+                    <DataTable 
+                        columns={archivedProductColumns}
+                        data={archivedProducts}
+                        keyField="productArchiveId"
+                        asyncState={productAsyncState}
+                        pagination={productPagination}
+                        filter={productFilter}
+                        updateFilter={updateProductFilter}
+                        selectedItem={selectedArchivedProduct}
+                        onRowClick={handleProductRowClick}
+                        onRowDoubleClick={(row) => { selectProductRow(row); setIsArchivedProductDetailsModalOpen(true); }}
+                    />
+                    )}
+                <div className="flex justify-end">
+                    <Button
+                        variant={selectedArchivedProduct ? "default" : "ghost"}
+                        disabled={!selectedArchivedProduct}
+                        onClick={() => setIsArchivedProductDetailsModalOpen(true)}
+                    >
+                        <Eye className="h-8 w-8"/>
+                        View Details
+                    </Button>
+                </div>
+            </section>
+
+            <ArchivedProductDetailsModal
+                isOpen={isArchivedProductDetailsModalOpen}
+                onClose={() => setIsArchivedProductDetailsModalOpen(false)}
+                selectedArchivedProduct={selectedArchivedProduct}
+                restoreArchivedProduct={restoreArchivedProduct}
+                setSelectedArchivedProduct={setSelectedArchivedProduct}
+            />
+        </>
+    );
+};
+
 const ArchivesPage = () => {
+    const { user } = useAuth();
+    const canViewArchivedProducts = (user?.trueRole || "") === "OWNER";
+
     const { 
         archivedAccounts, 
         asyncState: accountAsyncState, 
@@ -21,22 +91,9 @@ const ArchivesPage = () => {
         restoreArchivedAccount,
     } = useAccountArchive();
 
-    const { 
-        archivedProducts, 
-        asyncState: productAsyncState, 
-        pagination: productPagination, 
-        filter: productFilter, 
-        updateFilter: updateProductFilter,
-        fetchArchivedProduct,
-        restoreArchivedProduct,
-    } = useProductArchive();
-
-    
     const isAccountsLoading = accountAsyncState?.loading || accountAsyncState?.isLoading;
-    const isProductsLoading = productAsyncState?.loading || productAsyncState?.isLoading;
 
     const [isArchivedAccountDetailsModalOpen, setIsArchivedAccountDetailsModalOpen] = useState(false);
-    const [isArchivedProductDetailsModalOpen, setIsArchivedProductDetailsModalOpen] = useState(false);
 
     const {
         selected: selectedArchivedAccount,
@@ -44,13 +101,6 @@ const ArchivesPage = () => {
         toggleRow: handleAccountRowClick,
         selectRow: selectAccountRow,
     } = useRowSelection("accountArchiveId", fetchArchivedAccount);
-
-    const {
-        selected: selectedArchivedProduct,
-        setSelected: setSelectedArchivedProduct,
-        toggleRow: handleProductRowClick,
-        selectRow: selectProductRow,
-    } = useRowSelection("productArchiveId", fetchArchivedProduct);
 
     return (
         <>
@@ -94,36 +144,7 @@ const ArchivesPage = () => {
                     </div>
                 </section>
 
-                <section>
-                    <h2 className="text-2xl font-bold text-foreground mb-6">Products Archives</h2>
-
-                    {isProductsLoading ? (
-                        <ProductArchiveSkeleton rowCount={3} />
-                        ) : (
-                        <DataTable 
-                            columns={archivedProductColumns}
-                            data={archivedProducts}
-                            keyField="productArchiveId"
-                            asyncState={productAsyncState}
-                            pagination={productPagination}
-                            filter={productFilter}
-                            updateFilter={updateProductFilter}
-                            selectedItem={selectedArchivedProduct}
-                            onRowClick={handleProductRowClick}
-                            onRowDoubleClick={(row) => { selectProductRow(row); setIsArchivedProductDetailsModalOpen(true); }}
-                        />
-                        )}
-                    <div className="flex justify-end">
-                        <Button
-                            variant={selectedArchivedProduct ? "default" : "ghost"}
-                            disabled={!selectedArchivedProduct}
-                            onClick={() => setIsArchivedProductDetailsModalOpen(true)}
-                        >
-                            <Eye className="h-8 w-8"/>
-                            View Details
-                        </Button>
-                    </div>
-                </section>
+                {canViewArchivedProducts && <ProductArchivesSection />}
         </div>
 
         <ArchivedAccountDetailsModal
@@ -132,14 +153,6 @@ const ArchivesPage = () => {
             selectedArchivedAcccount={selectedArchivedAccount}
             restoreArchivedAccount={restoreArchivedAccount}
             setSelectedArchivedAccount={setSelectedArchivedAccount}
-        />
-
-        <ArchivedProductDetailsModal
-            isOpen={isArchivedProductDetailsModalOpen}
-            onClose={() => setIsArchivedProductDetailsModalOpen(false)}
-            selectedArchivedProduct={selectedArchivedProduct}
-            restoreArchivedProduct={restoreArchivedProduct}
-            setSelectedArchivedProduct={setSelectedArchivedProduct}
         />
         </>
         
