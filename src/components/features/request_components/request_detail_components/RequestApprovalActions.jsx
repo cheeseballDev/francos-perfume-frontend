@@ -15,8 +15,7 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
     const requestStage = currentPending?.stage || lastApproval?.stage;
     const requestStatus = selectedRequest.requestStatus;
     const requestId = selectedRequest.requestId;
-    console.log(requestStatus);
-
+    
     if (requestStatus === "DELIVERY CANCELLED") {
         return (
             <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
