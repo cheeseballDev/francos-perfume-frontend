@@ -78,6 +78,7 @@ const AuditLogPage = () => {
                     pagination={pagination}
                     filter={filter}
                     updateFilter={updateFilter}
+                    onClearSearch={() => handleSearchChange('')}
                     selectedItem={selectedAuditLog}
                     onRowClick={handleRowClick}
                     onRowDoubleClick={(row) => { selectRow(row); setIsAuditLogDetailsModalOpen(true); }}

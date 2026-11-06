@@ -13,8 +13,7 @@ const SearchBar = ({ value, onChange, placeholder = "Search by name or id..."}) 
   useEffect(() => {
     const handler = setTimeout(() => {
       if (localValue !== value) {
-        // Send a synthetic event object back to the parent to match your existing e.target.value logic
-        onChange({ target: { value: localValue } });
+        onChange(localValue);
       }
     }, 300);
 

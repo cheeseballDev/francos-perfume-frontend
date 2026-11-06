@@ -109,6 +109,7 @@ const ManageAccountsPage = () => {
           pagination={pagination}
           filter={filter}
           updateFilter={updateFilter}
+          onClearSearch={() => handleSearchChange('')}
           selectedItem={selectedAccount}
           onRowClick={handleRowClick}
           onRowDoubleClick={(row) => { selectRow(row); setIsAccountInfoModalOpen(true); }}

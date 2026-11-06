@@ -87,6 +87,7 @@ export default function TransactionsPage() {
                         pagination={pagination}
                         filter={filter}
                         updateFilter={updateFilter}
+                        onClearSearch={() => handleSearchChange('')}
                         selectedItem={selectedTransaction}
                         onRowClick={handleRowClick}
                         onRowDoubleClick={(row) => { selectRow(row); setIsTransactionDetailsModalOpen(true); }}

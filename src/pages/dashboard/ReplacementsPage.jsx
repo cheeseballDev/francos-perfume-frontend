@@ -79,6 +79,7 @@ export default function ReplacementsPage() {
                         pagination={pagination}
                         filter={filter}
                         updateFilter={updateFilter}
+                        onClearSearch={() => handleSearchChange('')}
                         selectedItem={selectedReplacement}
                         onRowClick={handleRowClick}
                         onRowDoubleClick={(row) => { selectRow(row); setIsDetailsOpen(true); }}

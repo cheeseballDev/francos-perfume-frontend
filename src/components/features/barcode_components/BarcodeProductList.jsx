@@ -87,6 +87,9 @@ const BarcodeProductList = ({
                 selectedItem={selectedProduct}
                 onRowClick={handleRowClick}
                 emptyMessage="No products found."
+                filter={filter}
+                updateFilter={updateFilter}
+                onClearSearch={() => handleSearchChange('')}
             />
 
             <PaginationBar

@@ -21,9 +21,21 @@ const DataTable = ({
         onRowClick = null,
         onRowDoubleClick = null,
         emptyMessage = "No records found.",
+        onClearSearch = null,
     }) => {
         const isBusy = asyncState?.isLoading || asyncState?.isFetching;
         const hasData = Array.isArray(data) && data.length > 0;
+
+        const KEPT_KEYS = ["pageCount", "pageSize", "direction", "search"];
+        const isActive = (value) => (Array.isArray(value) ? value.length > 0 : value !== "" && value !== null && value !== undefined);
+        const activeFilterKeys = Object.keys(filter || {}).filter((key) => !KEPT_KEYS.includes(key) && isActive(filter[key]));
+        const hasActiveFilters = activeFilterKeys.length > 0 || isActive(filter?.search);
+
+        const clearFilters = () => {
+            activeFilterKeys.forEach((key) => updateFilter(key, Array.isArray(filter[key]) ? [] : ""));
+            if (onClearSearch) onClearSearch();
+            else updateFilter("search", "");
+        };
 
   return (
     <div className="bg-card border border-border rounded-lg shadow-sm flex flex-col mb-4 overflow-hidden">
@@ -64,12 +76,12 @@ const DataTable = ({
                       <PackageOpen className="h-12 w-12 text-muted-foreground/30 mb-3 stroke-[1.5]" />
                       <p className="text-base text-foreground mb-1">No items found</p>
                       <p className="text-sm font-normal text-muted-foreground mb-4">{emptyMessage}</p>
-                      {updateFilter && (
-                         <button 
-                            onClick={() => updateFilter('search', '')} 
+                      {updateFilter && hasActiveFilters && (
+                         <button
+                            onClick={clearFilters}
                             className="text-primary hover:underline text-sm font-bold"
                          >
-                            Clear search filters
+                            Clear filters
                          </button>
                       )}
                   </div>

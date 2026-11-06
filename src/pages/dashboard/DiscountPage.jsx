@@ -89,6 +89,7 @@ const DiscountPage = () => {
             pagination={pagination}
             filter={filter}
             updateFilter={updateFilter}
+            onClearSearch={() => handleSearchChange('')}
             selectedItem={selectedDiscount}
             onRowClick={handleRowClick}
             onRowDoubleClick={(row) => { selectRow(row); setIsDiscountInfoModalOpen(true); }}

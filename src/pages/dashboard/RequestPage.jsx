@@ -162,6 +162,7 @@ const RequestPage = () => {
                     pagination={pagination}
                     filter={filter}
                     updateFilter={updateFilter}
+                    onClearSearch={() => handleSearchChange('')}
                     selectedItem={selectedRequest}
                     onRowClick={handleRowClick}
                     onRowDoubleClick={(row) => {
