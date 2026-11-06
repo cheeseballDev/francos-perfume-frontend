@@ -9,9 +9,9 @@ import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "@/hooks/account_hooks/useAccount";
 import { useRowSelection } from "@/hooks/useRowSelection";
+import { useUrlSearch } from "@/hooks/useUrlSearch";
 import { Eye, Plus } from "lucide-react";
 import { useState } from "react";
-import { useUrlSearch } from "@/hooks/useUrlSearch";
 
 const ManageAccountsPage = () => {
     const { user } = useAuth();
@@ -70,7 +70,7 @@ const ManageAccountsPage = () => {
     }
 
   return (
-    <div className="flex flex-col animate-fade-in font-montserrat h-screen overflow-y-auto">
+    <div className="flex flex-col animate-fade-in font-montserrat pb-8">
       <h1 className="text-3xl font-bold text-foreground mb-1 tracking-tight leading-none">
         Manage Accounts
       </h1>
