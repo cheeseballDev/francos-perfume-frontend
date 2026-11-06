@@ -69,7 +69,6 @@ const AccountInfoModal = ({
                 } finally {
                     setIsSubmitting(false);
                     setConfig(null);
-                    setSelectedAccount(null);
                 }
             } 
         });
@@ -110,7 +109,6 @@ const AccountInfoModal = ({
                 } finally {
                     setIsSubmitting(false);
                     setConfig(null);
-                    setSelectedAccount(null);
                 }
             },
         });
@@ -144,7 +142,6 @@ const AccountInfoModal = ({
                 } finally {
                     setIsSubmitting(false);
                     setConfig(null);
-                    setSelectedAccount(null);
                 }
             },
         });

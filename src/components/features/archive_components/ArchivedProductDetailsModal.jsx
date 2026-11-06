@@ -31,6 +31,9 @@ const ArchivedProductDetailsModal = ({ isOpen, onClose, selectedArchivedProduct,
                     description: "Product restored successfully.",
                 })
 
+                onClose();
+                setSelectedArchivedProduct(null);
+
             } catch (error) {
                 toast({
                     title: "Update Failed",
@@ -41,7 +44,6 @@ const ArchivedProductDetailsModal = ({ isOpen, onClose, selectedArchivedProduct,
             } finally {
                 setIsSubmitting(false);
                 setConfig(null);
-                setSelectedArchivedProduct(null);
             }
         },
         });

@@ -37,6 +37,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
     const [data, setData] = useState(() => getProductFormData(selectedProduct));
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isArchiving, setIsArchiving] = useState(false);
     const [originalImageUrl, setOriginalImageUrl] = useState(selectedProduct?.productImageUrl || null);
     const [isRemovingImage, setIsRemovingImage] = useState(false);
 
@@ -52,8 +53,9 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
     if (!isOpen) return null;
 
     const isDirty = !!data && JSON.stringify(data) !== JSON.stringify(getProductFormData(selectedProduct));
+    const isBusy = isSubmitting || isArchiving;
     const dismissGuard = guardDismiss({
-        isBusy: isSubmitting,
+        isBusy,
         isDirty,
         onDirty: () => setConfig(discardChangesConfig(onClose)),
     });
@@ -120,7 +122,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
         confirmText: "Archive Product",
             onConfirm: async () => {
                 try {
-                    setIsSubmitting(true);
+                    setIsArchiving(true);
                     await archiveProduct(productId);
                     
                     toast({
@@ -129,6 +131,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
                     });
 
                     onClose();
+                    setSelectedProduct(null);
 
                 } catch (error) {
                     toast({
@@ -139,9 +142,8 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
                     });
                     
                 } finally {
-                    setIsSubmitting(false);
+                    setIsArchiving(false);
                     setConfig(null);
-                    setSelectedProduct(null);
                 }
             },
         });
@@ -253,7 +255,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
 
                         <Button
                             onClick={handleSave}
-                            disabled={isSubmitting}
+                            disabled={isBusy}
                         >
                             <Check className="w-4 h-4 mr-2" />
                             {isSubmitting ? "Saving..." : "Save Changes"}
@@ -263,10 +265,10 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
                             variant="destructive"
                             className="w-full col-span-2"
                             onClick={handleArchiveProduct}
-                            disabled={isSubmitting}
+                            disabled={isBusy}
                         >
                             <Archive />
-                            {isSubmitting ? "Archiving..." : "Archive Product"}
+                            {isArchiving ? "Archiving..." : "Archive Product"}
                         </Button>
                     </div>
                 </DialogContent>
@@ -276,7 +278,7 @@ const EditProductModal = ({ isOpen, onClose, selectedProduct, setSelectedProduct
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
-                isLoading={isSubmitting}
+                isLoading={isBusy}
             />
         </>
     );

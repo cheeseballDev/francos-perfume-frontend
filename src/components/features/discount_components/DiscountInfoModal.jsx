@@ -58,7 +58,6 @@ const DiscountInfoModal = ({
                 } finally {
                     setIsSubmitting(false);
                     setConfig(null);
-                    setSelectedDiscount(null);
                 }
             },
         });
@@ -100,7 +99,6 @@ const DiscountInfoModal = ({
                 } finally {
                     setIsSubmitting(false);
                     setConfig(null);
-                    setSelectedDiscount(null);
                 }
             },
         });

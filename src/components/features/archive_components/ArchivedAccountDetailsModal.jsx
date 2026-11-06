@@ -32,6 +32,9 @@ const ArchivedAccountDetailsModal = ({ isOpen, onClose, selectedArchivedAcccount
                     description: "Account restored successfully.",
                 })
 
+                onClose();
+                setSelectedArchivedAccount(null);
+
             } catch (error) {
                 toast({
                     title: "Update Failed",
@@ -42,7 +45,6 @@ const ArchivedAccountDetailsModal = ({ isOpen, onClose, selectedArchivedAcccount
             } finally {
                 setIsSubmitting(false);
                 setConfig(null);
-                setSelectedArchivedAccount(null);
             }
         },
         });
