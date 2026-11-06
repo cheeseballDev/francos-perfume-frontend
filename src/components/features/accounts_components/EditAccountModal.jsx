@@ -72,9 +72,10 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
         onDirty: () => setConfig(discardChangesConfig(onClose)),
     });
 
-    const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
-    const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
-    const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
+    const filterGroups = Array.isArray(filterOptions) ? filterOptions : [];
+    const branchOptionData = filterGroups.find(option => option.key === "branchLocation")?.options || [];
+    const roleOptionData = filterGroups.find(option => option.key === "employeeRole")?.options || [];
+    const employeeShiftOptionData = filterGroups.find(option => option.key === "employeeShift")?.options || [];
 
     const branchOptions = branchOptionData.filter(
         (option) => option.value !== "" && option.value !== "__all__" && option.value !== "WAREHOUSE"
@@ -270,12 +271,14 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
 
           <div className="grid grid-cols-3 gap-6 mb-8">
             <FormSelect
+              key={isAdminRole ? "branch-admin" : "branch"}
               label="Branch"
               value={data.branchLocation || ''}
-              onChange={(value) => setData(prev => ({...prev, branchLocation: value }))}
+              onChange={(value) => handleChange('branchLocation', value)}
               options={visibleBranchOptions}
               placeholder="Select branch..."
-              disabled={isManager}
+              disabled={isManager || isAdminRole}
+              error={errors.branchLocation}
             />
             
             <FormSelect

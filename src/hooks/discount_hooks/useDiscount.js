@@ -25,10 +25,7 @@ export const useDiscounts = () => {
         totalEntries: 0,
     });
 
-    const [filterOptions, setFilterOptions] = useState({
-        discountStatus: [],
-        discountType: [],
-    });
+    const [filterOptions, setFilterOptions] = useState([]);
 
     const { filter, updateFilter } = useFilter({
         search: '',

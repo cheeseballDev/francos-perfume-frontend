@@ -19,10 +19,7 @@ export const useProduct = () => {
         totalEntries: 0,
     });
 
-    const [filterOptions, setFilterOptions] = useState({
-        productType: [],
-        productGender: [],
-    });
+    const [filterOptions, setFilterOptions] = useState([]);
 
     const PRODUCT_FILTER_SCHEMA = [
         { key: "productType", label: "Filter: Type", allLabel: "All Types" },

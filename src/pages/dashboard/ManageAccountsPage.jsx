@@ -44,6 +44,8 @@ const ManageAccountsPage = () => {
     const isManager = role === "MANAGER";
     const HIDDEN_ROLES_FOR_MANAGER = ["ADMIN", "OWNER"];
 
+    const filtersReady = Array.isArray(filterOptions) && filterOptions.length > 0;
+
     const visibleFilterOptions = !Array.isArray(filterOptions) ? [] : !isManager ? filterOptions : filterOptions.map((group) => {
         if (group.key === "employeeRole") {
             return { ...group, options: group.options.filter((o) => o.value === "" || !HIDDEN_ROLES_FOR_MANAGER.includes(String(o.value).toUpperCase())) };
@@ -83,7 +85,7 @@ const ManageAccountsPage = () => {
         updateFilter={updateFilter}
         filterOptions={visibleFilterOptions}
         className="mb-8"
-        actions={role !== 'MANAGER' && (
+        actions={role !== 'MANAGER' && filtersReady && (
           <Button
             onClick={() => setIsCreateAccountModalOpen(true)}
             className="shrink-0"

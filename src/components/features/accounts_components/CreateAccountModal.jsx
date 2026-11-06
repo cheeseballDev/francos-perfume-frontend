@@ -59,9 +59,10 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
         onDirty: () => setConfig(discardChangesConfig(discardAndClose)),
     });
 
-    const branchOptionData = filterOptions.find(option => option.key === "branchLocation")?.options || [];
-    const roleOptionData = filterOptions.find(option => option.key === "employeeRole")?.options || [];
-    const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
+    const filterGroups = Array.isArray(filterOptions) ? filterOptions : [];
+    const branchOptionData = filterGroups.find(option => option.key === "branchLocation")?.options || [];
+    const roleOptionData = filterGroups.find(option => option.key === "employeeRole")?.options || [];
+    const employeeShiftOptionData = filterGroups.find(option => option.key === "employeeShift")?.options || [];
 
     const branchOptions = branchOptionData.filter(
         (option) => option.value !== "" && option.value !== "__all__" && option.value !== "WAREHOUSE"
@@ -244,25 +245,32 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
 
           <div className="grid grid-cols-3 gap-6 mb-8">
             <FormSelect
+                key={isAdminRole ? "branch-admin" : "branch"}
                 label="Branch"
                 value={data.branchLocation || ''}
-                onChange={(value) => setData(prev => ({...prev, branchLocation: value }))}
+                onChange={(value) => handleChange('branchLocation', value)}
                 options={visibleBranchOptions}
                 placeholder="Select branch..."
+                disabled={isAdminRole}
+                error={errors.branchLocation}
             />
             
             <FormSelect
                 label="Role"
-                onChange={(value) => handleSelectAdminRole(value)}
+                value={data.employeeRole || ''}
+                onChange={handleSelectAdminRole}
                 options={roleOptions}
                 placeholder="Select role..."
+                error={errors.employeeRole}
             />
 
             <FormSelect
                 label="Shift"
-                onChange={(value) => setData(prev => ({...prev, employeeShift: value }))}
+                value={data.employeeShift || ''}
+                onChange={(value) => handleChange('employeeShift', value)}
                 options={employeeShiftOptions}
                 placeholder="Select shift..."
+                error={errors.employeeShift}
             />
           </div>
 

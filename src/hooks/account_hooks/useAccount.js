@@ -31,12 +31,7 @@ export const useAccount = () => {
         pageSize: 10,
     });
 
-    const [filterOptions, setFilterOptions] = useState({
-        accountStatus: [],
-        employeeRole: [],
-        employeeShift: [],
-        branchLocation: [],
-    });
+    const [filterOptions, setFilterOptions] = useState([]);
 
     const ACCOUNT_FILTER_SCHEMA = [
         { key: "employeeRole", label: "Filter: Role", allLabel: "All Roles" },

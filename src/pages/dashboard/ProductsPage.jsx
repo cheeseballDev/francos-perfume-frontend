@@ -33,6 +33,7 @@ export default function ProductsPage() {
     });
 
     const [isCreateProductModalOpen, setIsCreateProductModalOpen] = useState(false);
+    const filtersReady = Array.isArray(filterOptions) && filterOptions.length > 0;
     const [isEditProductModalOpen, setIsEditProductModalOpen] = useState(false);
 
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -65,7 +66,7 @@ export default function ProductsPage() {
                 updateFilter={updateFilter}
                 filterOptions={filterOptions}
                 className="mb-8"
-                actions={isOwner && (
+                actions={isOwner && filtersReady && (
                     <Button
                         onClick={() => setIsCreateProductModalOpen(true)}
                         className="shrink-0"
