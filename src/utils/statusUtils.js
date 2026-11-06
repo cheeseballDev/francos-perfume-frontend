@@ -20,7 +20,7 @@ const EXACT = {
     PARTIAL: "partial", "PARTIALLY COMPLETED": "partial", "PARTIALLY RECEIVED": "partial",
     "CLOSED PARTIAL": "partial", TEMPORARY: "partial",
 
-    REJECTED: "danger", CANCELLED: "danger", CANCELED: "danger", "DELIVERY CANCELLED": "danger", DEACTIVATED: "danger",
+    REJECTED: "danger", "NOT RECEIVED": "danger", CANCELLED: "danger", CANCELED: "danger", "DELIVERY CANCELLED": "danger", DEACTIVATED: "danger",
 
     CLOSED: "neutral", FINISHED: "neutral", BYPASSED: "neutral", INACTIVE: "neutral", ARCHIVED: "neutral",
 

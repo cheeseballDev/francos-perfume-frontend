@@ -8,18 +8,23 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useRef } from "react";
 
 const ConfirmDialog = ({ isOpen, onClose, config, isLoading }) => {
+    const latestConfig = useRef(config);
+    latestConfig.current = config;
+
     if (!config) return null;
 
     const handleConfirm = async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        const confirmedConfig = config;
         try {
-            if (config.onConfirm) {
-                await config.onConfirm();
+            if (confirmedConfig.onConfirm) {
+                await confirmedConfig.onConfirm();
             }
-            onClose();
+            if (latestConfig.current === confirmedConfig) onClose();
         } catch (error) {
             console.error("Confirmation action failed:", error);
         }

@@ -73,7 +73,7 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
         discountType: [isValid.required],
         ...(isPercent 
         ? { discountPercent: [isValid.required, isValid.decimalNumber] }
-        : { discountAmount: [isValid.required, isValid.decimalNumber] }
+        : { discountAmount: [isValid.required, isValid.decimalNumber, isValid.fixedDiscountAmount] }
         )
     };
 

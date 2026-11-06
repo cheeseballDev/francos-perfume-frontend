@@ -51,7 +51,9 @@ const CreateDiscountModal = ({ isOpen, onClose, createDiscount }) => {
         discountPrefix: [isValid.required, isValid.prefix],
         discountName: [isValid.required],
         discountType: [isValid.required],
-        [valueField]: [isValid.required, isValid.decimalNumber],
+        [valueField]: isPercent
+            ? [isValid.required, isValid.decimalNumber]
+            : [isValid.required, isValid.decimalNumber, isValid.fixedDiscountAmount],
     };
 
     const handleChange = (field, value) => {

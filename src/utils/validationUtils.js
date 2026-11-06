@@ -32,6 +32,9 @@ export const isValid = {
     decimalNumber: (value) =>
         value && !/^\d+(\.\d+)?$/.test(String(value)) ? 'Valid numbers or decimals only' : null,
 
+    fixedDiscountAmount: (value) =>
+        Number(value) > 0 ? null : 'Fixed discounts must be higher than ₱0',
+
     prefix: (value) =>
         value.length !== 3 ? `Must be 3 characters only` : null,
 

@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
 import { getAPIError } from "@/utils/apiErrorUtils";
+import { normalizeStatus } from "@/utils/statusUtils";
 import { ArrowLeft, CheckCircle, Loader2, Truck, XCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -76,13 +77,14 @@ export default function DeliveryDetailsPage() {
 
     const isInbound = selectedDelivery.direction === "INBOUND";
     const isOutbound = selectedDelivery.direction === "OUTBOUND";
-    const deliveryStatus = (selectedDelivery.deliveryStatus || "").toUpperCase();
+    const deliveryStatus = normalizeStatus(selectedDelivery.deliveryStatus);
     const isSameDestination = user?.branchLocation === selectedDelivery.toBranchName;
 
     const totalProducts = selectedDelivery.items?.length || 0;
     const totalUnits = selectedDelivery.items?.reduce((sum, item) => sum + (item.quantity || 0), 0);
     const isReceived = deliveryStatus === "COMPLETED"
         || deliveryStatus === "PARTIAL"
+        || deliveryStatus === "NOT RECEIVED"
         || (selectedDelivery.items || []).some((item) => (item.status || "").toUpperCase() === "RECEIVED");
     const totalReceived = selectedDelivery.items?.reduce((sum, item) => sum + (item.receivedQty || 0), 0);
 
@@ -167,24 +169,29 @@ export default function DeliveryDetailsPage() {
     const renderActionPanel = () => {
         if (isOutbound) {
             const isPendingDispatch = deliveryStatus === "PENDING" || deliveryStatus === "PENDING DISPATCH";
-            const canCancel = deliveryStatus !== "IN TRANSIT" && deliveryStatus !== "COMPLETED" && deliveryStatus !== "CANCELLED";
 
-            if (isPendingDispatch || canCancel) {
+            if (isPendingDispatch) {
                 return (
                     <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
                         <h2 className="text-base font-bold text-foreground">Required Action</h2>
                         <p className="text-xs text-muted-foreground">Mark as in transit to notify the receiving branch.</p>
-                        
-                        {isPendingDispatch && (
-                            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleMarkInTransit}>
-                                <Truck className="w-4 h-4 mr-2" /> Mark as In Transit
-                            </Button>
-                        )}
-                        {canCancel && (
-                            <Button variant="destructive" className="w-full" onClick={handleCancelDelivery}>
-                                <XCircle className="w-4 h-4 mr-2" /> Cancel Request
-                            </Button>
-                        )}
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleMarkInTransit}>
+                            <Truck className="w-4 h-4 mr-2" /> Mark as In Transit
+                        </Button>
+                        <Button variant="destructive" className="w-full" onClick={handleCancelDelivery}>
+                            <XCircle className="w-4 h-4 mr-2" /> Cancel Delivery
+                        </Button>
+                    </div>
+                );
+            }
+
+            if (deliveryStatus === "IN TRANSIT") {
+                return (
+                    <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-2 text-center">
+                        <h2 className="text-base font-bold text-foreground">Waiting for the Receiving Branch</h2>
+                        <p className="text-xs text-muted-foreground">
+                            This delivery is on its way. <span className="font-bold text-foreground">{selectedDelivery.toBranchName}</span> will confirm it once the items arrive.
+                        </p>
                     </div>
                 );
             }

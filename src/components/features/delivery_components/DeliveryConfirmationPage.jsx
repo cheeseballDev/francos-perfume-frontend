@@ -1,9 +1,11 @@
+import { useAuth } from "@/auth/UseAuth";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { postReceiveDelivery } from "@/services/DeliveryService";
 import { getAPIError } from "@/utils/apiErrorUtils";
+import { normalizeStatus } from "@/utils/statusUtils";
 import { ArrowLeft, CheckCircle, Loader2, PackageX, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -60,7 +62,9 @@ const STATUS_COPY = {
 const DeliveryConfirmationPage = () => {
     const { deliveryId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const { fetchDeliveryDetails } = useDelivery();
+    const [loadError, setLoadError] = useState(null);
 
     const [delivery, setDelivery] = useState(null);
     const [config, setConfig] = useState(null);
@@ -88,6 +92,8 @@ const DeliveryConfirmationPage = () => {
                 };
             });
             setItemReceipts(initial);
+        }).catch((error) => {
+            if (isMounted) setLoadError(getAPIError(error, "The delivery could not be loaded."));
         });
 
         return () => { isMounted = false; };
@@ -219,11 +225,45 @@ const DeliveryConfirmationPage = () => {
         });
     };
 
+    if (!delivery && loadError) {
+        return (
+            <div className="flex flex-col gap-4 items-center justify-center h-full font-montserrat text-center">
+                <PackageX className="h-10 w-10 text-destructive" />
+                <p className="font-semibold text-foreground">Couldn't load this delivery</p>
+                <p className="text-sm text-muted-foreground max-w-md">{loadError}</p>
+                <Button variant="outline" onClick={() => navigate("/home/deliveries")}>
+                    <ArrowLeft size={16} /> Back to Deliveries
+                </Button>
+            </div>
+        );
+    }
+
     if (!delivery) {
         return (
             <div className="flex flex-col gap-4 items-center justify-center h-full font-montserrat text-muted-foreground">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 Loading delivery details...
+            </div>
+        );
+    }
+
+    const deliveryStatus = normalizeStatus(delivery.deliveryStatus);
+    const isReceivingBranch = user?.branchLocation === delivery.toBranchName;
+    const blockedReason = !isReceivingBranch
+        ? `Only the receiving branch (${delivery.toBranchName}) can confirm this delivery.`
+        : deliveryStatus !== "IN TRANSIT"
+            ? `This delivery is ${deliveryStatus || "not in transit"}. Only deliveries that are in transit can be confirmed.`
+            : null;
+
+    if (blockedReason) {
+        return (
+            <div className="flex flex-col gap-4 items-center justify-center h-full font-montserrat text-center">
+                <PackageX className="h-10 w-10 text-destructive" />
+                <p className="font-semibold text-foreground">This delivery can't be confirmed</p>
+                <p className="text-sm text-muted-foreground max-w-md">{blockedReason}</p>
+                <Button variant="outline" onClick={() => navigate(`/home/deliveries/${deliveryId}`)}>
+                    <ArrowLeft size={16} /> Back to {delivery.deliveryDisplayId}
+                </Button>
             </div>
         );
     }
