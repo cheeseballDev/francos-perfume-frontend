@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { discardChangesConfig, guardDismiss } from '@/utils/modalUtils';
 import { isValid, validateForm } from '@/utils/validationUtils';
 import { Check } from 'lucide-react';
 import { useState } from 'react';
-import { getAPIError } from "@/utils/apiErrorUtils";
 
 const productValidationSchema = {
     productName: [isValid.required],
@@ -123,8 +123,8 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                         <div className="flex-1 overflow-y-auto px-6 pb-4">
                             <div className="py-4 border-b border-border">
                                 <ImageUpload
-                                    value={data.profileImageUrl}
-                                    onChange={(url) => handleChange('profileImageUrl', url)}
+                                    value={data.productImageUrl || ''}
+                                    onChange={(url) => handleChange('productImageUrl', url)}
                                     bucket="product-pictures"
                                     isEditing={true}
                                     imageText='Product Image'
@@ -155,7 +155,7 @@ const CreateProductModal = ({ isOpen, onClose, filterOptions, createProduct }) =
                                     onChange={(value) => handleChange('productGender', value)}
                                     options={genderOptions}
                                     placeholder="Select gender"
-                                    error={errors.gender}
+                                    error={errors.productGender}
                                 />
 
                                 <FormField 
