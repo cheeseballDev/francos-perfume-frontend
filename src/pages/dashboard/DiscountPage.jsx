@@ -129,6 +129,7 @@ const DiscountPage = () => {
             isOpen={isEditDiscountModalOpen} 
             onClose={() => setIsEditModalDiscountModalOpen(false)}
             selectedDiscount={selectedDiscount}
+            setSelectedDiscount={setSelectedDiscount}
             filterOptions={filterOptions} 
             updateDiscount={updateDiscount}
         />
