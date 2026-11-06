@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useState } from "react";
 import ModalOverlay from "@/components/shared/ModalOverlay";
+import { blockInvalidNumberKeys, blockInvalidNumberPaste } from "@/utils/numberInputUtils";
 
 const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment, isProcessing = false }) => {
     const [amountReceived, setAmountReceived] = useState("");
@@ -69,6 +70,8 @@ const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment, isPro
                 </span>
                     <input
                         type="number"
+                        onKeyDown={blockInvalidNumberKeys}
+                        onPaste={blockInvalidNumberPaste}
                         placeholder="Enter amount..."
                         value={amountReceived}
                         onChange={handleAmountChange}

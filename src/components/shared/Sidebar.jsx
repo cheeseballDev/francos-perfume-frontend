@@ -165,8 +165,8 @@ const Sidebar = () => {
           </Link>
         )}
 
-        {/* ARCHIVES - Manager, Owner, and Admin */}
-        {hasFullAccess && (
+        {/* ARCHIVES - Owner and Admin */}
+        {(isOwner || isAdmin) && (
           <Link to="/home/archives" className={getTabClass("/home/archives")}>
             <Archive size={24} />
             <p className="text-base">Archives</p>

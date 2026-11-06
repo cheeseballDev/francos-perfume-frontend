@@ -3,6 +3,7 @@ import logo from '../../../assets/FrancoPerfumeLogo.png';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import ModalOverlay from "@/components/shared/ModalOverlay";
+import { blockInvalidNumberKeys, blockInvalidNumberPaste } from "@/utils/numberInputUtils";
 
 const ProductModal = ({ product, isOpen, onClose, onAdd }) => {
     const [quantity, setQuantity] = useState(1);
@@ -89,6 +90,8 @@ const ProductModal = ({ product, isOpen, onClose, onAdd }) => {
                     
                     <input 
                     type="number"
+                    onKeyDown={blockInvalidNumberKeys}
+                    onPaste={blockInvalidNumberPaste}
                     value={quantity}
                     onChange={handleQuantityChange}
                     className="w-16 h-10 flex items-center justify-center border border-input rounded bg-transparent font-bold text-[18px] text-foreground text-center focus:outline-none focus:ring-2 focus:ring-ring"

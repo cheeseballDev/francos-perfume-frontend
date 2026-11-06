@@ -1,3 +1,5 @@
+import { blockInvalidNumberKeys, blockInvalidNumberPaste } from "@/utils/numberInputUtils";
+
 export const requestedProductsColumns = ( itemApprovals, handleApproveToggle, handleQtyChange, isEditable ) => 
 [
     {
@@ -51,6 +53,8 @@ export const requestedProductsColumns = ( itemApprovals, handleApproveToggle, ha
             return (
                 <input
                     type="number"
+                    onKeyDown={blockInvalidNumberKeys}
+                    onPaste={blockInvalidNumberPaste}
                     disabled={!isEditable || !approvalState?.isApproved}
                     value={itemApprovals[row.requestItemId]?.approvedQty ?? row.requestedQty}
                     onChange={(e) => handleQtyChange(row.requestItemId, e.target.value)}

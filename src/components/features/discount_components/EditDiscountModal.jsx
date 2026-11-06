@@ -90,8 +90,10 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
             handleChange(valueField, '');
             return;
         }
+        const value = Number(raw);
+        if (Number.isNaN(value)) return;
         const maxLimit = isPercent ? 100 : 9999;
-        handleChange(valueField, Math.min(maxLimit, Math.max(0, Number(raw))));
+        handleChange(valueField, Math.min(maxLimit, Math.max(0, value)));
     };
 
     const handleTypeChange = (selectedType) => {
@@ -197,6 +199,8 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
 
             <FormField 
                 label={isPercent ? "Discount Percentage (%)" : "Discount Amount (₱)"}
+                type="number"
+                step={isPercent ? "1" : "0.01"}
                 value={isPercent ? data.discountPercent : data.discountAmount}
                 onChange={e => handleValueChange(e.target.value)}
                 placeholder={isPercent ? "Enter discount percentage here..." : "Enter discount amount here..."}

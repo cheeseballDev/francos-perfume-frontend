@@ -14,7 +14,7 @@ const ROUTE_ROLES = {
     "/home/inventory": ["MANAGER", "OWNER", "STAFF"],
     "/home/products": ["OWNER"],
     "/home/accounts": ["MANAGER", "OWNER", "ADMIN"],
-    "/home/archives": ["MANAGER", "OWNER", "ADMIN"],
+    "/home/archives": ["OWNER", "ADMIN"],
 };
 
 const REFERENCE_PATTERN = new RegExp(`\\b(${Object.keys(REFERENCE_ROUTES).join("|")})-\\d+\\b`, "g");

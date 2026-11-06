@@ -2,6 +2,7 @@ import SearchableProductSelect from '@/components/shared/SearchableProductSelect
 import { Button } from '@/components/ui/button';
 import { Minus, Plus } from 'lucide-react';
 import { useEffect } from 'react';
+import { blockInvalidNumberKeys, blockInvalidNumberPaste } from '@/utils/numberInputUtils';
 
 const ProductSelector = ({ 
     selectedProduct, 
@@ -68,6 +69,8 @@ const ProductSelector = ({
                         </Button>
                         <input
                             type="number"
+                            onKeyDown={blockInvalidNumberKeys}
+                            onPaste={blockInvalidNumberPaste}
                             value={quantity}
                             onChange={(e) => {
                                 const val = Number(e.target.value);

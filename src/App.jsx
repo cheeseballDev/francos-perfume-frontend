@@ -144,8 +144,11 @@ const App = () => {
 
               <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'OWNER', 'ADMIN']} />}>
                 <Route path="accounts" element={<AccountsPage />} />
-                <Route path="archives" element={<ArchivesPage />} />
                 <Route path="audit" element={<AuditLogPage />} />
+              </Route>
+
+              <Route element={<ProtectedRoute user={user} allowedRoles={['OWNER', 'ADMIN']} />}>
+                <Route path="archives" element={<ArchivesPage />} />
               </Route>
             </Route>
             

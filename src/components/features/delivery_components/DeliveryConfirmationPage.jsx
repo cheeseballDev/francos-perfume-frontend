@@ -7,6 +7,7 @@ import { getAPIError } from "@/utils/apiErrorUtils";
 import { ArrowLeft, CheckCircle, Loader2, PackageX, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { blockInvalidNumberKeys, blockInvalidNumberPaste } from "@/utils/numberInputUtils";
 
 const REASON_OPTIONS = [
     { label: "Select reason...", value: "" },
@@ -295,6 +296,8 @@ const DeliveryConfirmationPage = () => {
                                         <td className="py-4 text-center">
                                             <input
                                                 type="number"
+                                                onKeyDown={blockInvalidNumberKeys}
+                                                onPaste={blockInvalidNumberPaste}
                                                 inputMode="numeric"
                                                 aria-label={`Received quantity for ${item.productName}`}
                                                 value={receipt.receivedQty ?? ""}

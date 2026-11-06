@@ -77,8 +77,10 @@ const CreateDiscountModal = ({ isOpen, onClose, createDiscount }) => {
             handleChange(valueField, '');
             return;
         }
+        const value = Number(raw);
+        if (Number.isNaN(value)) return;
         const maxLimit = isPercent ? 100 : 9999;
-        handleChange(valueField, Math.min(maxLimit, Math.max(0, Number(raw))));
+        handleChange(valueField, Math.min(maxLimit, Math.max(0, value)));
     };
 
     const handleSave = () => {

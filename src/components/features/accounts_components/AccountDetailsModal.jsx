@@ -220,19 +220,22 @@ const AccountInfoModal = ({
                 variant={isActive ? "destructive" : "default"}
                 onClick={handleToggleStatus}
                 disabled={isSelectedAccountTheCurrentUser}
+                className={isManager ? "col-span-2" : undefined}
               >
                 {isActive ? <MinusSquareIcon /> : <PlusSquareIcon />}
                 {isActive ? "Deactivate Account" : "Reactivate Account"}
               </Button>
 
-              <Button
-                variant="destructive"
-                onClick={handleArchiveAccount}
-                disabled={isManager || isSelectedAccountTheCurrentUser}
-              >
-                <Archive />
-                Archive Account
-              </Button>
+              {!isManager && (
+                <Button
+                  variant="destructive"
+                  onClick={handleArchiveAccount}
+                  disabled={isSelectedAccountTheCurrentUser}
+                >
+                  <Archive />
+                  Archive Account
+                </Button>
+              )}
             </div>
           </div>
         </DialogContent>
