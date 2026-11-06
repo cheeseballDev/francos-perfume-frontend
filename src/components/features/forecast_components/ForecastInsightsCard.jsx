@@ -131,7 +131,7 @@ const ForecastInsightsCard = ({ insightsState, onRefresh }) => {
                                                 {action.message && <p className="text-muted-foreground mt-0.5">{action.message}</p>}
                                             </div>
                                             {action.type === "TRANSFER" && action.fromBranchId && (
-                                                <Button size="sm" onClick={() => openTransfer(action)}>
+                                                <Button onClick={() => openTransfer(action)}>
                                                     Create transfer request
                                                 </Button>
                                             )}

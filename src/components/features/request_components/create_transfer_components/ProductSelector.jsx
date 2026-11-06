@@ -21,8 +21,8 @@ const ProductSelector = ({
     )?.label?.toUpperCase();
     const isWarehouse = fromBranchName === 'WAREHOUSE';
 
-    const maxQty = isWarehouse ? 99 : (availableQty);
-    const displayQty = isWarehouse ? '99' : (availableQty !== 0 ? availableQty : '--');
+    const maxQty = isWarehouse ? 999 : (availableQty);
+    const displayQty = isWarehouse ? '999' : (availableQty !== 0 ? availableQty : '--');
 
     const hasNoStock = !isWarehouse && availableQty === 0;
 

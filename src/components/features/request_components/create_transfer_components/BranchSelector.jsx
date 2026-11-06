@@ -10,13 +10,17 @@ const BranchSelector = ({ fromBranch, toBranch, setFromBranch, setToBranch, onCl
             
             <div className="grid grid-cols-2 gap-4 mb-4">
                 <FormSelect
+                    key={fromBranch ? "from-set" : "from-empty"}
                     label="Source Branch (From)"
+                    value={fromBranch ?? ""}
                     onChange={(value) => setFromBranch(value)}
                     options={fromBranchOptions}
                     placeholder= "Select source branch..."
                 />
                 <FormSelect
+                    key={`to-${fromBranch ?? "none"}-${toBranch ? "set" : "empty"}`}
                     label="Destination Branch (To)"
+                    value={toBranch ?? ""}
                     onChange={(value) => setToBranch(value)}
                     options={toBranchOptions}
                     placeholder={fromBranch ? "Select destination branch..." : "Select source branch first..."}
