@@ -77,7 +77,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
     const employeeShiftOptionData = filterOptions.find(option => option.key === "employeeShift")?.options || [];
 
     const branchOptions = branchOptionData.filter(
-        (option) => option.value !== "" && option.value !== "__all__"
+        (option) => option.value !== "" && option.value !== "__all__" && option.value !== "WAREHOUSE"
     );
 
     const roleOptions = roleOptionData.filter(
@@ -164,6 +164,22 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
         }
         handleChange('employeeImageUrl', url);
     };
+
+    const handleSelectAdminRole = (value) => {
+        setData((prev) => ({ 
+            ...prev, 
+            employeeRole: value,
+            branchLocation: value === "ADMIN" 
+            ? "WAREHOUSE" 
+            : prev.branchLocation === "WAREHOUSE" ? '' : prev.branchLocation
+        }));
+        setErrors((prev) => ({ ...prev, employeeRole: null, branchLocation: null }));
+    };
+
+    const isAdminRole = data.employeeRole === "ADMIN";
+    const visibleBranchOptions = isAdminRole
+        ? [{ value: "WAREHOUSE", label: "Warehouse" }]
+        : branchOptions;
 
     return (
     <>
@@ -255,9 +271,9 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
           <div className="grid grid-cols-3 gap-6 mb-8">
             <FormSelect
               label="Branch"
-              value={data.branchLocation}
+              value={data.branchLocation || ''}
               onChange={(value) => setData(prev => ({...prev, branchLocation: value }))}
-              options={branchOptions}
+              options={visibleBranchOptions}
               placeholder="Select branch..."
               disabled={isManager}
             />
@@ -265,7 +281,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
             <FormSelect
               label="Role"
               value={data.employeeRole}
-              onChange={(value) => setData(prev => ({...prev, employeeRole: value }))}
+              onChange={handleSelectAdminRole}
               options={roleOptions}
               placeholder="Select role..."
               disabled={isManager}

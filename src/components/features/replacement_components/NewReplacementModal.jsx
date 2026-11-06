@@ -248,7 +248,6 @@ const NewReplacementModal = ({ isOpen, onClose, onSaved }) => {
             description: `${selectedItem.productName} ×${quantity} will be replaced with ${selectedProduct.productName}. ${reasonLabel(form.reason)}; the returned perfume: ${returnedItemLabel(returnedItemAction).toLowerCase()}. ${paymentText} This can't be undone.`,
             confirmText: "Process",
             cancelText: "Go back",
-            confirmVariant: "success",
             onConfirm: handleSubmit,
         });
     };

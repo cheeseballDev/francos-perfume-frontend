@@ -140,6 +140,22 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
         })
     }
 
+    const handleSelectAdminRole = (value) => {
+        setData((prev) => ({ 
+            ...prev, 
+            employeeRole: value,
+            branchLocation: value === "ADMIN" 
+            ? "WAREHOUSE" 
+            : prev.branchLocation === "WAREHOUSE" ? '' : prev.branchLocation
+        }));
+        setErrors((prev) => ({ ...prev, employeeRole: null, branchLocation: null }));
+    };
+
+    const isAdminRole = data.employeeRole === "ADMIN";
+    const visibleBranchOptions = isAdminRole
+        ? [{ value: "WAREHOUSE", label: "Warehouse" }]
+        : branchOptions;
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -229,14 +245,15 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
           <div className="grid grid-cols-3 gap-6 mb-8">
             <FormSelect
                 label="Branch"
+                value={data.branchLocation || ''}
                 onChange={(value) => setData(prev => ({...prev, branchLocation: value }))}
-                options={branchOptions}
+                options={visibleBranchOptions}
                 placeholder="Select branch..."
             />
             
             <FormSelect
                 label="Role"
-                onChange={(value) => setData(prev => ({...prev, employeeRole: value }))}
+                onChange={(value) => handleSelectAdminRole(value)}
                 options={roleOptions}
                 placeholder="Select role..."
             />

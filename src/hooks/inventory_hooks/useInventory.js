@@ -28,7 +28,7 @@ export const useInventory = () => {
         productGender: '',
         pageCount: 1,
         pageSize: 10,
-        stockStatus: 'GOOD'
+        stockStatus: ''
     });
 
     const [filterOptions, setFilterOptions] = useState({
