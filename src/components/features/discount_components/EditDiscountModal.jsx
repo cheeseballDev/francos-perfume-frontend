@@ -60,6 +60,7 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
     });
 
     const isPercent = data.discountType === 'PERCENTAGE';
+    const valueField = isPercent ? 'discountPercent' : 'discountAmount';
 
     const discountTypeOptionData = filterOptions.find(option => option.key === "discountType")?.options || [];
     const discountTypeOptions = discountTypeOptionData.filter(
@@ -82,6 +83,15 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
         if (errors[field]) {
         setErrors((prev) => ({ ...prev, [field]: null }));
         }
+    };
+    
+    const handleValueChange = (raw) => {
+        if (raw === '') {
+            handleChange(valueField, '');
+            return;
+        }
+        const maxLimit = isPercent ? 100 : 9999;
+        handleChange(valueField, Math.min(maxLimit, Math.max(0, Number(raw))));
     };
 
     const handleTypeChange = (selectedType) => {
@@ -188,10 +198,7 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
             <FormField 
                 label={isPercent ? "Discount Percentage (%)" : "Discount Amount (₱)"}
                 value={isPercent ? data.discountPercent : data.discountAmount}
-                onChange={e => handleChange(
-                    isPercent ? 'discountPercent' : 'discountAmount',
-                    e.target.value
-                )}
+                onChange={e => handleValueChange(e.target.value)}
                 placeholder={isPercent ? "Enter discount percentage here..." : "Enter discount amount here..."}
                 error={isPercent ? errors.discountPercent : errors.discountAmount}
             />
