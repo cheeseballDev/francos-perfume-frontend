@@ -123,7 +123,7 @@ const ForecastPage = () => {
     ];
 
   return (
-    <div className="flex flex-col h-full w-full overflow-y-auto pr-1 pb-16 font-montserrat animate-fade-in">
+    <div className="flex flex-col w-full pb-16 font-montserrat animate-fade-in">
       <div className="mb-6 shrink-0">
         <h1 className="text-3xl font-bold text-foreground mb-1 leading-none tracking-tight">
           Stock Forecast

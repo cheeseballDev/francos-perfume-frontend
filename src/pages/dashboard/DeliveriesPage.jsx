@@ -212,7 +212,7 @@ const DeliveriesPage = () => {
     };
 
     return (
-        <div className="flex flex-col h-full animate-fade-in font-montserrat overflow-y-auto">
+        <div className="flex flex-col animate-fade-in font-montserrat pb-8">
             <div className="mb-6">
                 <h1 className="text-3xl font-bold text-foreground tracking-tight leading-none mb-1">
                     Deliveries
