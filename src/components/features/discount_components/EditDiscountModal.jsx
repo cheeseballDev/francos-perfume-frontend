@@ -4,10 +4,10 @@ import FormSelect from '@/components/shared/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { getAPIError } from "@/utils/apiErrorUtils";
+import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
 import { isValid, validateForm } from "@/utils/validationUtils";
 import { useEffect, useState } from 'react';
-import { discardChangesConfig, guardDismiss } from "@/utils/modalUtils";
-import { getAPIError } from "@/utils/apiErrorUtils";
 
 const getDiscountFormData = (discount) => {
   if (!discount) {
@@ -35,7 +35,7 @@ const getDiscountFormData = (discount) => {
   };
 };
 
-const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = [], updateDiscount }) => {
+const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = [], updateDiscount, setSelectedDiscount}) => {
     const { toast } = useToast();
     
     const [config, setConfig] = useState(null);
@@ -128,7 +128,7 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
                 });
 
                 onClose();
-
+                setSelectedDiscount(null);
             } catch (error) {
                 toast({
                     title: "Update Failed",
@@ -139,6 +139,7 @@ const EditDiscountModal = ({ isOpen, onClose, selectedDiscount, filterOptions = 
             } finally {
                 setIsSubmitting(false);
                 setConfig(null);
+                
             }
         } 
         });

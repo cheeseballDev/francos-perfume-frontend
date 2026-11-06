@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { ArrowLeft, CheckCircle, Loader2, Truck, XCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DeliveryInformation from "./DeliveryInformation";
-import { getAPIError } from "@/utils/apiErrorUtils";
 
 export default function DeliveryDetailsPage() {
     const { deliveryId } = useParams();
@@ -81,6 +81,10 @@ export default function DeliveryDetailsPage() {
 
     const totalProducts = selectedDelivery.items?.length || 0;
     const totalUnits = selectedDelivery.items?.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const isReceived = deliveryStatus === "COMPLETED"
+        || deliveryStatus === "PARTIAL"
+        || (selectedDelivery.items || []).some((item) => (item.status || "").toUpperCase() === "RECEIVED");
+    const totalReceived = selectedDelivery.items?.reduce((sum, item) => sum + (item.receivedQty || 0), 0);
 
     const handleMarkInTransit = () => {
         setConfig({
@@ -290,6 +294,24 @@ export default function DeliveryDetailsPage() {
                                 <span className="text-muted-foreground">Total Units:</span>
                                 <span className="font-bold text-foreground">{totalUnits}</span>
                             </div>
+                            {isReceived && (
+                                <>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Received Units:</span>
+                                        <span className="font-bold text-foreground">{totalReceived}</span>
+                                    </div>
+                                    <div className="space-y-1 pl-3 border-l-2 border-border">
+                                        {(selectedDelivery.items || []).map((item, index) => (
+                                            <div key={item.deliveryItemId || index} className="flex justify-between gap-3 text-xs">
+                                                <span className="text-muted-foreground truncate">{item.productName}</span>
+                                                <span className="font-semibold text-foreground shrink-0">
+                                                    {item.receivedQty || 0} / {item.quantity || 0}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 

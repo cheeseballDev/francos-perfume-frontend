@@ -7,6 +7,8 @@ const RequestTimeline = ({
     const { approvals = [], items = [] } = selectedRequest;
     const totalProducts = items?.length || 0;
     const totalUnits = items?.reduce((sum, item) => sum + (item.requestedQty || 0), 0);
+    const isReceived = approvals.some((approval) => (approval.status || "").toUpperCase() === "RECEIVED");
+    const totalReceived = items?.reduce((sum, item) => sum + (item.receivedQty || 0), 0);
 
     return (
         <div className="space-y-6">
@@ -58,6 +60,24 @@ const RequestTimeline = ({
                             <span className="text-muted-foreground">Total Units:</span>
                             <span className="font-bold text-foreground">{totalUnits}</span>
                         </div>
+                        {isReceived && (
+                            <>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Received Units:</span>
+                                    <span className="font-bold text-foreground">{totalReceived}</span>
+                                </div>
+                                <div className="space-y-1 pl-3 border-l-2 border-border">
+                                    {items.map((item, index) => (
+                                        <div key={item.requestItemId || index} className="flex justify-between gap-3 text-xs">
+                                            <span className="text-muted-foreground truncate">{item.productName}</span>
+                                            <span className="font-semibold text-foreground shrink-0">
+                                                {item.receivedQty || 0} / {item.requestedQty || 0}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

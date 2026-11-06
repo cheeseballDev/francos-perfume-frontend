@@ -3,15 +3,14 @@ import DetailItem from "@/components/shared/DetailItem";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { Edit, KeyRound, MinusSquareIcon, PlusSquareIcon } from "lucide-react";
 import { useState } from "react";
-import { getAPIError } from "@/utils/apiErrorUtils";
 
 const DiscountInfoModal = ({
     isOpen,
     onClose,
     selectedDiscount,
-    setSelectedDiscount,
     removeDiscount,
     toggleStatus,
     setIsEditDiscountModalOpen,

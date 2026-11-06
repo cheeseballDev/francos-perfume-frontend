@@ -15,8 +15,21 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
     const requestStage = currentPending?.stage || lastApproval?.stage;
     const requestStatus = selectedRequest.requestStatus;
     const requestId = selectedRequest.requestId;
+    console.log(requestStatus);
 
-    if (requestStatus === "REJECTED") {
+    if (requestStatus === "DELIVERY CANCELLED") {
+        return (
+            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
+                <h2 className="text-base font-bold text-foreground">No Action Required</h2>
+                <p className="text-sm text-muted-foreground">
+                    This request's delivery has been <span className="font-bold text-custom-red">cancelled</span>. 
+                    <br />
+                </p>
+            </div>
+        )
+    }
+
+    if (requestStatus === "REJECTED" || requestStatus === "CANCELLED" || requestStatus === "NOT RECEIVED") {
         return (
             <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
                 <h2 className="text-base font-bold text-foreground">No Action Required</h2>
@@ -27,6 +40,19 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
             </div>
         );
     }
+
+    if (requestStatus === "PARTIAL") {
+        return (
+            <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
+                <h2 className="text-base font-bold text-foreground">No Action Required</h2>
+                <p className="text-sm text-muted-foreground">
+                    This request's delivery has been <span className="font-bold text-amber-600">partially completed</span>. 
+                    <br />
+                </p>
+            </div>
+        )
+    }
+
 
     if (requestStatus === "RECEIVED" || requestStatus === "APPROVED" || requestStatus === "COMPLETED") {
         return (

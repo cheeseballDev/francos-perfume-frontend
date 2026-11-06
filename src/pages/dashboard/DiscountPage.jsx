@@ -1,14 +1,14 @@
 import { useAuth } from "@/auth/UseAuth";
-import { useRowSelection } from "@/hooks/useRowSelection";
 import CreateDiscountModal from "@/components/features/discount_components/CreateDiscountModal";
 import { discountColumns } from "@/components/features/discount_components/DiscountColumns";
-import DiscountInfoModal from "@/components/features/discount_components/DiscountInfoModal";
+import DiscountDetailsModal from "@/components/features/discount_components/DiscountDetailsModal";
 import EditDiscountModal from "@/components/features/discount_components/EditDiscountModal";
 import DiscountTableSkeleton from "@/components/loaders/DiscountTableSkeleton";
 import { SearchFilterBar } from "@/components/shared";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useDiscounts } from "@/hooks/discount_hooks/useDiscount";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import { Eye, Plus } from "lucide-react";
 import { useState } from "react";
 
@@ -115,7 +115,7 @@ const DiscountPage = () => {
             createDiscount={createDiscount}
         />
 
-        <DiscountInfoModal 
+        <DiscountDetailsModal 
             isOpen={isDiscountInfoModalOpen}
             onClose={() => setIsDiscountInfoModalOpen(false)}
             selectedDiscount={selectedDiscount}
