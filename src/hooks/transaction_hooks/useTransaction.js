@@ -1,10 +1,10 @@
 import { supabase } from "@/lib/SupabaseClient";
 import { getAllTransactions, getTransactionDetails, getTransactionFilters } from "@/services/TransactionService";
-import { buildFilterOptions } from "@/utils/formattingUtils";
+import { buildFilterOptions, todayInManila } from "@/utils/formattingUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "../useFilter";
 
-export const useTransaction = () => {
+export const useTransaction = ({ todayOnly = false } = {}) => {
     const isFirstLoad = useRef(true);
 
     const [transactions, setTransaction] = useState([]);
@@ -52,7 +52,11 @@ export const useTransaction = () => {
             setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         }
 
-        getAllTransactions(filter)
+        const query = todayOnly
+            ? { ...filter, fromDate: todayInManila(), toDate: todayInManila() }
+            : filter;
+
+        getAllTransactions(query)
             .then(data => {
                 isFirstLoad.current = false;
                 setTransaction(data.data);
@@ -69,7 +73,7 @@ export const useTransaction = () => {
         .finally(() => {
             setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
         });
-    }, [filter])
+    }, [filter, todayOnly])
 
     useEffect(() => {
         const timer = setTimeout(() => {

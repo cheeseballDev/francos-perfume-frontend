@@ -239,19 +239,20 @@ const DashboardHome = () => {
                                     )}
                                 </DashboardPanel>
 
-                                {/* Transactions Panel (Manager / Owner Only) */}
-                                {(userRole === "MANAGER" || userRole === "OWNER") && (
+                                {(userRole === "MANAGER" || userRole === "OWNER" || userRole === "STAFF") && (
                                     <DashboardPanel 
-                                        title={`Recent Transactions`} 
-                                        actionText="View All Transactions"
+                                        title={userRole === "STAFF" ? "Today's Recent Transactions" : "Recent Transactions"} 
+                                        actionText={userRole === "STAFF" ? "View Today's Transactions" : "View All Transactions"}
                                         onAction={() => navigate('/home/transactions')} 
                                     >
                                         {totalTransactions?.recentTransactionsList?.slice(0, 10).map((transaction, i) => (
                                             <TransactionItem key={transaction.salesOrderId || i} transaction={transaction} />
                                         ))}
 
-                                        {(totalTransactions?.totalTransactionsCount ?? 0) === 0 && (
-                                            <p className="text-sm text-muted-foreground text-center mt-4">No recent transactions.</p>
+                                        {(totalTransactions?.recentTransactionsList?.length ?? 0) === 0 && (
+                                            <p className="text-sm text-muted-foreground text-center mt-4">
+                                                {userRole === "STAFF" ? "No transactions yet today." : "No recent transactions."}
+                                            </p>
                                         )}
                                     </DashboardPanel>
                                 )}

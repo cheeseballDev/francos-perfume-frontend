@@ -128,10 +128,10 @@ const App = () => {
                 {/* FIXED ROUTE TO MATCH BUTTON NAVIGATION */}
                 <Route path="deliveries/:deliveryId/confirm" element={<DeliveryConfirmationPage />} />
                 <Route path="barcode" element={<BarcodePage />} /> 
+                <Route path="transactions" element={<TransactionsPage />} />
               </Route>
 
               <Route element={<ProtectedRoute user={user} allowedRoles={['MANAGER', 'OWNER']} />}>
-                <Route path="transactions" element={<TransactionsPage />} />
                 <Route path="replacements" element={<ReplacementsPage />} />
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="forecast" element={<ForecastPage />} />

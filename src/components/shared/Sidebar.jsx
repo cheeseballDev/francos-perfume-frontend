@@ -108,8 +108,7 @@ const Sidebar = () => {
           </Link>
         )}
 
-        {/* TRANSACTIONS - Manager & Owner Only */}
-        {hasManagementAccess && (
+        {(hasManagementAccess || isStaff) && (
           <Link to="/home/transactions" className={getTabClass("/home/transactions")}>
             <FileClock size={24} />
             <p className="text-base">Transactions List</p>

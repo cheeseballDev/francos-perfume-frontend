@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useTransaction } from '@/hooks/transaction_hooks/useTransaction';
 import { useRowSelection } from "@/hooks/useRowSelection";
 import { useUrlSearch } from "@/hooks/useUrlSearch";
+import { formatDateForTable, todayInManila } from '@/utils/formattingUtils';
 import { Eye, FileDown, Upload } from 'lucide-react';
 import { useState } from 'react';
 import ExportTransactionModal from "../../components/features/transactions_components/ExportTransactionModal";
@@ -18,7 +19,9 @@ export default function TransactionsPage() {
 
     const isStaff = user.trueRole === "STAFF";
     const isOwner = user.trueRole === "OWNER";
-    const isManager = user.trueRole === "MANAGER";
+
+    const [view, setView] = useState("ALL");
+    const todayOnly = isStaff || view === "TODAY";
 
     const { 
         transactions,
@@ -28,7 +31,7 @@ export default function TransactionsPage() {
         filterOptions,
         updateFilter,
         fetchTransactionDetails
-    } = useTransaction();
+    } = useTransaction({ todayOnly });
 
     const [searchQuery, setSearchQuery] = useState('');
     useUrlSearch((query) => {
@@ -38,6 +41,11 @@ export default function TransactionsPage() {
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [isTransactionDetailsModalOpen, setIsTransactionDetailsModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+    const handleViewChange = (next) => {
+        setView(next);
+        updateFilter('pageCount', 1);
+    };
 
     const handleSearchChange = (value) => {
         const query = value?.target ? value.target.value : value;
@@ -63,10 +71,33 @@ export default function TransactionsPage() {
             <div className="bg-background min-h-screen font-montserrat flex flex-col animate-fade-in relative">
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h1 className="text-[32px] font-bold text-foreground leading-none mb-2">Transaction History</h1>
-                        <p className="text-muted-foreground text-sm">View all POS sales.</p>
+                        <h1 className="text-[32px] font-bold text-foreground leading-none mb-2">
+                            {todayOnly ? "Today's Transactions" : "Transaction History"}
+                        </h1>
+                        <p className="text-muted-foreground text-sm">
+                            {todayOnly
+                                ? `POS sales made${isOwner ? "" : " at your branch"} today, ${formatDateForTable(todayInManila())}.`
+                                : "View all POS sales."}
+                        </p>
                     </div>
                 </div>
+
+                {!isStaff && (
+                    <div className="flex gap-2 mb-4">
+                        <Button
+                            variant={view === "ALL" ? "default" : "outline"}
+                            onClick={() => handleViewChange("ALL")}
+                        >
+                            All Transactions
+                        </Button>
+                        <Button
+                            variant={view === "TODAY" ? "default" : "outline"}
+                            onClick={() => handleViewChange("TODAY")}
+                        >
+                            Today
+                        </Button>
+                    </div>
+                )}
 
                 <SearchFilterBar
                     searchValue={searchQuery}
@@ -96,10 +127,12 @@ export default function TransactionsPage() {
 
             <div className="flex items-center justify-between w-full mt-4">
                 <div className="flex items-center gap-4">
-                    <Button onClick={() => setIsExportModalOpen(true)}>
-                        <FileDown className='h-4 w-4 mr-2'/>
-                        Export Transactions
-                    </Button>
+                    {!isStaff && (
+                        <Button onClick={() => setIsExportModalOpen(true)}>
+                            <FileDown className='h-4 w-4 mr-2'/>
+                            Export Transactions
+                        </Button>
+                    )}
 
                     {!isStaff && 
                         <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>

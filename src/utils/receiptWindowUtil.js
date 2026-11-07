@@ -15,6 +15,7 @@ export const openReceiptTab = (receipt) => {
         <!DOCTYPE html>
         <html>
         <head>
+            <meta charset="utf-8">
             <title>Receipt - ${receipt.receiptNumber}</title>
             <style>
                 body { 
@@ -109,10 +110,16 @@ export const openReceiptTab = (receipt) => {
         </html>
     `;
 
-    // Open a new browser tab/window
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-        newWindow.document.write(htmlContent);
-        newWindow.document.close();
-    }
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
