@@ -166,6 +166,7 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
                     <SelectItem value="Damaged">Damaged</SelectItem>
                     <SelectItem value="Expired">Expired</SelectItem>
                     <SelectItem value="Returned">Returned</SelectItem>
+                    <SelectItem value="Sold Offline">Sold Offline</SelectItem>
                     </SelectContent>
                 </Select>
                 </div>
