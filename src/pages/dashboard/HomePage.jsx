@@ -136,7 +136,11 @@ const DashboardHome = () => {
                         {userRole === "ADMIN" ? "Admin Dashboard" : "Dashboard"}
                     </h1>
                     <p className="text-muted-foreground text-sm">
-                        {userRole === "ADMIN" ? "System-wide audit trail and management." : "An overview for your branch"}
+                        {userRole === "ADMIN"
+                            ? "System-wide audit trail and management."
+                            : userRole === "OWNER"
+                                ? "An overview of all branches"
+                                : "An overview for your branch"}
                     </p>
                 </div>
                 {(userRole === "MANAGER" || userRole === "OWNER") && (
@@ -202,7 +206,7 @@ const DashboardHome = () => {
                                 </DashboardPanel>
                             
                                 <DashboardPanel 
-                                title="Pending Deliveries for Dispatch" 
+                                title="Pending and In-Transit Deliveries" 
                                 actionText="View All Deliveries"
                                 onAction={() => navigate('/home/deliveries')}
                                 >

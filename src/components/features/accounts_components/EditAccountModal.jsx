@@ -14,7 +14,7 @@ import { useAuth } from "../../../auth/UseAuth";
 const getAccountFormData = (account) => ({
     firstName: account?.firstName || "",
     lastName: account?.lastName || "",
-    middleName: account?.middleName || "",
+    middleName: account?.middleName && account.middleName.trim().toUpperCase() !== "N/A" ? account.middleName : "",
     contactNumber: account?.contactNumber || "",
     address: account?.address || "",
     email: account?.email || "",

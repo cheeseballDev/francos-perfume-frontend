@@ -53,7 +53,7 @@ const ForecastInsightsCard = ({ insightsState, onRefresh }) => {
                             <CardTitle className="text-base text-foreground">AI Insights</CardTitle>
                         </div>
                         <CardDescription>
-                            Claude explains the ML.NET forecast and suggests what to do. All numbers come from the system.
+                            AI explains the ML.NET forecast and suggests what to do. All numbers come from the system.
                         </CardDescription>
                     </div>
                     {result && (

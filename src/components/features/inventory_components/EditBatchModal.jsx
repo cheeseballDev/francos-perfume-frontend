@@ -123,9 +123,10 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
                 <Button 
                     variant="secondary" 
                     size="icon-sm" 
-                    onClick={() => handleChange('quantity', Math.min(99, data.quantity + 1))}
+                    aria-label="Decrease quantity"
+                    onClick={() => handleChange('quantity', Math.max(0, data.quantity - 1))}
                 >
-                    <Plus size={16} />
+                    <Minus size={16} />
                 </Button>
                 <Input
                     type="number"
@@ -135,15 +136,16 @@ const EditBatchModal = ({ isOpen, onClose, selectedBatch, handleSaveBatchWrapper
                         handleChange('quantity', Math.min(999, Math.max(0, val)));
                     }}
                     min={0}
-                    max={99}
+                    max={999}
                     className="w-24 text-center font-bold text-lg focus:ring-ring"
                 />
                 <Button 
                     variant="secondary" 
                     size="icon-sm" 
-                    onClick={() => handleChange('quantity',Math.max(0, data.quantity - 1))}
+                    aria-label="Increase quantity"
+                    onClick={() => handleChange('quantity', Math.min(999, data.quantity + 1))}
                 >
-                    <Minus size={16} />
+                    <Plus size={16} />
                 </Button>
                 </div>
             </div>

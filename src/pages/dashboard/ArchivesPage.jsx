@@ -8,10 +8,22 @@ import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useAccountArchive } from "@/hooks/archive_hooks/useAccountArchive";
 import { useProductArchive } from "@/hooks/archive_hooks/useProductArchive";
-import { Eye } from "lucide-react";
-import { useState } from "react";
+import { Eye, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
-const ProductArchivesSection = () => {
+const SearchNotice = ({ search, onClear }) => (
+    <div className="flex items-center justify-between gap-3 mb-4 px-4 py-2 rounded-lg border border-border bg-muted/50 text-sm">
+        <span className="text-muted-foreground">
+            Showing results for <span className="font-semibold text-foreground">{search}</span>
+        </span>
+        <Button variant="ghost" size="sm" onClick={onClear}>
+            <X className="h-4 w-4 mr-1" /> Clear
+        </Button>
+    </div>
+);
+
+const ProductArchivesSection = ({ urlSearch = "", onClearSearch }) => {
     const {
         archivedProducts,
         asyncState: productAsyncState,
@@ -21,6 +33,10 @@ const ProductArchivesSection = () => {
         fetchArchivedProduct,
         restoreArchivedProduct,
     } = useProductArchive();
+
+    useEffect(() => {
+        if ((productFilter.search || "") !== urlSearch) updateProductFilter('search', urlSearch);
+    }, [urlSearch]);
 
     const isProductsLoading = productAsyncState?.loading || productAsyncState?.isLoading;
 
@@ -37,6 +53,8 @@ const ProductArchivesSection = () => {
         <>
             <section>
                 <h2 className="text-2xl font-bold text-foreground mb-6">Products Archives</h2>
+
+                {urlSearch && <SearchNotice search={urlSearch} onClear={onClearSearch} />}
 
                 {isProductsLoading ? (
                     <ProductArchiveSkeleton rowCount={3} />
@@ -81,6 +99,13 @@ const ArchivesPage = () => {
     const { user } = useAuth();
     const canViewArchivedProducts = (user?.trueRole || "") === "OWNER";
 
+    const [searchParams, setSearchParams] = useSearchParams();
+    const urlSearch = searchParams.get("search") || "";
+    const isProductSearch = searchParams.get("section") === "products";
+    const accountSearch = isProductSearch ? "" : urlSearch;
+    const productSearch = isProductSearch ? urlSearch : "";
+    const clearUrlSearch = () => setSearchParams({}, { replace: true });
+
     const { 
         archivedAccounts, 
         asyncState: accountAsyncState, 
@@ -90,6 +115,10 @@ const ArchivesPage = () => {
         fetchArchivedAccount,
         restoreArchivedAccount,
     } = useAccountArchive();
+
+    useEffect(() => {
+        if ((accountFilter.search || "") !== accountSearch) updateAccountFilter('search', accountSearch);
+    }, [accountSearch]);
 
     const isAccountsLoading = accountAsyncState?.loading || accountAsyncState?.isLoading;
 
@@ -115,6 +144,8 @@ const ArchivesPage = () => {
 
                 <section className="mb-10">
                     <h2 className="text-2xl font-bold text-foreground mb-6">Accounts Archives</h2>
+
+                    {accountSearch && <SearchNotice search={accountSearch} onClear={clearUrlSearch} />}
 
                     {isAccountsLoading ? (
                         <AccountArchiveSkeleton rowCount={3} />
@@ -144,7 +175,9 @@ const ArchivesPage = () => {
                     </div>
                 </section>
 
-                {canViewArchivedProducts && <ProductArchivesSection />}
+                {canViewArchivedProducts && (
+                    <ProductArchivesSection urlSearch={productSearch} onClearSearch={clearUrlSearch} />
+                )}
         </div>
 
         <ArchivedAccountDetailsModal

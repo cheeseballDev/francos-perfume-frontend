@@ -19,8 +19,7 @@ import perfumePlaceholder from "../../../assets/FrancoPerfumeLogo.png";
 
 const InventoryTable = ({inventory, asyncState, pagination, fetchBatchesForProduct, batchMap, setBatchMap, filter, updateFilter, handleOpenEditBatchModal}) => {
     const { user } = useAuth();
-    const canEditBranch = (branchId) =>
-        user?.trueRole === "OWNER" || Number(branchId) === Number(user?.branchId);
+    const canEditBranch = (branchId) => Number(branchId) === Number(user?.branchId);
 
     const [expandedRows, setExpandedRows] = useState({});
     

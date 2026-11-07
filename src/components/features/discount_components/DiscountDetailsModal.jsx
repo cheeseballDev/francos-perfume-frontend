@@ -89,7 +89,7 @@ const DiscountInfoModal = ({
 
                 } catch (error) {
                     toast({
-                        title: "Reset Password Failed",
+                        title: "Status Update Failed",
                         description: isActive 
                         ? `An error occurred while deactivating the discount.\n${getAPIError(error)}`
                         : `An error occurred while reactivating the discount.\n${getAPIError(error)}`,

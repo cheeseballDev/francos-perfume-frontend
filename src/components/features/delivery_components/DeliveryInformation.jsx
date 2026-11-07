@@ -11,20 +11,20 @@ export default function DeliveryInformation({ delivery }) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
                     <span className="text-xs text-muted-foreground block font-medium">From Branch</span>
-                    <span className="font-semibold text-foreground">
+                    <span className="font-semibold text-foreground break-words">
                         {delivery.fromBranchName || "N/A"}
                     </span>
                 </div>
                 <div>
                     <span className="text-xs text-muted-foreground block font-medium">To Branch</span>
-                    <span className="font-semibold text-foreground">
+                    <span className="font-semibold text-foreground break-words">
                         {delivery.toBranchName || "N/A"}
                     </span>
                 </div>
                 <div>
                     <span className="text-xs text-muted-foreground block font-medium">Created By</span>
                     <span className="font-semibold text-foreground">
-                        {delivery.employeeDisplayId || "N/A"}
+                        {delivery.createdBy || delivery.employeeDisplayId || "N/A"}
                     </span>
                 </div>
                 <div>

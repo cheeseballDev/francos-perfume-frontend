@@ -16,8 +16,13 @@ export const getTransactionDetails = async (salesOrderId) => {
     return response.data;
 }
 
-export const getExcel = async (fromDate, toDate) => {
-    const params = cleanFilters({ fromDate, toDate }); 
+const exportParams = (fromDate, toDate, filters = {}) => {
+    const { pageCount, pageSize, ...listFilters } = filters;
+    return cleanFilters({ ...listFilters, fromDate, toDate });
+};
+
+export const getExcel = async (fromDate, toDate, filters = {}) => {
+    const params = exportParams(fromDate, toDate, filters);
     const response = await apiClient.get(`${PATH}/excel`, {
         params,
         responseType: "blob",
@@ -30,8 +35,8 @@ export const getTransactionFilters = async () => {
     return response.data;
 }
 
-export const getPdf = async (fromDate, toDate) => {
-    const params = cleanFilters({ fromDate, toDate });
+export const getPdf = async (fromDate, toDate, filters = {}) => {
+    const params = exportParams(fromDate, toDate, filters);
     const response = await apiClient.get(`${PATH}/pdf`, {
         params,
         responseType: "blob",

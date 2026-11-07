@@ -83,13 +83,13 @@ const DeliveryCard = ({
 
     return (
         <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <div className="flex items-center gap-4 min-w-0">
                     <div className="p-2 bg-muted rounded-lg">
                         <ShoppingCart size={28} className="text-muted-foreground" />
                     </div>
-                    <div>
-                        <div className="flex items-center gap-2">
+                    <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-bold text-lg text-foreground">{deliveryId}</h3>
                             <StatusBadge status={delivery.direction} />
                             <StatusBadge status={delivery.deliveryStatus} />
@@ -99,7 +99,7 @@ const DeliveryCard = ({
                                 Request: <ReferenceLink reference={delivery.requestDisplayId} />
                             </p>
                         )}
-                        <p className="text-sm text-muted-foreground">{route}</p>
+                        <p className="text-sm text-muted-foreground break-words">{route}</p>
                     </div>
                 </div>
                 <div className="text-right">

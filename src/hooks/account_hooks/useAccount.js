@@ -7,6 +7,7 @@ import { useFilter } from "../useFilter";
 export const useAccount = () => {
     const [accounts, setAccounts] = useState([]);
     const isFirstLoad = useRef(true);
+    const latestRequest = useRef(0);
 
     const [asyncState, setAsyncState] = useState({
         isLoading: true,
@@ -47,8 +48,10 @@ export const useAccount = () => {
             setAsyncState((prev) => ({ ...prev, isFetching: true, error: null }));
         }
 
+        const requestId = ++latestRequest.current;
         try {
             const data = await getAllAccounts(filter);
+            if (requestId !== latestRequest.current) return;
             isFirstLoad.current = false;
             setAccounts(data.data);
             setPagination({
@@ -56,9 +59,12 @@ export const useAccount = () => {
                 totalEntries: data.totalEmployees || 0,
             });
         } catch (err) {
+            if (requestId !== latestRequest.current) return;
             setAsyncState((prev) => ({ ...prev, error: err }));
         } finally {
-            setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
+            if (requestId === latestRequest.current) {
+                setAsyncState((prev) => ({ ...prev, isLoading: false, isFetching: false}));
+            }
         }
     }, [filter]);
 

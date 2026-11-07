@@ -27,11 +27,11 @@ export const useExportReport = () => {
         window.URL.revokeObjectURL(url);
     };
 
-    const exportExcel = useCallback(async (fromDate, toDate) => {
+    const exportExcel = useCallback(async (fromDate, toDate, filters = {}) => {
         setIsExporting(true);
         setIsError(null);
         try {
-            const response = await getExcel(fromDate, toDate);
+            const response = await getExcel(fromDate, toDate, filters);
             const filename = getFilename(response, "Transaction_List.xlsx");
             triggerDownload(response.data, filename);
         } catch (err) {
@@ -42,11 +42,11 @@ export const useExportReport = () => {
         }
     }, []);
 
-    const exportPdf = useCallback(async (fromDate, toDate) => {
+    const exportPdf = useCallback(async (fromDate, toDate, filters = {}) => {
         setIsExporting(true);
         setIsError(null);
         try {
-            const response = await getPdf(fromDate, toDate);
+            const response = await getPdf(fromDate, toDate, filters);
             const filename = getFilename(response, "Transaction_List.pdf");
             triggerDownload(response.data, filename);
         } catch (err) {

@@ -25,11 +25,11 @@ export const referenceRoute = (reference, context = "") => {
     if (!REFERENCE_ROUTES[prefix]) return null;
 
     if (/\barchived\b/i.test(context) && prefix === "PROD") {
-        return "/home/archives?section=products";
+        return `/home/archives?section=products&search=${encodeURIComponent(reference)}`;
     }
 
     if (/\barchived\b/i.test(context) && prefix === "EMP") {
-        return "/home/archives";
+        return `/home/archives?search=${encodeURIComponent(reference)}`;
     }
 
     const base = /\brestored\b/i.test(context) && prefix === "PROD"
@@ -41,8 +41,9 @@ export const referenceRoute = (reference, context = "") => {
 
 export const canOpenRoute = (route, role) => {
     if (!route) return false;
-    const path = route.split("?")[0];
-    const allowed = ROUTE_ROLES[route] ?? ROUTE_ROLES[path];
+    const [path, query = ""] = route.split("?");
+    const section = new URLSearchParams(query).get("section");
+    const allowed = (section && ROUTE_ROLES[`${path}?section=${section}`]) || ROUTE_ROLES[path];
     return !allowed || allowed.includes(String(role || "").toUpperCase());
 };
 

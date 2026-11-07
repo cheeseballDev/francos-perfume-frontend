@@ -123,6 +123,7 @@ export default function TransactionsPage() {
             <ExportTransactionModal 
                 isOpen={isExportModalOpen} 
                 onClose={() => setIsExportModalOpen(false)}
+                filter={filter}
             />
 
             <TransactionDetailsModal 

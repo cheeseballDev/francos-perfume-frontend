@@ -44,7 +44,7 @@ const AccountInfoModal = ({
         setConfig({
         title: "Are you sure you want to reset the password for this account?",
         description:
-            "The user of this account will be logged out and an email will be sent including their one-time generated password.",
+            "The user of this account will be logged out and their password will be reset to the default password. They must set a new password the next time they log in.",
         confirmText: "Reset Password",
         onConfirm: async () => {
             try {
@@ -191,7 +191,7 @@ const AccountInfoModal = ({
                   <DetailItem label="Last name" value={selectedAccount.lastName || "N/A"} />
                 </div>
 
-                <DetailItem label="Address" value={selectedAccount.address || "N/A"} uppercase={true} />
+                <DetailItem label="Address" value={selectedAccount.address || "N/A"} />
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <DetailItem label="Contact number" value={selectedAccount.contactNumber || "N/A"} />

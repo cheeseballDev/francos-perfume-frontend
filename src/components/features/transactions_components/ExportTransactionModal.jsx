@@ -11,7 +11,7 @@ import { useExportReport } from "@/hooks/transaction_hooks/useExportReport";
 import { FileSpreadsheet, FileText, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const ExportTransactionModal = ({ isOpen, onClose }) => {
+const ExportTransactionModal = ({ isOpen, onClose, filter = {} }) => {
   const [selectedFormat, setSelectedFormat] = useState(null);
   const [fromDate, setfromDate] = useState("");
   const [toDate, settoDate] = useState("");
@@ -35,9 +35,9 @@ const ExportTransactionModal = ({ isOpen, onClose }) => {
 
     try {
         if (selectedFormat === 'pdf') {
-            await exportPdf(fromDate, toDate);
+            await exportPdf(fromDate, toDate, filter);
         } else if (selectedFormat === 'xlsx') {
-            await exportExcel(fromDate, toDate);
+            await exportExcel(fromDate, toDate, filter);
         }
         
         onClose();

@@ -136,7 +136,7 @@ const ImageUpload = ({
                 <div className="flex-grow">
                     <h3 className="text-[16px] font-bold text-foreground">{imageText}</h3>
                     <p className="text-xs text-muted-foreground mt-0.5 mb-3">
-                        Allowed: JPG, PNG, WEBP, GIF, AVIF, SVG (Max 50MB)
+                        Allowed: JPG, PNG, WEBP, GIF, AVIF, SVG (Max 5MB)
                     </p>
 
                     <input

@@ -4,7 +4,9 @@ const PaginationBar = ({ pageCount, pageSize, totalPages, totalEntries, updateFi
   return (
         <div className="flex justify-between items-center mt-auto px-4 py-3 border-t border-border text-sm text-muted-foreground">  
           <p>
-            Showing {((pageCount - 1) * pageSize) + 1} to {Math.min(pageCount * pageSize, totalEntries)} of {totalEntries} entries
+            {totalEntries > 0
+              ? `Showing ${((pageCount - 1) * pageSize) + 1} to ${Math.min(pageCount * pageSize, totalEntries)} of ${totalEntries} entries`
+              : "No entries to show"}
           </p>
           <div className="flex items-center gap-4">
             <button
