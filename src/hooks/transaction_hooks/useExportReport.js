@@ -1,4 +1,4 @@
-import { getExcel, getPdf, getSalesReportExcel } from "@/services/TransactionService";
+import { getExcel, getImportTemplate, getPdf, getSalesReportExcel } from "@/services/TransactionService";
 import { useCallback, useState } from "react";
 
 export const useExportReport = () => {
@@ -72,5 +72,20 @@ export const useExportReport = () => {
         }
     }, []);
 
-    return { exportExcel, exportPdf, exportSalesReport, isExporting, isError };
+    const downloadTemplate = useCallback(async () => {
+        setIsExporting(true);
+        setIsError(null);
+        try {
+            const response = await getImportTemplate();
+            const filename = getFilename(response, "Offline Sales Template.xlsx");
+            triggerDownload(response.data, filename);
+        } catch (err) {
+            setIsError(err);
+            throw err;
+        } finally {
+            setIsExporting(false);
+        }
+    }, []);
+
+    return { exportExcel, exportPdf, exportSalesReport, downloadTemplate, isExporting, isError };
 };

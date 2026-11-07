@@ -6,11 +6,13 @@ import TransactionTableSkeleton from '@/components/loaders/TransactionTableSkele
 import { SearchFilterBar } from '@/components/shared';
 import DataTable from '@/components/shared/DataTable';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+import { useExportReport } from '@/hooks/transaction_hooks/useExportReport';
 import { useTransaction } from '@/hooks/transaction_hooks/useTransaction';
 import { useRowSelection } from "@/hooks/useRowSelection";
 import { useUrlSearch } from "@/hooks/useUrlSearch";
 import { formatDateForTable, todayInManila } from '@/utils/formattingUtils';
-import { Eye, FileDown, Upload } from 'lucide-react';
+import { Download, Eye, FileDown, Upload } from 'lucide-react';
 import { useState } from 'react';
 import ExportTransactionModal from "../../components/features/transactions_components/ExportTransactionModal";
 
@@ -22,6 +24,8 @@ export default function TransactionsPage() {
 
     const [view, setView] = useState("ALL");
     const todayOnly = isStaff || view === "TODAY";
+    const { toast } = useToast();
+    const { downloadTemplate, isExporting: isDownloadingTemplate } = useExportReport();
 
     const { 
         transactions,
@@ -41,6 +45,22 @@ export default function TransactionsPage() {
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [isTransactionDetailsModalOpen, setIsTransactionDetailsModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+    const handleDownloadTemplate = async () => {
+        try {
+            await downloadTemplate();
+            toast({
+                title: 'Template Downloaded',
+                description: 'Record the sales made offline in this file, then give it to your branch manager to import.',
+            });
+        } catch {
+            toast({
+                title: 'Download Failed',
+                description: 'The template could not be downloaded. Check your connection and try again.',
+                variant: 'destructive',
+            });
+        }
+    };
 
     const handleViewChange = (next) => {
         setView(next);
@@ -131,6 +151,13 @@ export default function TransactionsPage() {
                         <Button onClick={() => setIsExportModalOpen(true)}>
                             <FileDown className='h-4 w-4 mr-2'/>
                             Export Transactions
+                        </Button>
+                    )}
+
+                    {isStaff && (
+                        <Button variant="outline" onClick={handleDownloadTemplate} disabled={isDownloadingTemplate}>
+                            <Download className='h-4 w-4 mr-2' />
+                            {isDownloadingTemplate ? 'Downloading...' : 'Download Offline Sales Template'}
                         </Button>
                     )}
 
