@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 const accountValidationSchema = {
     firstName: [isValid.required],
     lastName: [isValid.required],
-    email: [isValid.required, isValid.email],
+    email: [isValid.required, isValid.email, isValid.companyEmail],
     address: [isValid.required, isValid.minLength(3)],
     contactNumber: [isValid.required, isValid.phone],
     branchLocation: [isValid.required],
@@ -227,7 +227,7 @@ const CreateAccountModal = ({ isOpen, onClose, filterOptions = [], createAccount
                 value={data.email || ''}
                 maxLength={50}
                 onChange={e => handleChange('email', e.target.value)}
-                placeholder="Enter email here..."
+                placeholder="name@francosperfume.shop"
                 error={errors.email}
             />
             <FormField 

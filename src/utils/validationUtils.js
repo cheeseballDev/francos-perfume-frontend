@@ -14,6 +14,11 @@ export const isValid = {
     email: (value) => 
         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Invalid email address' : null,
     
+    companyEmail: (value) =>
+        value && !String(value).trim().toLowerCase().endsWith('@francosperfume.shop')
+            ? 'Email must end in @francosperfume.shop'
+            : null,
+
     phone: (value) => 
         !/^(\+63|0)\d{10}$/.test(value.replace(/\s/g, '')) ? 'Invalid phone number' : null,
     

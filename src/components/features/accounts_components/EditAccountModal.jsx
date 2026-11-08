@@ -28,7 +28,7 @@ const accountValidationSchema = {
     firstName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
     lastName: [isValid.required, isValid.maxLength(25), isValid.minLength(2), isValid.noNumbers],
     address: [isValid.required, isValid.minLength(3)],
-    email: [isValid.required, isValid.email],
+    email: [isValid.required, isValid.email, isValid.companyEmail],
     contactNumber: [isValid.phone],
     branchLocation: [isValid.required],
     employeeRole: [isValid.required],
@@ -253,7 +253,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
               maxLength={50}
               value={data.email}
               onChange={e => handleChange('email', e.target.value)}
-              placeholder="Enter email here..."
+              placeholder="name@francosperfume.shop"
               error={errors.email}
             />
             <FormField 
