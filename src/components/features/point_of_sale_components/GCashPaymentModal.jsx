@@ -1,6 +1,6 @@
+import ModalOverlay from "@/components/shared/ModalOverlay";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import ModalOverlay from "@/components/shared/ModalOverlay";
 
 const GCashPaymentModal = ({ isOpen, onClose, onBack, onConfirmPayment, isProcessing = false }) => {
   const [referenceNumber, setReferenceNumber] = useState("");
@@ -46,23 +46,23 @@ const GCashPaymentModal = ({ isOpen, onClose, onBack, onConfirmPayment, isProces
 
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Button
-            variant="outline"
-            className="py-5 text-lg font-extrabold tracking-widest"
-            disabled={isProcessing}
-            onClick={onBack ?? handleClose}
-          >
-            GO BACK
-          </Button>
-          <Button
-            variant="success"
-            className="py-5 text-lg font-extrabold tracking-widest shadow-md"
-            disabled={!isValid || isProcessing}
-            onClick={handleConfirm}
-          >
-            CONFIRM PAYMENT
-          </Button>
+        <div className="flex gap-3">
+            <Button
+                variant="outline"
+                className="shrink-0 px-5 py-5 text-sm font-bold tracking-wide"
+                disabled={isProcessing}
+                onClick={onBack ?? handleClose}
+            >
+                GO BACK
+            </Button>
+            <Button
+                variant="success"
+                className="flex-1 py-5 text-lg font-extrabold tracking-widest shadow-md"
+                disabled={!isValid || isProcessing}
+                onClick={handleConfirm}
+            >
+                CONFIRM PAYMENT
+            </Button>
         </div>
         <button 
           onClick={handleClose}
