@@ -11,6 +11,7 @@ const DiscountInfoModal = ({
     isOpen,
     onClose,
     selectedDiscount,
+    setSelectedDiscount,
     removeDiscount,
     toggleStatus,
     setIsEditDiscountModalOpen,
@@ -46,7 +47,7 @@ const DiscountInfoModal = ({
                     });
 
                     onClose();
-                    setSelectedDiscount(null);
+                    setSelectedDiscount?.(null);
 
                 } catch (error) {
                     toast({
@@ -85,7 +86,7 @@ const DiscountInfoModal = ({
                     });
 
                     onClose();
-                    setSelectedDiscount(null);
+                    setSelectedDiscount?.(null);
 
                 } catch (error) {
                     toast({

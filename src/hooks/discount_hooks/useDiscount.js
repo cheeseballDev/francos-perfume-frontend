@@ -106,31 +106,19 @@ export const useDiscounts = () => {
     };
 
     const updateDiscount = async (id, dto) => {
-        try {
-            const data = await patchUpdateDiscountDetails(id, dto);
-            await fetchAllDiscounts();
-            return data;
-        } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-        }
+        const data = await patchUpdateDiscountDetails(id, dto);
+        await fetchAllDiscounts();
+        return data;
     };
 
     const removeDiscount = async (id) => {
-        try {
-            await deleteDiscount(id);
-            await fetchAllDiscounts();
-        } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-        }
+        await deleteDiscount(id);
+        await fetchAllDiscounts();
     };
 
     const toggleStatus = useCallback(async (id) => {
-        try {
-            await patchToggleDiscountStatus(id);
-            await fetchAllDiscounts();
-        } catch (err) {
-            setAsyncState((prev) => ({ ...prev, error: err }));
-        }
+        await patchToggleDiscountStatus(id);
+        await fetchAllDiscounts();
     }, [fetchAllDiscounts]);
 
     const fetchDiscountFilters = useCallback(async () => {

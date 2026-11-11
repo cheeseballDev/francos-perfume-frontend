@@ -348,6 +348,7 @@ const PointOfSalePage = () => {
         <CashPaymentModal 
             isOpen={showCashModal} 
             onClose={() => setShowCashModal(false)} 
+            onBack={() => { setShowCashModal(false); setShowCheckoutModal(true); }}
             grandTotal={grandTotal} 
             onConfirmPayment={requestPaymentConfirmation} 
             isProcessing={isProcessing || isConfirmingPayment}
@@ -355,6 +356,7 @@ const PointOfSalePage = () => {
         <GCashPaymentModal 
             isOpen={showGCashModal} 
             onClose={() => setShowGCashModal(false)} 
+            onBack={() => { setShowGCashModal(false); setShowCheckoutModal(true); }}
             onConfirmPayment={requestPaymentConfirmation} 
             isProcessing={isProcessing || isConfirmingPayment}
         />

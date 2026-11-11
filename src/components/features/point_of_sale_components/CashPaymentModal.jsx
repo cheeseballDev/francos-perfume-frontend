@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import ModalOverlay from "@/components/shared/ModalOverlay";
 import { blockInvalidNumberKeys, blockInvalidNumberPaste } from "@/utils/numberInputUtils";
 
-const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment, isProcessing = false }) => {
+const CashPaymentModal = ({ isOpen, onClose, onBack, grandTotal, onConfirmPayment, isProcessing = false }) => {
     const [amountReceived, setAmountReceived] = useState("");
 
     useEffect(() => {
@@ -94,10 +94,18 @@ const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment, isPro
             </div>
             </div>
 
-            <div className="flex justify-center">
+            <div className="grid grid-cols-2 gap-4">
+            <Button
+                variant="outline"
+                className="py-6 text-lg font-extrabold tracking-widest"
+                disabled={isProcessing}
+                onClick={onBack ?? handleClose}
+            >
+                GO BACK
+            </Button>
             <Button
                 variant="success"
-                className="px-10 py-6 text-lg font-extrabold tracking-widest w-full max-w-[300px] shadow-md"
+                className="py-6 text-lg font-extrabold tracking-widest shadow-md"
                 disabled={!isSufficient || isProcessing}
                 onClick={handleConfirm}
             >

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import ModalOverlay from "@/components/shared/ModalOverlay";
 
-const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment, isProcessing = false }) => {
+const GCashPaymentModal = ({ isOpen, onClose, onBack, onConfirmPayment, isProcessing = false }) => {
   const [referenceNumber, setReferenceNumber] = useState("");
 
   useEffect(() => {
@@ -46,10 +46,18 @@ const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment, isProcessing = f
 
         </div>
 
-        <div className="flex justify-center">
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            variant="outline"
+            className="py-5 text-lg font-extrabold tracking-widest"
+            disabled={isProcessing}
+            onClick={onBack ?? handleClose}
+          >
+            GO BACK
+          </Button>
           <Button
             variant="success"
-            className="px-8 py-5 text-lg font-extrabold tracking-widest shadow-md"
+            className="py-5 text-lg font-extrabold tracking-widest shadow-md"
             disabled={!isValid || isProcessing}
             onClick={handleConfirm}
           >
