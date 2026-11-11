@@ -2,6 +2,7 @@ import { CancelConfirmModal, CashPaymentModal, CheckoutModal, DiscountModal, GCa
 import { ProfileDropdown } from '@/components/shared';
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 import { useBarcodeScanner } from '@/hooks/point_of_sale_hooks/useBarcodeScanner';
 import { useCart } from '@/hooks/point_of_sale_hooks/useCart';
 import { useCheckout } from '@/hooks/point_of_sale_hooks/useCheckout';
@@ -53,6 +54,9 @@ const PointOfSalePage = () => {
     //const [latestReceipt, setLatestReceipt] = useState(null);
     
     const [config, setConfig] = useState(null); 
+    const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+
+    const { toast } = useToast();
 
     const currentDateTime = useClock();
 
@@ -92,28 +96,48 @@ const PointOfSalePage = () => {
             }
         });
         } catch (error) {
-
-        setShowCashModal(false);
-        setShowGCashModal(false);
-        setShowCheckoutModal(false);
-        setConfig({
-            isAlert: true,
-            title: "Checkout Failed",
-            description: `An error occurred during checkout.\n${getAPIError(error)}`,
-            confirmVariant: "destructive",
-            confirmText: "Acknowledge",
-            onConfirm: () => setConfig(null)
-        });
+            toast({
+                title: "Checkout Failed",
+                description: `An error occurred during checkout.\n${getAPIError(error)}`,
+                variant: "destructive",
+                duration: 5000
+            });
         }
     };
 
-    const showStockAlert = (message) => setConfig({
-        isAlert: true,
+    const formatAmount = (value) =>
+        `₱${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    const requestPaymentConfirmation = (paymentDetails) => {
+        const description = paymentDetails.method === "CASH"
+            ? `Complete this sale of ${formatAmount(grandTotal)} paid in cash? Amount received: ${formatAmount(paymentDetails.amountPaid)}. Change: ${formatAmount(paymentDetails.amountPaid - grandTotal)}.`
+            : `Complete this sale of ${formatAmount(grandTotal)} paid through GCash with reference ID ${paymentDetails.referenceNumber}?`;
+
+        setIsConfirmingPayment(true);
+        setConfig({
+            title: "Confirm Payment?",
+            description: `${description} Please check the details before continuing.`,
+            confirmText: "Complete Sale",
+            loadingText: "Processing...",
+            confirmVariant: "success",
+            onConfirm: async () => {
+                await onConfirmPayment(paymentDetails);
+                setIsConfirmingPayment(false);
+            },
+            onCancel: () => setIsConfirmingPayment(false),
+        });
+    };
+
+    const closeConfig = () => {
+        setConfig(null);
+        setIsConfirmingPayment(false);
+    };
+
+    const showStockAlert = (message) => toast({
         title: "Not Enough Stock",
         description: message,
-        confirmVariant: "destructive",
-        confirmText: "OK",
-        onConfirm: () => setConfig(null)
+        variant: "destructive",
+        duration: 4000
     });
 
     const addToCartWithStockCheck = (product, quantity, availableStock) => {
@@ -130,13 +154,11 @@ const PointOfSalePage = () => {
             addToCartWithStockCheck(data, 1, data.productQty ?? listed?.productQty);
         },
         onScanError: (error, barcode) => {
-            setConfig({
-                isAlert: true,
+            toast({
                 title: "Scan Failed",
                 description: `${getAPIError(error, "Product not found or invalid.")} (barcode "${barcode}")`,
-                confirmVariant: "destructive",
-                confirmText: "OK",
-                onConfirm: () => setConfig(null)
+                variant: "destructive",
+                duration: 4000
             });
         }
     });
@@ -327,14 +349,14 @@ const PointOfSalePage = () => {
             isOpen={showCashModal} 
             onClose={() => setShowCashModal(false)} 
             grandTotal={grandTotal} 
-            onConfirmPayment={onConfirmPayment} 
-            isProcessing={isProcessing}
+            onConfirmPayment={requestPaymentConfirmation} 
+            isProcessing={isProcessing || isConfirmingPayment}
         />
         <GCashPaymentModal 
             isOpen={showGCashModal} 
             onClose={() => setShowGCashModal(false)} 
-            onConfirmPayment={onConfirmPayment} 
-            isProcessing={isProcessing}
+            onConfirmPayment={requestPaymentConfirmation} 
+            isProcessing={isProcessing || isConfirmingPayment}
         />
 
         <CancelConfirmModal isOpen={showCancelConfirm} 
@@ -349,9 +371,11 @@ const PointOfSalePage = () => {
 
         <ConfirmDialog
             isOpen={!!config}
-            onClose={() => setConfig(null)}
+            onClose={closeConfig}
             config={config}
             isLoading={isProcessing}
+            className="z-[120]"
+            overlayClassName="z-[120]"
         />
         </div>
     );

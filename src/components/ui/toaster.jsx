@@ -4,7 +4,7 @@ export function Toaster() {
   const { toasts } = useToast();
 
   return (
-    <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+    <div className="fixed top-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none">
       {toasts.map(function (t) {
         return (
           <div 

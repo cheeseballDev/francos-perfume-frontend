@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ModalOverlay from "@/components/shared/ModalOverlay";
 import { blockInvalidNumberKeys, blockInvalidNumberPaste } from "@/utils/numberInputUtils";
 
 const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment, isProcessing = false }) => {
     const [amountReceived, setAmountReceived] = useState("");
+
+    useEffect(() => {
+        if (!isOpen) setAmountReceived("");
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -94,7 +98,7 @@ const CashPaymentModal = ({ isOpen, onClose, grandTotal, onConfirmPayment, isPro
             <Button
                 variant="success"
                 className="px-10 py-6 text-lg font-extrabold tracking-widest w-full max-w-[300px] shadow-md"
-                disabled={!isSufficient}
+                disabled={!isSufficient || isProcessing}
                 onClick={handleConfirm}
             >
                 CONFIRM PAYMENT

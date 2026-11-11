@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ModalOverlay from "@/components/shared/ModalOverlay";
 
 const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment, isProcessing = false }) => {
   const [referenceNumber, setReferenceNumber] = useState("");
+
+  useEffect(() => {
+    if (!isOpen) setReferenceNumber("");
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -12,7 +16,6 @@ const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment, isProcessing = f
   const handleConfirm = () => {
     if (isValid) {
       onConfirmPayment({ method: "GCASH", referenceNumber: referenceNumber.trim() });
-      setReferenceNumber("");
     }
   };
 
@@ -47,7 +50,7 @@ const GCashPaymentModal = ({ isOpen, onClose, onConfirmPayment, isProcessing = f
           <Button
             variant="success"
             className="px-8 py-5 text-lg font-extrabold tracking-widest shadow-md"
-            disabled={!isValid}
+            disabled={!isValid || isProcessing}
             onClick={handleConfirm}
           >
             CONFIRM PAYMENT

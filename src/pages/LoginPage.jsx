@@ -79,10 +79,11 @@ const LoginPage = () => {
             <span className="text-sm font-medium">Go back and logout</span>
             </div>
 
+            <div className="w-full max-w-sm bg-card text-card-foreground border border-border rounded-2xl shadow-xl p-8 flex flex-col items-center text-center animate-fade-in">
             <h2 className="text-2xl font-bold text-foreground mb-1 tracking-tight">Select A Module</h2>
-            <p className="text-muted-foreground mb-10 text-sm">Welcome back {firstName + " " + lastName}.</p>
+            <p className="text-muted-foreground mb-8 text-sm">Welcome back {firstName + " " + lastName}.</p>
             
-            <div className="w-full max-w-sm flex flex-col gap-4">
+            <div className="w-full flex flex-col gap-4">
             <Button 
                 onClick={() => handleModuleSelect(MODULES.POS)}
                 className="w-full bg-primary text-primary-foreground hover:opacity-90"
@@ -96,6 +97,7 @@ const LoginPage = () => {
             >
                 Access Dashboard
             </Button>
+            </div>
             </div>
         </div>
         )
@@ -124,10 +126,10 @@ const LoginPage = () => {
             {isDark ? <Sun size={24} /> : <Moon size={24} />}
         </button>
 
-        <div className="w-full max-w-sm flex flex-col items-center text-center">
-            <img src={logo} alt="Franco Perfume" className="h-24 w-auto max-w-[200px] object-contain mb-6"/>
-            <h1 className="text-3xl font-bold text-foreground mb-1 tracking-tight">OneFrancoScentHub</h1>
-            <p className="text-muted-foreground mb-8 text-sm">Welcome back!</p>
+        <div className="w-full max-w-sm bg-card text-card-foreground border border-border rounded-2xl shadow-xl p-8 flex flex-col items-center text-center animate-fade-in">
+            <img src={logo} alt="Franco Perfume" className="h-20 w-auto max-w-[180px] object-contain mb-4"/>
+            <h1 className="text-2xl font-bold text-foreground mb-1 tracking-tight">OneFrancoScentHub</h1>
+            <p className="text-muted-foreground mb-6 text-sm">Welcome back! Log in to continue.</p>
 
             <form onSubmit={onSubmit} noValidate className="w-full flex flex-col gap-4 text-left">
                 <FormField

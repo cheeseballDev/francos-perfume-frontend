@@ -93,12 +93,19 @@ export default function DeliveryDetailsPage() {
             title: "Mark as In Transit?",
             description: "This will notify the receiving branch that the delivery is on its way.",
             confirmText: "Mark In Transit",
+            loadingText: "Marking as In Transit...",
             onConfirm: async () => {
                 try {
                     await postDispatchDelivery(deliveryId);
                     await loadDeliveryData();
+                    toast({
+                        title: "Success",
+                        description: "Delivery marked as in transit successfully.",
+                        className: "bg-emerald-600 text-white border-emerald-700",
+                    });
                 } catch (error) {
                     showActionError("Mark as In Transit Failed", error);
+                    await loadDeliveryData();
                 } finally {
                     setConfig(null);
                 }
@@ -112,6 +119,7 @@ export default function DeliveryDetailsPage() {
             title: "Cancel this delivery?",
             description: "This cannot be undone. The delivery will be cancelled.",
             confirmText: "Cancel Delivery",
+            loadingText: "Cancelling...",
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
@@ -129,9 +137,10 @@ export default function DeliveryDetailsPage() {
 
     const handleAcceptDelivery = () => {
         setConfig({
-            title: "Accept this delivery delivery?",
+            title: "Accept this delivery?",
             description: "You are confirming that you accept this inbound delivery.",
             confirmText: "Accept Delivery",
+            loadingText: "Accepting...",
             onConfirm: async () => {
                 try {
                     await postReceiveDelivery(deliveryId, { accepted: true });
@@ -151,6 +160,7 @@ export default function DeliveryDetailsPage() {
             title: "Reject this delivery request?",
             description: "This will notify the source branch that the delivery has been rejected.",
             confirmText: "Reject Request",
+            loadingText: "Rejecting...",
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {

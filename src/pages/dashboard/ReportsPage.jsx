@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useReport } from "@/hooks/report_hooks/useReport";
 import { useExportReport } from "@/hooks/transaction_hooks/useExportReport";
-import { formatPeriodRange, getPeriodOption } from "@/utils/periodUtils";
+import { describePeriod, formatPeriodRange, getPeriodLabel, getPeriodOption } from "@/utils/periodUtils";
 import { FileDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { getAPIError } from "@/utils/apiErrorUtils";
@@ -36,7 +36,7 @@ const ReportsPage = () => {
             await exportSalesReport(filter);
             toast({
                 title: "Success",
-                description: `Downloaded the top 10 sales list for ${getPeriodOption(period).shortLabel}.`
+                description: `Downloaded the top 10 sales list for ${describePeriod(period)}.`
             });
         } catch (error) {
             toast({
@@ -134,7 +134,7 @@ const ReportsPage = () => {
                         disabled={isDownloading}
                         >
                         {isDownloading ? <Loader2 className='h-4 w-4 mr-2 animate-spin'/> : <FileDown className='h-4 w-4 mr-2'/>}
-                        Export Top 10 Sales List ({getPeriodOption(period).label})
+                        Export Top 10 Sales List ({getPeriodLabel(period)})
                     </Button>
                 </div>
                 

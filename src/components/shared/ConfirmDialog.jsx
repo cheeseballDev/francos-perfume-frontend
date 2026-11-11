@@ -8,18 +8,33 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useRef } from "react";
+import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-const ConfirmDialog = ({ isOpen, onClose, config, isLoading }) => {
+const ConfirmDialog = ({ isOpen, onClose, config, isLoading, className, overlayClassName }) => {
     const latestConfig = useRef(config);
     latestConfig.current = config;
 
+    const runningRef = useRef(false);
+    const [isRunning, setIsRunning] = useState(false);
+
+    useEffect(() => {
+        runningRef.current = false;
+        setIsRunning(false);
+    }, [config]);
+
     if (!config) return null;
+
+    const isBusy = Boolean(isLoading) || isRunning;
 
     const handleConfirm = async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (runningRef.current || isLoading) return;
+
         const confirmedConfig = config;
+        runningRef.current = true;
+        setIsRunning(true);
         try {
             if (confirmedConfig.onConfirm) {
                 await confirmedConfig.onConfirm();
@@ -27,12 +42,18 @@ const ConfirmDialog = ({ isOpen, onClose, config, isLoading }) => {
             if (latestConfig.current === confirmedConfig) onClose();
         } catch (error) {
             console.error("Confirmation action failed:", error);
+        } finally {
+            if (latestConfig.current === confirmedConfig) {
+                runningRef.current = false;
+                setIsRunning(false);
+            }
         }
     };
 
     const handleCancel = (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (isBusy) return;
         onClose();
     }
 
@@ -54,9 +75,14 @@ const ConfirmDialog = ({ isOpen, onClose, config, isLoading }) => {
     return (
         <AlertDialog
             open={isOpen}
-            onOpenChange={(open) => !open && onClose()}
+            onOpenChange={(open) => !open && !isBusy && onClose()}
         >
-            <AlertDialogContent onOverlayClick={() => !isLoading && onClose()}>
+            <AlertDialogContent
+                className={className}
+                overlayClassName={overlayClassName}
+                onOverlayClick={() => !isBusy && onClose()}
+                onEscapeKeyDown={(e) => isBusy && e.preventDefault()}
+            >
 
                 <AlertDialogHeader className="items-center text-center sm:items-center sm:text-center">
                     <AlertDialogTitle className="text-center justify-center font-bold">
@@ -72,6 +98,7 @@ const ConfirmDialog = ({ isOpen, onClose, config, isLoading }) => {
                         {!isAlertOnly && (
                             <AlertDialogCancel
                                 onClick={handleCancel}
+                                disabled={isBusy}
                                 className="w-full mt-0 border-input bg-background hover:bg-muted text-foreground"
                             >
                                 {config.cancelText || "Cancel"}
@@ -81,9 +108,14 @@ const ConfirmDialog = ({ isOpen, onClose, config, isLoading }) => {
                         <AlertDialogAction
                             onClick={handleConfirm}
                             className={`w-full font-bold ${getButtonColor(confirmVariant)}`}
-                            disabled={isLoading}
+                            disabled={isBusy}
                         >
-                            {isLoading ? "Saving..." : (config.confirmText || (isAlertOnly ? "OK" : "Confirm"))}
+                            {isBusy ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    {config.loadingText || "Saving..."}
+                                </span>
+                            ) : (config.confirmText || (isAlertOnly ? "OK" : "Confirm"))}
                         </AlertDialogAction>
                     </div>
                 </AlertDialogFooter>

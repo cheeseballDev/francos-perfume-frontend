@@ -14,7 +14,7 @@ import { useAuditLog } from "@/hooks/audit_hooks/useAuditLog";
 import { useBranchComparison } from "@/hooks/kpi_hooks/useBranchComparison";
 import { useKPI } from "@/hooks/kpi_hooks/useKPI";
 import { formatPeso } from "@/utils/formattingUtils";
-import { DEFAULT_PERIOD, getPeriodOption } from "@/utils/periodUtils";
+import { DEFAULT_PERIOD, describePeriod } from "@/utils/periodUtils";
 import { TONES } from "@/utils/statusUtils";
 import { Banknote, Boxes, Clock, Package, Receipt } from "lucide-react";
 import { useState } from "react";
@@ -26,7 +26,7 @@ const DashboardHome = () => {
     const navigate = useNavigate(); 
     const userRole = user.trueRole;
     const [kpiPeriod, setKpiPeriod] = useState(DEFAULT_PERIOD);
-    const kpiPeriodLabel = getPeriodOption(kpiPeriod).shortLabel;
+    const kpiPeriodLabel = describePeriod(kpiPeriod);
 
     const {
         lowStock,
@@ -92,7 +92,7 @@ const DashboardHome = () => {
         { 
             title: "Total Revenue", 
             mainValue: formatRevenue(revenue),
-            subText: `${formatPeso(revenue)} in the ${kpiPeriodLabel}`, 
+            subText: `${formatPeso(revenue)} in ${kpiPeriodLabel}`, 
             Icon: Banknote, 
             color: "text-emerald-500",
             route: "/home/transactions" 
@@ -116,7 +116,7 @@ const DashboardHome = () => {
         { 
             title: "Total Transactions", 
             mainValue: (totalTransactions?.totalTransactionsCount || 0).toLocaleString(), 
-            subText: `Sales in the ${kpiPeriodLabel}`, 
+            subText: `Sales in ${kpiPeriodLabel}`, 
             Icon: Receipt, 
             color: "text-blue-500",
             route: "/home/transactions" 

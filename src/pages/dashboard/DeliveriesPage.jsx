@@ -73,11 +73,12 @@ const DeliveriesPage = () => {
             title: "Mark as In Transit?",
             description: "This will notify the receiving branch that the delivery is on its way.",
             confirmText: "Mark In Transit",
-            onConfirm: async () => {['']
+            loadingText: "Marking as In Transit...",
+            onConfirm: async () => {
                 try {
                     setIsSubmitting(true);
                     await postDispatchDelivery(deliveryId);
-                    fetchDeliveries();
+                    await fetchDeliveries();
                     setConfig(null);
                     toast({
                         title: "Success",
@@ -107,12 +108,13 @@ const DeliveriesPage = () => {
             title: "Cancel this request?",
             description: "This cannot be undone. The request will be terminated.",
             confirmText: "Cancel Request",
+            loadingText: "Cancelling...",
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
                     setIsSubmitting(true);
                     await postCancelDelivery(deliveryId);
-                    fetchDeliveries();
+                    await fetchDeliveries();
                     setConfig(null);
                     toast({
                         title: "Success",
@@ -146,7 +148,7 @@ const DeliveriesPage = () => {
                 try {
                     setIsSubmitting(true);
                     await postReceiveDelivery(deliveryId, { accepted: true });
-                    fetchDeliveries();
+                    await fetchDeliveries();
                     setConfig(null);
                     toast({
                         title: "Success",
@@ -181,7 +183,7 @@ const DeliveriesPage = () => {
                 try {
                     setIsSubmitting(true);
                     await postReceiveDelivery(deliveryId, { accepted: false });
-                    fetchDeliveries();
+                    await fetchDeliveries();
                     setConfig(null);
                     toast({
                         title: "Success",
