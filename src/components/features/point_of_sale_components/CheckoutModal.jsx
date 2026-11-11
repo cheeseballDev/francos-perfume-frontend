@@ -33,8 +33,10 @@ const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
             <p>One discount per transaction. Senior/PWD customers may choose either their Senior/PWD discount or the shop's current discount.</p>
           </div>
 
-          <div className="flex-1 flex flex-col justify-center pl-2">
-            <p className="text-muted-foreground font-medium text-sm mb-4">PAYMENT OPTIONS:</p>
+          </div>
+
+          <div className="flex-1 flex flex-col justify-center p-8">
+            <p className="text-muted-foreground font-medium text-sm mb-4 text-center">PAYMENT OPTIONS:</p>
             
             <div className="flex flex-col gap-4">
               <button 
@@ -54,7 +56,6 @@ const CheckoutModal = ({ isOpen, onClose, grandTotal, onPaymentSelect }) => {
           </div>
 
         </div>
-      </div>
     </ModalOverlay>
   );
 };
