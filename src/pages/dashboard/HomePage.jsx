@@ -190,7 +190,7 @@ const DashboardHome = () => {
 
                     {/* BOTTOM GRIDS (Staff, Manager, Owner) */}
                     {userRole !== "ADMIN" && (
-                        <div className="grid grid-cols-2 lg:grid-cols-2 gap-6 mb-10">
+                        <div className="grid grid-cols-2 lg:grid-cols-2 gap-6">
                                 <DashboardPanel 
                                 title="Pending Requests for Approval" 
                                 actionText="View All Requests"
@@ -261,7 +261,7 @@ const DashboardHome = () => {
 
                     {userRole === "OWNER" && (
                         <DashboardPanel 
-                            className="mb-10"
+                            className="mb-6"
                         title="Branch Performance">
                             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                             <div className="flex gap-2">

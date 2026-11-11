@@ -26,8 +26,8 @@ export default function BarcodePage() {
                 <p className="text-muted-foreground text-sm">Create, view, and manage product barcodes.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <div className="lg:col-span-7 flex flex-col bg-card rounded-lg border border-border shadow-sm p-4 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start ">
+                <div className="mb-8 lg:col-span-7 flex flex-col bg-card rounded-lg border border-border shadow-sm p-4 overflow-hidden">
                     <BarcodeProductList 
                         setSelectedProduct={setSelectedProduct} 
                         selectedProduct={selectedProduct}

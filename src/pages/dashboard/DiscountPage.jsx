@@ -50,7 +50,7 @@ const DiscountPage = () => {
     }
 
     return (
-        <div className="flex flex-col h-full animate-fade-in relative font-montserrat">
+        <div className="flex flex-col animate-fade-in relative font-montserrat">
 
         <h1 className="text-3xl font-bold text-foreground mb-1 leading-none tracking-tight">Discount Management</h1>
         
@@ -79,8 +79,6 @@ const DiscountPage = () => {
         {asyncState?.isLoading ? (
         <DiscountTableSkeleton rowCount={5} />
         ) : (
-        <div className="overflow-y-auto h-screen min-h-100"
-            onClick={(e) => e.stopPropagation()}>
             <DataTable 
             columns={discountColumns}
             data={discounts}
@@ -94,7 +92,6 @@ const DiscountPage = () => {
             onRowClick={handleRowClick}
             onRowDoubleClick={(row) => { selectRow(row); setIsDiscountInfoModalOpen(true); }}
             />
-        </div>
         )}
 
         <div className="flex justify-end mt-4">

@@ -16,6 +16,11 @@ import RequestTimeline from "./request_detail_components/RequestTimeline";
 import { requestedProductsColumns } from "./request_detail_components/RequestedProductsColumns";
 import { getAPIError } from "@/utils/apiErrorUtils";
 
+const getDeliveryDetailsRoute = (deliveryDisplayId) => {
+    const match = /^DEL-0*(\d+)$/i.exec(String(deliveryDisplayId || "").trim());
+    return match ? `/home/deliveries/${match[1]}` : null;
+};
+
 export default function RequestDetailsPage() {
 
     const { toast } = useToast();
@@ -175,6 +180,8 @@ export default function RequestDetailsPage() {
     }
 
     const isEditable = canUserApproveRequest(user, { ...data });
+    const deliveryRoute = getDeliveryDetailsRoute(data.deliveryDisplayId);
+    const handleViewDelivery = deliveryRoute ? () => navigate(deliveryRoute) : null;
 
     return (
         <div className="p-6 min-h-screen font-montserrat">
@@ -249,6 +256,7 @@ export default function RequestDetailsPage() {
                         handleRejectRequest={handleRejectRequest}
                         selectedRequest={data}
                         isSubmitting={isSubmitting}
+                        onViewDelivery={handleViewDelivery}
                     />
                 </div>
             </div>

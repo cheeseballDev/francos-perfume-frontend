@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { canUserApproveRequest } from "@/utils/requestAuthorizationUtils";
-import { Check, X } from "lucide-react";
+import { Check, Truck, X } from "lucide-react";
 
-export const RequestApprovalActions = ({ user, allProductsApproved, anyProductApproved, remarks, setRemarks, handleApproveRequest, handleRejectRequest, selectedRequest, isSubmitting }) => {
+export const RequestApprovalActions = ({ user, allProductsApproved, anyProductApproved, remarks, setRemarks, handleApproveRequest, handleRejectRequest, selectedRequest, isSubmitting, onViewDelivery }) => {
 
     const isAuthorized = canUserApproveRequest(user, selectedRequest);
 
@@ -15,6 +15,16 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
     const requestStage = currentPending?.stage || lastApproval?.stage;
     const requestStatus = selectedRequest.requestStatus;
     const requestId = selectedRequest.requestId;
+
+    const deliveryAction = onViewDelivery ? (
+        <Button
+            variant="outline"
+            className="w-full font-bold"
+            onClick={onViewDelivery}
+        >
+            <Truck className="w-4 h-4 mr-2" /> View Delivery Details
+        </Button>
+    ) : null;
     
     if (requestStatus === "DELIVERY CANCELLED") {
         return (
@@ -22,8 +32,8 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
                 <h2 className="text-base font-bold text-foreground">No Action Required</h2>
                 <p className="text-sm text-muted-foreground">
                     This request's delivery has been <span className="font-bold text-custom-red">cancelled</span>. 
-                    <br />
                 </p>
+                {deliveryAction}
             </div>
         )
     }
@@ -34,8 +44,8 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
                 <h2 className="text-base font-bold text-foreground">No Action Required</h2>
                 <p className="text-sm text-muted-foreground">
                     This request is <span className="font-bold text-custom-red">{requestStatus}</span>. 
-                    <br />
                 </p>
+                {deliveryAction}
             </div>
         );
     }
@@ -46,8 +56,8 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
                 <h2 className="text-base font-bold text-foreground">No Action Required</h2>
                 <p className="text-sm text-muted-foreground">
                     This request's delivery has been <span className="font-bold text-amber-600">partially completed</span>. 
-                    <br />
                 </p>
+                {deliveryAction}
             </div>
         )
     }
@@ -60,6 +70,7 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
                 <p className="text-sm text-muted-foreground">
                     This request has already been <span className="font-bold text-custom-green">{requestStatus}</span>. No further approval or rejection actions are required.
                 </p>
+                {deliveryAction}
             </div>
         );
     }
@@ -70,10 +81,12 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
             <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-4 text-center">
                 <h2 className="text-base font-bold text-foreground">No Action Required</h2>
                 <p className="text-sm text-muted-foreground">
-                    This request is currently in the <span className="font-bold text-custom-blue">{requestStage}</span> stage. No approval or rejection actions are required at this time. 
-                    <br />
-                    Please wait for the delivery and go to the <span className="font-bold text-foreground">DELIVERY PAGE</span> to confirm the delivery.
+                    This request is currently in the <span className="font-bold text-custom-blue">{requestStage}</span> stage. No approval or rejection actions are required at this time.
+                    {deliveryAction
+                        ? " Open the delivery to track it, or to dispatch or confirm it."
+                        : " Please wait for the delivery and go to the Deliveries page to confirm it."}
                 </p>
+                {deliveryAction}
             </div>
         );
     }
@@ -89,6 +102,7 @@ export const RequestApprovalActions = ({ user, allProductsApproved, anyProductAp
                     </span>
                     . You are not authorized to approve or reject at this time.
                 </p>
+                {deliveryAction}
             </div>
         );
     }
