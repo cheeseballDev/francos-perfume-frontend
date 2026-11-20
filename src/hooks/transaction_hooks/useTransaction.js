@@ -85,17 +85,28 @@ export const useTransaction = ({ todayOnly = false } = {}) => {
 
     useEffect(() => {
         const channel = supabase
-            .channel("public:sales_order")
+            .channel("sales-order-changes")
             .on(
                 "postgres_changes",
-                { event: "INSERT", schema: "public", table: "sales_order" }, 
+                { event: "*", schema: "public", table: "sales_order" }, 
                 () => {
                     fetchTransactions();
                 }
-            )
-            .on(
+            ).on(
                 "postgres_changes",
-                { event: "INSERT", schema: "public", table: "product_replacement" },
+                { event: "*", schema: "public", table: "payment" }, 
+                () => {
+                    fetchTransactions();
+                }
+            ).on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "product_replacement" },
+                () => {
+                    fetchTransactions();
+                }
+            ).on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "sales_order_detail" },
                 () => {
                     fetchTransactions();
                 }
@@ -117,7 +128,6 @@ export const useTransaction = ({ todayOnly = false } = {}) => {
         }
     }, []) 
 
-    // FIXED: Removed asyncState overrides
     const fetchTransactionFilters = useCallback(async () => {
         try {
             const data = await getTransactionFilters();

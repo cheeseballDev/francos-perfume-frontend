@@ -3,64 +3,65 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { ReferenceLink } from "@/components/shared/ReferenceText";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
+import { useDeliveryDetails } from "@/hooks/delivery_hooks/useDeliveryDetails";
 import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
 import { getAPIError } from "@/utils/apiErrorUtils";
 import { normalizeStatus } from "@/utils/statusUtils";
 import { ArrowLeft, CheckCircle, Loader2, Truck, XCircle } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DeliveryInformation from "./DeliveryInformation";
 
 export default function DeliveryDetailsPage() {
-    const { deliveryId } = useParams();
-    const navigate = useNavigate();
-    const { fetchDeliveryDetails } = useDelivery();
-
-    const [selectedDelivery, setSelectedDelivery] = useState(null);
-    const [loadError, setLoadError] = useState(null);
-    const [config, setConfig] = useState(null);
+    const { user } = useAuth();
     const { toast } = useToast();
+    const { deliveryId } = useParams();
+
+    const navigate = useNavigate();
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [config, setConfig] = useState(null);
+
+
+    const {
+        selectedDelivery,
+        error: loadError,
+        reload: reloadDelivery,
+    } = useDeliveryDetails(deliveryId);
 
     const showActionError = (title, error) => {
         toast({
             title,
-            description: getAPIError(error),
+            description: `An error occurred.\n${getAPIError(error)}`,
             variant: "destructive",
             duration: 5000,
         });
     };
 
-    const { user } = useAuth();
-
-    const loadDeliveryData = useCallback(async () => {
-        try {
-            const response = await fetchDeliveryDetails(deliveryId);
-            if (response) {
-                setSelectedDelivery(response.data);
-                setLoadError(null);
-            }
-        } catch (error) {
-            setLoadError(getAPIError(error, "The delivery could not be loaded."));
-        }
-    }, [deliveryId, fetchDeliveryDetails]);
-
-    useEffect(() => {
-        if (!deliveryId) return;
-        loadDeliveryData();
-    }, [deliveryId, fetchDeliveryDetails, loadDeliveryData]);
+    const showAlertDialog = (title, description) => {
+        setConfig({
+            isAlert: true,
+            title,
+            description,
+            confirmVariant: "destructive",
+            confirmText: "Acknowledge",
+            onConfirm: () => setConfig(null),
+        });
+    };
 
     if (!selectedDelivery && loadError) {
         return (
             <div className="flex flex-col gap-4 items-center justify-center min-h-screen p-6 font-montserrat text-center">
                 <XCircle className="h-10 w-10 text-destructive" />
                 <p className="font-semibold text-foreground">Couldn't load this delivery</p>
-                <p className="text-sm text-muted-foreground max-w-md">{loadError}</p>
+                <p className="text-sm text-muted-foreground max-w-md">
+                    {getAPIError(loadError, "The delivery could not be loaded.")}
+                </p>
                 <div className="flex gap-3">
                     <Button variant="outline" onClick={() => navigate("/home/deliveries")}>
                         <ArrowLeft className="w-4 h-4 mr-2" /> Back to Deliveries
                     </Button>
-                    <Button onClick={loadDeliveryData}>Try Again</Button>
+                    <Button onClick={() => reloadDelivery().catch(() => {})}>Try Again</Button>
                 </div>
             </div>
         );
@@ -81,12 +82,13 @@ export default function DeliveryDetailsPage() {
     const isSameDestination = user?.branchLocation === selectedDelivery.toBranchName;
 
     const totalProducts = selectedDelivery.items?.length || 0;
-    const totalUnits = selectedDelivery.items?.reduce((sum, item) => sum + (item.quantity || 0), 0);
-    const isReceived = deliveryStatus === "COMPLETED"
-        || deliveryStatus === "PARTIAL"
-        || deliveryStatus === "NOT RECEIVED"
-        || (selectedDelivery.items || []).some((item) => (item.status || "").toUpperCase() === "RECEIVED");
-    const totalReceived = selectedDelivery.items?.reduce((sum, item) => sum + (item.receivedQty || 0), 0);
+    const totalUnits = selectedDelivery.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+    const isReceived =
+        deliveryStatus === "COMPLETED" ||
+        deliveryStatus === "PARTIAL" ||
+        deliveryStatus === "NOT RECEIVED" ||
+        (selectedDelivery.items || []).some((item) => (item.status || "").toUpperCase() === "RECEIVED");
+    const totalReceived = selectedDelivery.items?.reduce((sum, item) => sum + (item.receivedQty || 0), 0) || 0;
 
     const handleMarkInTransit = () => {
         setConfig({
@@ -96,21 +98,23 @@ export default function DeliveryDetailsPage() {
             loadingText: "Marking as In Transit...",
             onConfirm: async () => {
                 try {
+                    setIsSubmitting(true);
                     await postDispatchDelivery(deliveryId);
-                    await loadDeliveryData();
+                    await reloadDelivery();
+                    setConfig(null);
                     toast({
                         title: "Success",
                         description: "Delivery marked as in transit successfully.",
                         className: "bg-emerald-600 text-white border-emerald-700",
                     });
                 } catch (error) {
-                    showActionError("Mark as In Transit Failed", error);
-                    await loadDeliveryData();
-                } finally {
                     setConfig(null);
+                    showActionError("Mark as In Transit Failed", error);
+                    await reloadDelivery().catch(() => {});
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
-            onCancel: () => setConfig(null),
         });
     };
 
@@ -123,15 +127,21 @@ export default function DeliveryDetailsPage() {
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
+                    setIsSubmitting(true);
                     await postCancelDelivery(deliveryId);
+                    setConfig(null);
+                    toast({
+                        title: "Success",
+                        description: "Delivery cancelled successfully.",
+                    });
                     navigate("/home/deliveries");
                 } catch (error) {
-                    showActionError("Cancel Delivery Failed", error);
-                } finally {
                     setConfig(null);
+                    showAlertDialog("Action Failed", `Failed to cancel the delivery: ${getAPIError(error)}`);
+                } finally {
+                    setIsSubmitting(false);
                 }
             },
-            onCancel: () => setConfig(null),
         });
     };
 
@@ -143,15 +153,17 @@ export default function DeliveryDetailsPage() {
             loadingText: "Accepting...",
             onConfirm: async () => {
                 try {
+                    setIsSubmitting(true);
                     await postReceiveDelivery(deliveryId, { accepted: true });
-                    await loadDeliveryData();
+                    await reloadDelivery();
+                    setConfig(null);
                 } catch (error) {
+                    setConfig(null);
                     showActionError("Accept Delivery Failed", error);
                 } finally {
-                    setConfig(null);
+                    setIsSubmitting(false);
                 }
             },
-            onCancel: () => setConfig(null),
         });
     };
 
@@ -164,15 +176,17 @@ export default function DeliveryDetailsPage() {
             confirmVariant: "destructive",
             onConfirm: async () => {
                 try {
+                    setIsSubmitting(true);
                     await postReceiveDelivery(deliveryId, { accepted: false });
+                    setConfig(null);
                     navigate("/home/deliveries");
                 } catch (error) {
+                    setConfig(null);
                     showActionError("Reject Delivery Failed", error);
                 } finally {
-                    setConfig(null);
+                    setIsSubmitting(false);
                 }
             },
-            onCancel: () => setConfig(null),
         });
     };
 
@@ -185,10 +199,19 @@ export default function DeliveryDetailsPage() {
                     <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
                         <h2 className="text-base font-bold text-foreground">Required Action</h2>
                         <p className="text-xs text-muted-foreground">Mark as in transit to notify the receiving branch.</p>
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" onClick={handleMarkInTransit}>
+                        <Button
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                            disabled={isSubmitting}
+                            onClick={handleMarkInTransit}
+                        >
                             <Truck className="w-4 h-4 mr-2" /> Mark as In Transit
                         </Button>
-                        <Button variant="destructive" className="w-full" onClick={handleCancelDelivery}>
+                        <Button
+                            variant="destructive"
+                            className="w-full"
+                            disabled={isSubmitting}
+                            onClick={handleCancelDelivery}
+                        >
                             <XCircle className="w-4 h-4 mr-2" /> Cancel Delivery
                         </Button>
                     </div>
@@ -216,10 +239,19 @@ export default function DeliveryDetailsPage() {
                     <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
                         <h2 className="text-base font-bold text-foreground">Required Action</h2>
                         <p className="text-xs text-muted-foreground">Accept or reject this inbound request.</p>
-                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={handleAcceptDelivery}>
+                        <Button
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                            disabled={isSubmitting}
+                            onClick={handleAcceptDelivery}
+                        >
                             <CheckCircle className="w-4 h-4 mr-2" /> Accept Request
                         </Button>
-                        <Button variant="destructive" className="w-full" onClick={handleRejectDelivery}>
+                        <Button
+                            variant="destructive"
+                            className="w-full"
+                            disabled={isSubmitting}
+                            onClick={handleRejectDelivery}
+                        >
                             <XCircle className="w-4 h-4 mr-2" /> Reject Request
                         </Button>
                     </div>
@@ -231,7 +263,11 @@ export default function DeliveryDetailsPage() {
                     <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-3">
                         <h2 className="text-base font-bold text-foreground">Required Action</h2>
                         <p className="text-xs text-muted-foreground">Review and confirm the items received.</p>
-                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => navigate(`/home/deliveries/${deliveryId}/confirm`)}>
+                        <Button
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                            disabled={isSubmitting}
+                            onClick={() => navigate(`/home/deliveries/${deliveryId}/confirm`)}
+                        >
                             <CheckCircle className="w-4 h-4 mr-2" /> Confirm Delivery
                         </Button>
                     </div>
@@ -340,6 +376,7 @@ export default function DeliveryDetailsPage() {
                 isOpen={!!config}
                 onClose={() => setConfig(null)}
                 config={config}
+                isLoading={isSubmitting}
             />
         </div>
     );

@@ -11,11 +11,12 @@ const GCashPaymentModal = ({ isOpen, onClose, onBack, onConfirmPayment, isProces
 
   if (!isOpen) return null;
 
-  const isValid = referenceNumber.trim().length > 0;
+  const trimmedReference = referenceNumber.trim();
+  const isValid = trimmedReference.length >= 10;
 
   const handleConfirm = () => {
     if (isValid) {
-      onConfirmPayment({ method: "GCASH", referenceNumber: referenceNumber.trim() });
+      onConfirmPayment({ method: "GCASH", referenceNumber: trimmedReference });
     }
   };
 
@@ -38,7 +39,10 @@ const GCashPaymentModal = ({ isOpen, onClose, onBack, onConfirmPayment, isProces
                     placeholder="Enter reference ID..."
                     value={referenceNumber}
                     maxLength="13"
-                    onChange={(e) => setReferenceNumber(e.target.value)}
+                    onChange={e => {
+                        const numericString = e.target.value.replace(/[^\d+]/g, '');
+                        setReferenceNumber(numericString);
+                    }}
                     className="flex-1 border border-input bg-transparent rounded-md px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                     autoFocus
                 />
@@ -56,7 +60,6 @@ const GCashPaymentModal = ({ isOpen, onClose, onBack, onConfirmPayment, isProces
                 GO BACK
             </Button>
             <Button
-                variant="success"
                 className="flex-1 py-5 text-lg font-extrabold tracking-widest shadow-md"
                 disabled={!isValid || isProcessing}
                 onClick={handleConfirm}

@@ -10,10 +10,10 @@ import { usePointOfSale } from '@/hooks/point_of_sale_hooks/usePointOfSale';
 import { useClock } from '@/hooks/useClock';
 import { getScanBarcode } from '@/services/PointOfSaleService';
 import { useTheme } from '@/theme/useTheme';
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { openReceiptTab } from '@/utils/receiptWindowUtil';
 import { Loader2, Moon, PackageSearch, ShoppingCart, Sun } from 'lucide-react';
 import { useState } from 'react';
-import { getAPIError } from "@/utils/apiErrorUtils";
 
 const PointOfSalePage = () => {
     const { 
@@ -119,7 +119,6 @@ const PointOfSalePage = () => {
             description: `${description} Please check the details before continuing.`,
             confirmText: "Complete Sale",
             loadingText: "Processing...",
-            confirmVariant: "success",
             onConfirm: async () => {
                 await onConfirmPayment(paymentDetails);
                 setIsConfirmingPayment(false);

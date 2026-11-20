@@ -254,6 +254,7 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
               value={data.email}
               onChange={e => handleChange('email', e.target.value)}
               placeholder="name@francosperfume.shop"
+              disabled={isManager}
               error={errors.email}
             />
             <FormField 
@@ -296,7 +297,6 @@ const EditAccountModal = ({ isOpen, onClose, selectedAccount, filterOptions = []
               onChange={(value) => setData(prev => ({...prev, employeeShift: value }))}
               options={employeeShiftOptions}
               placeholder="Select shift..."
-              disabled={isManager}
             />
 
           </div>

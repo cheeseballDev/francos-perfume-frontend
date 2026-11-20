@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { postCancelDelivery, postDispatchDelivery, postReceiveDelivery } from "@/services/DeliveryService";
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { ArrowDownLeft, ArrowUpRight, Clock, ListFilter } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getAPIError } from "@/utils/apiErrorUtils";
 const DeliveriesPage = () => {
     const {
         deliveries,
@@ -248,7 +248,6 @@ const DeliveriesPage = () => {
             <div className="grid grid-cols-3 gap-2 mb-4">
                 <Button
                     variant={activeTab === "INBOUND" ? "default" : "outline"}
-                    disabled={user.branchLocation === "WAREHOUSE"}
                     onClick={() => handleTabChange("INBOUND")}
                 >
                     <ArrowDownLeft className="w-4 h-4" />

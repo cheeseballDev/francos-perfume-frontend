@@ -49,9 +49,9 @@ export const useRequestDetails = (requestId) => {
                 "postgres_changes",
                 { 
                     event: "*", schema: "public", table: "request_approval", filter: `request_id=eq.${requestId}`
-                } , 
+                }, 
                 () => {
-                    loadDetails(false);
+                    loadDetails(false).catch(() => {});
                 }
             )
             .subscribe();

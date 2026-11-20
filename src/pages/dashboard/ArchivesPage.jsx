@@ -1,6 +1,5 @@
 import { useAuth } from "@/auth/UseAuth";
 import { archivedAccountColumns, archivedProductColumns } from "@/components/features/archive_components/ArchiveColumns";
-import { useRowSelection } from "@/hooks/useRowSelection";
 import ArchivedAccountDetailsModal from "@/components/features/archive_components/ArchivedAccountDetailsModal";
 import ArchivedProductDetailsModal from "@/components/features/archive_components/ArchivedProductDetailsModal";
 import { AccountArchiveSkeleton, ProductArchiveSkeleton } from "@/components/loaders/ArchiveTableSkeletons";
@@ -8,6 +7,7 @@ import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
 import { useAccountArchive } from "@/hooks/archive_hooks/useAccountArchive";
 import { useProductArchive } from "@/hooks/archive_hooks/useProductArchive";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import { Eye, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -76,6 +76,7 @@ const ProductArchivesSection = ({ urlSearch = "", onClearSearch }) => {
                     <Button
                         variant={selectedArchivedProduct ? "default" : "ghost"}
                         disabled={!selectedArchivedProduct}
+                        className="mb-6"
                         onClick={() => setIsArchivedProductDetailsModalOpen(true)}
                     >
                         <Eye className="h-8 w-8"/>
@@ -142,7 +143,7 @@ const ArchivesPage = () => {
                     </p>
                 </header>
 
-                <section className="mb-10">
+                <section>
                     <h2 className="text-2xl font-bold text-foreground mb-6">Accounts Archives</h2>
 
                     {accountSearch && <SearchNotice search={accountSearch} onClear={clearUrlSearch} />}
@@ -176,7 +177,9 @@ const ArchivesPage = () => {
                 </section>
 
                 {canViewArchivedProducts && (
-                    <ProductArchivesSection urlSearch={productSearch} onClearSearch={clearUrlSearch} />
+                    <ProductArchivesSection urlSearch={productSearch} 
+                    onClearSearch={clearUrlSearch} 
+                    />
                 )}
         </div>
 

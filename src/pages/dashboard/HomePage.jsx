@@ -152,7 +152,7 @@ const DashboardHome = () => {
                 <DashboardSkeleton cardCount={5} />
             ) : (
                 <div className="flex flex-col gap-6">
-                    
+
                     {/* ADMIN VIEW */}
                     {userRole === "ADMIN" && (
                         <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -188,9 +188,39 @@ const DashboardHome = () => {
                         </div>
                     )}
 
+                    {userRole === "OWNER" && (
+                        <DashboardPanel 
+                        title="Branch Performance">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <div className="flex gap-2">
+                                {METRICS.map((m) => (
+                                    <Button
+                                        key={m.key}
+                                        variant={metric === m.key ? "default" : "outline"}
+                                        onClick={() => setMetric(m.key)}
+                                    >
+                                        {m.label}
+                                    </Button>
+                                ))}
+                            </div>
+                            <PeriodSelect value={comparisonPeriod} onChange={setComparisonPeriod} showRange />
+                            </div>
+
+                            {comparisonState.isLoading ? (
+                                <div className="flex flex-col gap-3">
+                                    {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-6 w-full" />)}
+                                </div>
+                            ) : comparisonState.error ? (
+                                <p className="text-sm text-destructive">Couldn't load branch comparison.</p>
+                            ) : (
+                                <BranchBarChart data={branchMetrics} valueKey={metric} format={activeMetric.format} />
+                            )}
+                        </DashboardPanel>
+                    )}
+
                     {/* BOTTOM GRIDS (Staff, Manager, Owner) */}
                     {userRole !== "ADMIN" && (
-                        <div className="grid grid-cols-2 lg:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
                                 <DashboardPanel 
                                 title="Pending Requests for Approval" 
                                 actionText="View All Requests"
@@ -257,37 +287,6 @@ const DashboardHome = () => {
                                     </DashboardPanel>
                                 )}
                         </div>
-                    )}
-
-                    {userRole === "OWNER" && (
-                        <DashboardPanel 
-                            className="mb-6"
-                        title="Branch Performance">
-                            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                            <div className="flex gap-2">
-                                {METRICS.map((m) => (
-                                    <Button
-                                        key={m.key}
-                                        variant={metric === m.key ? "default" : "outline"}
-                                        onClick={() => setMetric(m.key)}
-                                    >
-                                        {m.label}
-                                    </Button>
-                                ))}
-                            </div>
-                            <PeriodSelect value={comparisonPeriod} onChange={setComparisonPeriod} showRange />
-                            </div>
-
-                            {comparisonState.isLoading ? (
-                                <div className="flex flex-col gap-3">
-                                    {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-6 w-full" />)}
-                                </div>
-                            ) : comparisonState.error ? (
-                                <p className="text-sm text-destructive">Couldn't load branch comparison.</p>
-                            ) : (
-                                <BranchBarChart data={branchMetrics} valueKey={metric} format={activeMetric.format} />
-                            )}
-                        </DashboardPanel>
                     )}
 
                 </div>

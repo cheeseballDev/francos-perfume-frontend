@@ -86,7 +86,7 @@ export const useInventory = () => {
 
     useEffect(() => {
         const channel = supabase
-            .channel("public:inventory")
+            .channel("inventory-changes")
             .on(
                 "postgres_changes",
                 { event: "*", schema: "public", table: "inventory" }, 
