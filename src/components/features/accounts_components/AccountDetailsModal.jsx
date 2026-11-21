@@ -1,17 +1,17 @@
 import { useAuth } from "@/auth/UseAuth";
-import SensitiveText from "@/components/shared/SensitiveText";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import DetailItem from "@/components/shared/DetailItem";
+import SensitiveText from "@/components/shared/SensitiveText";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { formatLabel } from "@/utils/formattingUtils";
 import { Archive, Edit, KeyRound, MinusSquareIcon, PlusSquareIcon } from "lucide-react";
 import { useState } from "react";
 import logo from '../../../assets/FrancoPerfumeLogo.png';
-import { getAPIError } from "@/utils/apiErrorUtils";
 
 const AccountInfoModal = ({
     isOpen,
@@ -34,6 +34,8 @@ const AccountInfoModal = ({
     const accountId = selectedAccount.employeeId;
     const isActive = selectedAccount?.status === "ACTIVE";
     const isSelectedAccountTheCurrentUser = accountId === user.employeeId;
+    const isAlsoManager = user?.trueRole === selectedAccount.employeeRole;
+    const isAccountOwner = selectedAccount.employeeRole === "OWNER";
 
     const handleEditAccount = () => {
         setIsEditAccountModalOpen(true);
@@ -202,43 +204,45 @@ const AccountInfoModal = ({
             </div>
 
             <div className="grid grid-cols-2 gap-6">
-              <Button 
-                onClick={handleEditAccount}
-                disabled={isSelectedAccountTheCurrentUser}
-                >
-                <Edit />
-                Edit Account
-              </Button>
+                {!isAlsoManager && !isAccountOwner && !isManager &&
+                <>
+                    <Button 
+                        onClick={handleEditAccount}
+                        disabled={isSelectedAccountTheCurrentUser}
+                        >
+                        <Edit />
+                        Edit Account
+                    </Button>
 
-              <Button 
-                variant="destructive" 
-                onClick={handleResetPassword}
-                disabled={isSelectedAccountTheCurrentUser}
-                >
-                <KeyRound />
-                Reset Password
-              </Button>
+                    <Button 
+                        variant="destructive" 
+                        onClick={handleResetPassword}
+                        disabled={isSelectedAccountTheCurrentUser}
+                        >
+                        <KeyRound />
+                        Reset Password
+                    </Button>
 
-              <Button
-                variant={isActive ? "destructive" : "default"}
-                onClick={handleToggleStatus}
-                disabled={isSelectedAccountTheCurrentUser}
-                className={isManager ? "col-span-2" : undefined}
-              >
-                {isActive ? <MinusSquareIcon /> : <PlusSquareIcon />}
-                {isActive ? "Deactivate Account" : "Reactivate Account"}
-              </Button>
+                    <Button
+                        variant="destructive"
+                        onClick={handleArchiveAccount}
+                        disabled={isSelectedAccountTheCurrentUser}
+                        >
+                    <Archive />
+                    Archive Account
+                    </Button>
 
-              {!isManager && (
-                <Button
-                  variant="destructive"
-                  onClick={handleArchiveAccount}
-                  disabled={isSelectedAccountTheCurrentUser}
-                >
-                  <Archive />
-                  Archive Account
-                </Button>
-              )}
+                    <Button
+                        variant={isActive ? "destructive" : "default"}
+                        onClick={handleToggleStatus}
+                        disabled={isSelectedAccountTheCurrentUser}
+                        className={isManager ? "col-span-2" : undefined}
+                    >
+                        {isActive ? <MinusSquareIcon /> : <PlusSquareIcon />}
+                        {isActive ? "Deactivate Account" : "Reactivate Account"}
+                    </Button>
+                </>
+                }
             </div>
           </div>
         </DialogContent>
