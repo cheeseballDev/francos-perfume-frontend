@@ -4,8 +4,6 @@ import { MessageSquare } from "lucide-react";
 export default function DeliveryInformation({ delivery }) {
     if (!delivery) return null;
 
-    console.log(delivery);
-
     return (
         <div className="bg-card text-card-foreground p-6 rounded-xl border border-border shadow-sm space-y-6">
             <h2 className="text-xl font-bold text-foreground">Delivery Information</h2>

@@ -14,7 +14,6 @@ const RETURNED_ITEM_LABELS = {
 
 const TransactionDetailsModal = ({ isOpen, onClose, selectedTransaction }) => {
     if (!isOpen || !selectedTransaction) return null;
-    console.log(selectedTransaction);
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>

@@ -275,6 +275,21 @@ export default function DeliveryDetailsPage() {
             }
         }
 
+        if (deliveryStatus === 'PARTIAL') {
+            return (
+                <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-2 text-center">
+                    <h2 className="text-base font-bold text-foreground">No Action Required</h2>
+                    <p className="text-xs text-muted-foreground">
+                        This delivery is <span className="font-bold text-foreground">PARTIALLY COMPLETED.</span>
+                    </p>
+                    <p className="text-xs text-custom-red">
+                        Remarks: <span className="font-bold text-foreground">{selectedDelivery?.remarks || "N/A"}</span>.
+                    </p>
+            </div>
+            )
+        }
+
+
         return (
             <div className="bg-card p-6 rounded-xl border border-border shadow-sm space-y-2 text-center">
                 <h2 className="text-base font-bold text-foreground">No Action Required</h2>
