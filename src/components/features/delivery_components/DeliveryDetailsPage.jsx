@@ -283,7 +283,7 @@ export default function DeliveryDetailsPage() {
                         This delivery is <span className="font-bold text-foreground">PARTIALLY COMPLETED.</span>
                     </p>
                     <p className="text-xs text-custom-red">
-                        Remarks: <span className="font-bold text-foreground">{selectedDelivery?.remarks || "N/A"}</span>.
+                        Remarks: <span className="font-bold text-foreground">{selectedDelivery?.requestRemarks || "N/A"}</span>.
                     </p>
             </div>
             )
