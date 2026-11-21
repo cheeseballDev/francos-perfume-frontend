@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useDelivery } from "@/hooks/delivery_hooks/useDelivery";
 import { postReceiveDelivery } from "@/services/DeliveryService";
 import { getAPIError } from "@/utils/apiErrorUtils";
+import { blockInvalidNumberKeys, blockInvalidNumberPaste } from "@/utils/numberInputUtils";
 import { normalizeStatus } from "@/utils/statusUtils";
 import { ArrowLeft, CheckCircle, Loader2, PackageX, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { blockInvalidNumberKeys, blockInvalidNumberPaste } from "@/utils/numberInputUtils";
 
 const REASON_OPTIONS = [
     { label: "Select reason...", value: "" },
@@ -20,13 +20,6 @@ const REASON_OPTIONS = [
 ];
 
 const rowKey = (item) => String(item.requestItemId ?? item.deliveryItemId ?? item.productId);
-
-/*
-const todayLocal = () => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
-*/
 
 const toUtcNoonIso = (dateString) => new Date(`${dateString}T12:00:00Z`).toISOString();
 
@@ -68,7 +61,7 @@ const DeliveryConfirmationPage = () => {
 
     const [delivery, setDelivery] = useState(null);
     const [config, setConfig] = useState(null);
-    const [remarks, setRemarks] = useState("");
+    const [comment, setComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showErrors, setShowErrors] = useState(false);
 
@@ -189,8 +182,8 @@ const DeliveryConfirmationPage = () => {
                         remarks: receipt.reason || null,
                     };
                 }),
+                comments: comment
             };
-            console.log(payload);
 
             await postReceiveDelivery(deliveryId, payload);
             setConfig(null);
@@ -377,8 +370,8 @@ const DeliveryConfirmationPage = () => {
             <div className="bg-card border border-border rounded-xl shadow-sm p-6">
                 <h2 className="text-lg font-bold text-foreground mb-4">Additional Remarks</h2>
                 <textarea
-                    value={remarks}
-                    onChange={(e) => setRemarks(e.target.value)}
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
                     placeholder="Add your comments or message for this delivery..."
                     className="w-full border border-input bg-background text-foreground rounded-lg p-3 text-sm resize-none h-28 outline-none focus:ring-2 focus:ring-ring transition-colors"
                 />

@@ -4,6 +4,8 @@ import { MessageSquare } from "lucide-react";
 export default function DeliveryInformation({ delivery }) {
     if (!delivery) return null;
 
+    console.log(delivery);
+
     return (
         <div className="bg-card text-card-foreground p-6 rounded-xl border border-border shadow-sm space-y-6">
             <h2 className="text-xl font-bold text-foreground">Delivery Information</h2>
@@ -42,8 +44,8 @@ export default function DeliveryInformation({ delivery }) {
                 <div>
                     <h3 className="font-bold text-foreground text-sm">Delivery Message</h3>
                     <p className="text-xs text-muted-foreground mt-1 whitespace-pre-line leading-relaxed">
-                        {delivery.deliveryMessage && delivery.deliveryMessage !== "string"
-                            ? delivery.deliveryMessage
+                        {delivery.comment && delivery.comment !== "string"
+                            ? delivery.comment
                             : "No delivery message provided."}
                     </p>
                 </div>
