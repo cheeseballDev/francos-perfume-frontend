@@ -117,7 +117,7 @@ const LoginPage = () => {
         );
     }
 
-    const inputClass = "w-full border border-input bg-background text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
+    const inputClass = "w-full h-[40px] border border-input bg-background text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
     
     return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background font-montserrat p-4 relative">
