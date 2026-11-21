@@ -17,8 +17,6 @@ const SUBTITLES = {
     password: "Choose a new password for your account.",
 };
 
-// The backend sends these when the reset token is missing, expired or for another email.
-// The user can't fix that on the password step, so they start again from the email step.
 const RESET_SESSION_ERRORS = ["invalid email for password change.", "password change failed."];
 const isResetSessionError = (message = "") =>
     RESET_SESSION_ERRORS.includes(message.trim().toLowerCase()) || /token|expired/i.test(message);
@@ -31,7 +29,7 @@ const getErrorMessage = (err) =>
 const ForgotPasswordPage = () => {
     const navigate = useNavigate();
 
-    const [step, setStep] = useState("email"); // "email" | "code" | "password"
+    const [step, setStep] = useState("email");
     const [email, setEmail] = useState("");
     const [otp, setOtp] = useState(EMPTY_CODE);
     const [resetToken, setResetToken] = useState(null);

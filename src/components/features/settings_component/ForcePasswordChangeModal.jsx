@@ -1,10 +1,10 @@
 import PasswordConditionsList from "@/components/shared/PasswordConditionsList";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { getAPIError } from "@/utils/apiErrorUtils";
 import { allPasswordConditionsMet, getPasswordConditions } from "@/utils/validationUtils";
 import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { useState } from "react";
-import { getAPIError } from "@/utils/apiErrorUtils";
 
 const ForcePasswordChangeModal = ({ isOpen, onClose, onSuccess, oldPassword, firstName, lastName }) => {
     const { toast } = useToast();

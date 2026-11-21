@@ -4,10 +4,10 @@ import FormField from '@/components/shared/FormField';
 import { Button } from '@/components/ui/button';
 import { useLogin } from '@/hooks/useLogin';
 import { useTheme } from '@/theme/useTheme';
-import { ChevronLeft, Loader2, Moon, Sun } from 'lucide-react';
+import { MODULES } from "@/utils/roleAccess";
+import { ChevronLeft, Eye, EyeOff, Loader2, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import logo from '../assets/FrancoPerfumeLogo.png';
-import { MODULES } from "@/utils/roleAccess";
 import OtpVerification from './OtpVerification';
 
 const LOGOUT_MESSAGES = {
@@ -49,6 +49,7 @@ const LoginPage = () => {
     const { isDark, toggleTheme } = useTheme();
 
     const [logoutMessage, setLogoutMessage] = useState(readLogoutReason);
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         try {
@@ -116,6 +117,8 @@ const LoginPage = () => {
         );
     }
 
+    const inputClass = "w-full border border-input bg-background text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary";
+    
     return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background font-montserrat p-4 relative">
         <button
@@ -133,26 +136,39 @@ const LoginPage = () => {
 
             <form onSubmit={onSubmit} noValidate className="w-full flex flex-col gap-4 text-left">
                 <FormField
-                    label="Email"
                     type="email"
-                    placeholder="Enter email"
+                    className={`${inputClass} pr-10`}
+                    placeholder="Enter your email"
                     value={email}
                     onChange={(e) => {
                         setEmail(e.target.value);
                         setLogoutMessage(null);
                     }}
                 />
-
-                <FormField
-                    label="Password"
-                    type="password"
-                    placeholder="Enter password"
+                <div className="relative">
+                <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => {
-                        setPassword(e.target.value);
-                        setLogoutMessage(null);
-                    }}
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            setLogoutMessage(null);
+                        }}
+                    placeholder="Enter your password"
+                    className={`${inputClass} pr-10`}
+                    autoComplete="new-password"
+                    autoFocus
                 />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        tabIndex={-1}
+                    >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                </div>
 
                 {message && (
                     <p role="alert" className="text-sm text-destructive text-center -mt-1">{message}</p>
